@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Zenbliss Portal Terminal</title>
+    <style>
+        :root {
+            --primary-blue: #1A365D;
+            --accent-red: #9B2C2C;
+            --background-white: #FFFFFF;
+            --text-dark: #2D3748;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #F7FAFC;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Branding Header with Logo Placement */
+        .portal-header {
+            background-color: var(--primary-blue);
+            color: var(--background-white);
+            padding: 20px 0;
+            border-bottom: 4px solid var(--accent-red);
+            text-align: center;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .school-logo {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: bold;
+            border: 2px solid var(--accent-red);
+        }
+
+        .school-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* Main Login Area */
+        .main-hero {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 850px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .login-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .login-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .login-card h3 {
+            color: var(--primary-blue);
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4A5568;
+        }
+
+        .form-group input {
+            padding: 10px 14px;
+            border: 1px solid #CBD5E0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-blue);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #2A4365;
+        }
+
+        .teacher-btn {
+            background-color: var(--accent-red);
+        }
+
+        .teacher-btn:hover {
+            background-color: #742A2A;
+        }
+
+        .footer-notice {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #A0AEC0;
+            border-top: 1px solid var(--border-color);
+            background: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="LOGO" class="school-logo"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="school-logo" style="display: none;">LOGO</div>
+            <h1 class="school-title">ZENBLISS SCHOOLS & COLLEGE</h1>
+        </div>
+    </header>
+
+    <main class="main-hero">
+        <div class="login-grid">
+
+            <div class="login-card">
+                <h3>Student Login</h3>
+                <form onsubmit="return handleStudentLogin(event)" action="student-dashboard.html" method="GET"></form>
+                <div class="form-group">
+                    <label for="student-id">Admission Number (Z-ID)</label>
+                    <input type="text" id="student-id" placeholder="e.g. Z26001" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-pass">Password</label>
+                    <input type="password" id="student-pass" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit">Login to Student Portal</button>
+                </form>
+            </div>
+
+            <div class="login-card">
+                <h3>Staff & Faculty Login</h3>
+                <form action="class-teacher-dashboard.html" method="GET">
+                    <div class="form-group">
+                        <label for="teacher-email">Staff ID / Email Address</label>
+                        <input type="text" id="teacher-email" placeholder="e.g. TS2605" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-pass">Password</label>
+                        <input type="password" id="teacher-pass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-submit teacher-btn">Login to Faculty Portal</button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer-notice">
+        &copy; 2026 Zenbliss Schools & College. Secured Academic Portal Terminal.
+    </footer>
+    <script src="app.js"></script>
+</body>
+
+</html>

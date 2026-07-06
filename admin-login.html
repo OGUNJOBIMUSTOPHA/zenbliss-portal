@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenbliss Schools — Admin Control Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Private layout variant styles for the admin window */
+        .admin-page-body {
+            background-color: #1A202C;
+            /* Dark professional theme background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .admin-box {
+            border-top: 6px solid var(--accent-red);
+            width: 100%;
+            max-width: 420px;
+            padding: 35px;
+            background: var(--background-white);
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-logo-centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .admin-logo-centered img {
+            height: 70px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .admin-logo-centered h2 {
+            color: var(--primary-blue);
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body class="admin-page-body">
+
+    <div class="admin-box">
+        <div class="admin-logo-centered">
+            <img src="logo.jpg" alt="Zenbliss Logo">
+            <h2>PROPRIETRESS TERMINAL</h2>
+            <small style="color: #718096; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Secure
+                Access Only</small>
+        </div>
+
+        <form class="portal-form" onsubmit="handleAdminLogin(event)">
+            <div class="form-group">
+                <label for="admin-user">System Username</label>
+                <input type="text" id="admin-user" placeholder="Enter Admin Username" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="admin-pass">Master Password</label>
+                <input type="password" id="admin-pass" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit accent-red" style="margin-top: 15px;">Initialize Control
+                Dashboard</button>
+        </form>
+    </div>
+
+    <script>
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('admin-user').value;
+            alert("Verifying secure token for admin user: " + user);
+
+            // This instantly forwards the administrator into the control dashboard file
+            window.location.href = "admin-dashboard.html";
+        }
+    </script>
+</body>
+
+</html>

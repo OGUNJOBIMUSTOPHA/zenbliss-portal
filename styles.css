@@ -1,0 +1,126 @@
+/* --- Color Palette & Variable Defaults --- */
+:root {
+    --primary-blue: #1A365D;
+    --accent-red: #9B2C2C;
+    --background-white: #FFFFFF;
+    --light-gray: #EDF2F7;
+    --border-color: #E2E8F0;
+    --text-dark: #2D3748;
+}
+
+/* --- Base Framework Resets --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #F7FAFC;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+
+/* --- Shared Portal Navigation Header --- */
+.portal-header {
+    background-color: var(--primary-blue);
+    color: var(--background-white);
+    padding: 15px 0;
+    border-bottom: 4px solid var(--accent-red);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-branding {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.school-logo-img {
+    height: 45px;
+    width: auto;
+    background-color: #ffffff;
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.school-logo-text {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.portal-badge {
+    background-color: var(--accent-red);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* --- Shared Form Fields & Buttons --- */
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #4A5568;
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #CBD5E0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.btn-submit {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.btn-submit.primary-blue {
+    background-color: var(--primary-blue);
+}
+
+.btn-submit.primary-blue:hover {
+    background-color: #2A4365;
+}
+
+.btn-submit.accent-red {
+    background-color: var(--accent-red);
+}
+
+.btn-submit.accent-red:hover {
+    background-color: #742A2A;
+}
+
+/* --- Crucial Operational Visibility Classes --- */
+.hidden {
+    display: none !important;
+}

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Teacher Master Ledger — Zenbliss Schools</title>
+    <style>
+        /* Embedded Core Styles to prevent white screen issues */
+        :root {
+            --primary-blue: #1A365D;
+            --accent-red: #9B2C2C;
+            --background-white: #FFFFFF;
+            --light-gray: #EDF2F7;
+            --border-color: #E2E8F0;
+            --text-dark: #2D3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #F7FAFC;
+            color: var(--text-dark);
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+
+        .portal-header {
+            background-color: var(--primary-blue);
+            color: var(--background-white);
+            padding: 15px 0;
+            border-bottom: 4px solid var(--accent-red);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-branding {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .school-logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .portal-badge {
+            background-color: var(--accent-red);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .class-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: var(--background-white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gate-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            margin-bottom: 25px;
+        }
+
+        .term-selector-wrapper {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .term-select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E0;
+            font-size: 0.9rem;
+            width: 280px;
+        }
+
+        .summary-banner {
+            background-color: var(--primary-blue);
+            color: var(--background-white);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .compilation-card {
+            background: var(--background-white);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .ledger-table th,
+        .ledger-table td {
+            padding: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+
+        .ledger-table th {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .subject-header-group {
+            background-color: #2B6CB0 !important;
+            font-weight: bold;
+        }
+
+        .score-input {
+            width: 42px;
+            padding: 4px;
+            text-align: center;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+        }
+
+        .student-name-cell {
+            text-align: left;
+            font-weight: 600;
+            min-width: 140px;
+            background-color: #F7FAFC;
+        }
+
+        .sub-total-span {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .report-card-section {
+            background: #FAFAFA;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .report-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .form-row-three {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .comment-box {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #CBD5E0;
+            font-family: inherit;
+        }
+
+        .auto-box {
+            background-color: #EDF2F7;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .btn-submit {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .primary-blue {
+            background-color: var(--primary-blue);
+        }
+
+        .accent-red {
+            background-color: var(--accent-red);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="header-container">
+            <div class="logo-branding">
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+            </div>
+            <span class="portal-badge">Class Teacher Terminal</span>
+        </div>
+    </header>
+
+    <div class="class-container">
+
+        <div class="profile-card">
+            <div>
+                <h2 style="color: var(--primary-blue); margin:0;">Welcome, Mrs. Alao</h2>
+                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">Designation: Form Teacher Desk |
+                    Assigned Level: JSS 1</p>
+            </div>
+            <div class="profile-actions">
+                <span
+                    style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
+                    2026/2027</span>
+                <a href="index.html" class="btn-submit accent-red" style="padding:8px 15px; font-size:0.85rem;">🚪 Log
+                    Out</a>
+            </div>
+        </div>
+
+        <div id="ledger-gate" class="gate-card">
+            <h3 style="color: var(--primary-blue); margin-bottom: 10px;">Select Class Management Target</h3>
+            <p style="color: #718096; font-size: 0.9rem;">Choose the targeted compilation framework to open the scores
+                upload matrix sheets.</p>
+
+            <div class="term-selector-wrapper">
+                <select id="target-compilation-term" class="term-select">
+                    <option value="JSS1_3rd">JSS 1 — Third Term Ledger (Current)</option>
+                    <option value="JSS1_2nd">JSS 1 — Second Term Ledger</option>
+                    <option value="JSS1_1st">JSS 1 — First Term Ledger</option>
+                </select>
+            </div>
+
+            <button class="btn-submit primary-blue" style="padding: 12px 30px;" onclick="loadClassLedgerWorkspace()">📝
+                Open & Upload Results</button>
+        </div>
+
+        <div id="master-workspace" class="hidden">
+
+            <div class="summary-banner">
+                <div>
+                    <h2 style="margin:0; font-size:1.4rem;" id="active-banner-title">Assigned Level: JSS 1 Ledger</h2>
+                    <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
+                        (60) across all subjects.</p>
+                </div>
+                <button id="admin-submit-btn" class="btn-submit accent-red hidden" onclick="submitToAdminTerminal()">🚀
+                    Submit Complete Ledger to Admin</button>
+            </div>
+
+            <div class="compilation-card">
+                <h3 style="color:var(--primary-blue); margin-bottom:15px;">1. Academic Continuous Assessment Grid</h3>
+
+                <div style="overflow-x: auto;">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Admission No</th>
+                                <th rowspan="2">Student Name</th>
+                                <th colspan="4" class="subject-header-group">Mathematics</th>
+                                <th colspan="4" class="subject-header-group">English Language</th>
+                                <th colspan="4" class="subject-header-group">Biology</th>
+                                <th rowspan="2" style="background:#2D3748;">Global Total<br>(300)</th>
+                                <th rowspan="2" style="background:#2D3748;">Global Average<br>(%)</th>
+                                <th rowspan="2">Action</th>
+                            </tr>
+                            <tr>
+                                <th>CA1 (20)</th>
+                                <th>CA2 (20)</th>
+                                <th>Ex (60)</th>
+                                <th>Tot</th>
+                                <th>CA1 (20)</th>
+                                <th>CA2 (20)</th>
+                                <th>Ex (60)</th>
+                                <th>Tot</th>
+                                <th>CA1 (20)</th>
+                                <th>CA2 (20)</th>
+                                <th>Ex (60)</th>
+                                <th>Tot</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="ledger-row">
+                                <td><input type="text" class="score-input stud-id" placeholder="Z26001"
+                                        onchange="lookupStudentName(this)" style="width:75px; font-weight:bold;"></td>
+                                <td class="student-name-cell">— Input ID —</td>
+                                <td><input type="number" class="score-input m-ca1" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input m-ca2" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input m-ex" min="0" max="60"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><span class="sub-total-span m-tot">0</span></td>
+                                <td><input type="number" class="score-input e-ca1" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input e-ca2" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input e-ex" min="0" max="60"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><span class="sub-total-span e-tot">0</span></td>
+                                <td><input type="number" class="score-input b-ca1" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input b-ca2" min="0" max="20"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><input type="number" class="score-input b-ex" min="0" max="60"
+                                        oninput="calculateMatrixRow(this)"></td>
+                                <td><span class="sub-total-span b-tot">0</span></td>
+                                <td><span class="row-total" style="font-weight:bold;">0</span></td>
+                                <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">0.0%</span>
+                                </td>
+                                <td><button type="button" style="padding:4px 8px; cursor:pointer;"
+                                        onclick="loadToReportCardView(this)">Configure Card</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="report-card-box" class="compilation-card hidden">
+                <h3 style="color:var(--primary-blue);">2. Report Card Setup: <span id="active-student-card-title"
+                        style="color:var(--accent-red);"></span></h3>
+                <div class="report-card-section">
+                    <div class="form-row-three">
+                        <div class="form-group">
+                            <label>Punctuality Rating (1-5)</label>
+                            <select id="card-punctual">
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Very Good</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Days Present (Max 90)</label>
+                            <input type="number" id="card-attendance" min="0" max="90" placeholder="e.g. 85">
+                        </div>
+                    </div>
+                    <div class="report-card-grid">
+                        <div class="form-group">
+                            <label>Class Teacher's Remarks</label>
+                            <textarea id="card-teacher-comment" class="comment-box" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Auto-Generated Principal Comment</label>
+                            <div id="card-principal-comment" class="auto-box">Awaiting performance calculations...</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right; margin-top:15px;">
+                        <button class="btn-submit primary-blue" onclick="commitStudentReportMetrics()">Apply
+                            Parameters</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅️ Close Workspace</button>
+        </div>
+
+    </div>
+
+    <script>
+        const studentDatabaseRegistry = { "Z26001": "ADENIRAN TOBI" };
+        let activeRowReference = null;
+
+        function loadClassLedgerWorkspace() {
+            document.getElementById('ledger-gate').classList.add('hidden');
+            document.getElementById('master-workspace').classList.remove('hidden');
+        }
+
+        function returnToGate() {
+            document.getElementById('master-workspace').classList.add('hidden');
+            document.getElementById('ledger-gate').classList.remove('hidden');
+        }
+
+        function lookupStudentName(inputField) {
+            const row = inputField.closest('tr');
+            const idValue = inputField.value.trim().toUpperCase();
+            const nameCell = row.querySelector('.student-name-cell');
+            if (studentDatabaseRegistry[idValue]) {
+                nameCell.innerText = studentDatabaseRegistry[idValue];
+            } else {
+                nameCell.innerText = "NOT FOUND";
+            }
+        }
+
+        function calculateMatrixRow(element) {
+            const row = element.closest('tr');
+            // --- LIVE TYPING GUARD WITH ALERT ---
+            const maxVal = parseFloat(element.getAttribute('max'));
+            const currentVal = parseFloat(element.value) || 0;
+
+            if (maxVal && currentVal > maxVal) {
+                element.value = element.value.slice(0, -1);
+                alert(`The entered score exceeds the maximum limit of ${maxVal} marks for this field.`);
+            }
+            // --- END OF LIVE TYPING GUARD ---
+            const m = (parseFloat(row.querySelector('.m-ca1').value) || 0) + (parseFloat(row.querySelector('.m-ca2').value) || 0) + (parseFloat(row.querySelector('.m-ex').value) || 0);
+            row.querySelector('.m-tot').innerText = m;
+
+            const e = (parseFloat(row.querySelector('.e-ca1').value) || 0) + (parseFloat(row.querySelector('.e-ca2').value) || 0) + (parseFloat(row.querySelector('.e-ex').value) || 0);
+            row.querySelector('.e-tot').innerText = e;
+
+            const b = (parseFloat(row.querySelector('.b-ca1').value) || 0) + (parseFloat(row.querySelector('.b-ca2').value) || 0) + (parseFloat(row.querySelector('.b-ex').value) || 0);
+            row.querySelector('.b-tot').innerText = b;
+
+            const tot = m + e + b;
+            row.querySelector('.row-total').innerText = tot;
+            row.querySelector('.row-avg').innerText = (tot / 3).toFixed(1) + "%";
+            checkLedgerCompletionStatus();
+        }
+
+        function loadToReportCardView(btn) {
+            const row = btn.closest('tr');
+            const name = row.querySelector('.student-name-cell').innerText;
+            const avg = parseFloat(row.querySelector('.row-avg').innerText) || 0;
+            activeRowReference = row;
+            document.getElementById('active-student-card-title').innerText = name;
+            document.getElementById('card-principal-comment').innerText = avg >= 50 ? "Commendable effort." : "Needs serious improvement.";
+            document.getElementById('report-card-box').classList.remove('hidden');
+        }
+
+        function commitStudentReportMetrics() {
+            alert("Metrics Applied!");
+            document.getElementById('report-card-box').classList.add('hidden');
+        }
+
+        function checkLedgerCompletionStatus() {
+            const total = parseFloat(document.querySelector('.row-total').innerText) || 0;
+            if (total > 0) document.getElementById('admin-submit-btn').classList.remove('hidden');
+        }
+
+        // CONNECTED TO THE SERVER DATABASE:
+        async function submitToAdminTerminal() {
+            // Target the active row in the table
+            const row = document.querySelector('.ledger-row');
+
+            // Collect the inputs
+            const studentData = {
+                name: row.querySelector('.student-name-cell').innerText,
+                admission_number: row.querySelector('.stud-id').value.trim(),
+                class_level: "JSS 1",
+                term: "Third Term",
+                math_score: parseInt(row.querySelector('.m-tot').innerText) || 0,
+                english_score: parseInt(row.querySelector('.e-tot').innerText) || 0
+            };
+
+            // Validation: stop if no student ID has been entered yet
+            if (!studentData.admission_number || studentData.name === "NOT FOUND" || studentData.name === "— Input ID —") {
+                alert("Please enter a valid Admission Number first!");
+                return;
+            }
+
+            try {
+                // Post data to our Node server endpoint
+                const response = await fetch('/api/students', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(studentData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert("✨ Success! " + result.message);
+                    returnToGate();
+                } else {
+                    alert("Error saving data: " + result.error);
+                }
+            } catch (error) {
+                console.error("Transmission Error:", error);
+                alert("Could not connect to the database server. Ensure 'node server.js' is running!");
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal — Zenbliss Schools</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .student-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: var(--background-white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Results Gate/Trigger Card */
+        .gate-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            margin-bottom: 25px;
+        }
+
+        .term-selector-wrapper {
+            margin: 20px 0;
+        }
+
+        .term-select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E0;
+            font-size: 0.9rem;
+            width: 250px;
+        }
+
+        .report-card-mockup {
+            background: #ffffff;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 3px double var(--primary-blue);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .grades-table th,
+        .grades-table td {
+            border: 1px solid #A0AEC0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .grades-table th {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .remarks-box {
+            border: 1px solid var(--border-color);
+            background-color: #F7FAFC;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .print-bar {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .report-card-mockup,
+            .report-card-mockup * {
+                visibility: visible;
+            }
+
+            .report-card-mockup {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none;
+            }
+
+            .print-bar {
+                display: none;
+            }
+        }
+
+        .report-logo {
+            max-width: 120px;
+            /* Keeps the logo a professional size */
+            height: auto;
+            /* Prevents stretching */
+            display: block;
+            /* Allows centering */
+            margin: 0 auto 15px auto;
+            /* Centers it and adds space below */
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="header-container">
+            <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img">
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+            </div>
+            <span class="portal-badge" style="background-color: #38A169;">Student Terminal</span>
+        </div>
+    </header>
+
+    <div class="student-container">
+
+        <div class="profile-card">
+            <div>
+                <h2 style="color: var(--primary-blue); margin:0;">Welcome, ADENIRAN TOBI</h2>
+                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">Admission ID: <span
+                        style="font-weight:bold;">Z26001</span> | Class: JSS 1</p>
+            </div>
+            <div class="profile-actions">
+                <span class="badge badge-dept" style="background:#C6F6D5; color:#22543D; padding:8px 12px;">Active
+                    Account</span>
+                <a href="index.html" class="btn-submit accent-red"
+                    style="margin:0; padding:8px 15px; text-decoration:none; font-size:0.85rem;">🚪 Log Out</a>
+            </div>
+        </div>
+
+        <div id="result-gate" class="gate-card">
+            <h3 style="color: var(--primary-blue); margin-bottom: 10px;">Access Academic Result Portfolios</h3>
+            <p style="color: #718096; font-size: 0.9rem;">Select an academic year and term level to extract archived
+                reporting indices.</p>
+
+            <div class="term-selector-wrapper">
+                <select id="selected-term-archive" class="term-select">
+                    <option value="2026_3rd">2026/2027 Session — Third Term (Current)</option>
+                    <option value="2026_2nd">2026/2027 Session — Second Term</option>
+                    <option value="2026_1st">2026/2027 Session — First Term</option>
+                </select>
+            </div>
+
+            <button class="btn-submit primary-blue" style="margin: 0; padding: 12px 30px;"
+                onclick="revealReportCard()">View Term Results</button>
+        </div>
+
+        <div id="report-card-view" class="report-card-mockup hidden">
+            <div class="report-header">
+                <img src="logo.jpg" alt="School logo" class="report-logo">
+                <h1 style="color: var(--primary-blue); margin: 0 0 5px 0; letter-spacing: 1px;">ZENBLISS SCHOOLS &
+                    COLLEGE</h2>
+                    <small style="font-weight: bold; color: #4A5568; text-transform: uppercase;">Official Student
+                        Terminal
+                        Progress Report</small>
+            </div>
+
+            <div class="report-meta-grid">
+                <div>
+                    <p><strong>Student Name:</strong> ADENIRAN TOBI</p>
+                    <p><strong>Admission Number:</strong> Z26001</p>
+                    <p><strong>Class Level:</strong> JSS 1</p>
+                </div>
+                <div style="text-align: right;">
+                    <p><strong>Academic Session:</strong> 2026/2027</p>
+                    <p><strong>Term:</strong> <span id="display-target-term">Third Term (End of Session)</span></p>
+                    <p><strong>Days Present:</strong> 88 / 90 Days</p>
+                </div>
+            </div>
+
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>1st CA (20)</th>
+                        <th>2nd CA (20)</th>
+                        <th>Examination (60)</th>
+                        <th>Total Score (100)</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody id="dynamic-grades-body">
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #EDF2F7; font-weight: bold;">
+                        <td colspan="4" style="text-align: right;">Cumulative Average Percentage:</td>
+                        <td><span id="display-target-avg">72.7%</span></td>
+                        <td style="color: var(--accent-red);">PASS</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="report-meta-grid" style="margin-bottom: 15px;">
+                <div class="remarks-box">
+                    <strong>Behavioral Traits & Character Ratings:</strong><br>
+                    <span style="display:inline-block; margin-top:5px;">• Punctuality: <strong>5 / 5
+                            (Excellent)</strong></span><br>
+                    <span>• Honesty & Trust: <strong>4 / 5 (Very Good)</strong></span>
+                </div>
+                <div class="remarks-box">
+                    <strong>Class Teacher's Remark:</strong><br>
+                    <p style="margin: 5px 0 0 0; font-style: italic;">"An encouraging academic result paired with an
+                        exemplary character pattern."</p>
+                </div>
+            </div>
+
+            <div class="remarks-box" style="border-left: 5px solid var(--accent-red);">
+                <strong>Principal's Executive Comment:</strong><br>
+                <p style="margin: 5px 0 0 0; font-style: italic; font-weight: 600; color: var(--primary-blue);">
+                    "An outstanding performance. This exceptional standard reflects brilliant focus and ability. Well
+                    done."
+                </p>
+            </div>
+
+            <div class="print-bar">
+                <button class="btn-submit" style="background:#718096; margin:0;" onclick="returnToGate()">⬅️ Back to
+                    Term Select</button>
+                <button class="btn-submit primary-blue" style="margin: 0;" onclick="window.print()">🖨️ Print / Download
+                    Report Card PDF</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Term history mock database compilation data dictionary
+        const academicHistoryDB = {
+            "2026_3rd": {
+                term: "Third Term (End of Session)",
+                avg: "72.7%",
+                scores: [
+                    { name: "Mathematics", c1: 18, c2: 17, ex: 40, tot: 75, g: "A" },
+                    { name: "English Language", c1: 14, c2: 15, ex: 33, tot: 62, g: "B" },
+                    { name: "Biology", c1: 19, c2: 18, ex: 44, tot: 81, g: "A" }
+                ]
+            },
+            "2026_2nd": {
+                term: "Second Term",
+                avg: "66.0%",
+                scores: [
+                    { name: "Mathematics", c1: 15, c2: 12, ex: 38, tot: 65, g: "B" },
+                    { name: "English Language", c1: 11, c2: 13, ex: 36, tot: 60, g: "B" },
+                    { name: "Biology", c1: 14, c2: 15, ex: 44, tot: 73, g: "A" }
+                ]
+            },
+            "2026_1st": {
+                term: "First Term",
+                avg: "58.3%",
+                scores: [
+                    { name: "Mathematics", c1: 10, c2: 11, ex: 30, tot: 51, g: "C" },
+                    { name: "English Language", c1: 12, c2: 14, ex: 32, tot: 58, g: "C" },
+                    { name: "Biology", c1: 16, c2: 15, ex: 35, tot: 66, g: "B" }
+                ]
+            }
+        };
+
+        function revealReportCard() {
+            const selectedTerm = document.getElementById('selected-term-archive').value;
+            const archive = academicHistoryDB[selectedTerm];
+
+            // Build dynamically tracking values inside student fields
+            document.getElementById('display-target-term').innerText = archive.term;
+            document.getElementById('display-target-avg').innerText = archive.avg;
+
+            const tbody = document.getElementById('dynamic-grades-body');
+            tbody.innerHTML = "";
+
+            archive.scores.forEach(row => {
+                tbody.innerHTML += `<tr>
+                    <td style="text-align: left; font-weight: 600;">${row.name}</td>
+                    <td>${row.c1}</td>
+                    <td>${row.c2}</td>
+                    <td>${row.ex}</td>
+                    <td style="font-weight: bold;">${row.tot}</td>
+                    <td style="font-weight: bold; color: ${row.g === 'A' ? 'green' : (row.g === 'B' ? 'blue' : 'orange')}">${row.g}</td>
+                </tr>`;
+            });
+
+            document.getElementById('result-gate').classList.add('hidden');
+            document.getElementById('report-card-view').classList.remove('hidden');
+        }
+
+        function returnToGate() {
+            document.getElementById('report-card-view').classList.add('hidden');
+            document.getElementById('result-gate').classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>

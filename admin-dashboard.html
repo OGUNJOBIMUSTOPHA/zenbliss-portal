@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Control Dashboard — Zenbliss Schools</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-box {
+            background: var(--background-white);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .control-box h2 {
+            color: var(--primary-blue);
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        .data-table th {
+            background-color: var(--light-gray);
+            color: var(--primary-blue);
+        }
+
+        .action-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #FED7D7;
+            color: #C53030;
+        }
+
+        .btn-approve {
+            background-color: #C6F6D5;
+            color: #22543D;
+        }
+
+        .btn-reject {
+            background-color: #FEEBC8;
+            color: #744210;
+        }
+
+        .broadsheet-card {
+            background: var(--background-white);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .broadsheet-scroll {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        .matrix-table th {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .global-upload-bar {
+            background: #EBF8FF;
+            border: 1px solid #BEE3F8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="header-container">
+            <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img">
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+            </div>
+            <span class="portal-badge" style="background-color: var(--accent-red);">Proprietress Terminal</span>
+        </div>
+    </header>
+
+    <div class="admin-container">
+
+        <div class="dashboard-grid">
+
+            <div class="control-box">
+                <h2>Staff Registry (Add / Delete Teachers)</h2>
+                <form class="portal-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
+                    <div class="form-row">
+                        <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
+                            style="flex:2;">
+                        <input type="email" id="new-staff-email" placeholder="Email Address" required style="flex:2;">
+                        <button type="submit" class="btn-submit primary-blue" style="margin:0; padding:10px;">Add
+                            Staff</button>
+                    </div>
+                </form>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Teacher Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-registry-rows">
+                        <tr>
+                            <td>Mrs. Alao</td>
+                            <td>alao@zenbliss.com</td>
+                            <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete
+                                    Account</button></td>
+                        </tr>
+                        <tr>
+                            <td>Mr. Benson</td>
+                            <td>benson@zenbliss.com</td>
+                            <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete
+                                    Account</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="control-box">
+                <h2>Assign Class Responsibilities</h2>
+                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Bind a registered teacher directly
+                    to a specific class level management desk.</p>
+                <form class="portal-form" onsubmit="assignTeacherTask(event)">
+                    <div class="form-group">
+                        <label>Select Teacher</label>
+                        <select id="assign-staff-select" required>
+                            <option value="Mrs. Alao">Mrs. Alao</option>
+                            <option value="Mr. Benson">Mr. Benson</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Class Allocation</label>
+                        <select id="assign-class" required>
+                            <option value="JSS1">JSS 1</option>
+                            <option value="JSS2">JSS 2</option>
+                            <option value="JSS3">JSS 3</option>
+                            <option value="SS1">SS 1</option>
+                            <option value="SS2">SS 2</option>
+                            <option value="SS3">SS 3</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit primary-blue" style="margin-top:10px;">Assign Class
+                        Desk</button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="control-box" style="margin-bottom: 30px;">
+            <h2>Pending Student Applications</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Applied Class Level / Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ADENIRAN TOBI</td>
+                        <td>SS1 — <span style="color:var(--accent-red); font-weight:bold;">Science</span></td>
+                        <td>
+                            <button class="action-btn btn-approve"
+                                onclick="approveStudent(this, 'ADENIRAN TOBI')">Approve & Issue Z-ID</button>
+                            <button class="action-btn btn-delete" onclick="this.closest('tr').remove()">Reject</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="broadsheet-card">
+            <h2>Review Uploaded Class Results</h2>
+            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">
+                Select a class to review the complete grade metrics updated by the respective Class Teacher.
+            </p>
+
+            <div style="margin-bottom: 20px;">
+                <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)">
+                    <option value="">-- Choose Class Ledger --</option>
+                    <option value="JSS1">JSS 1 Master Sheet</option>
+                    <option value="SS1">SS 1 Master Sheet</option>
+                </select>
+                <button onclick="printBroadsheet()" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">Print
+                    Class Broadsheet</button>
+            </div>
+
+            <div id="matrix-display-wrapper" class="hidden">
+                <div class="broadsheet-scroll">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Admission ID</th>
+                                <th>Student Name</th>
+                                <th>Math</th>
+                                <th>English</th>
+                                <th>Biology</th>
+                                <th>Civic Ed</th>
+                                <th>Total Mark</th>
+                                <th>Average %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-rows">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="global-upload-bar">
+                    <div>
+                        <h4 style="color: var(--primary-blue);">Finalize & Upload Results Globally</h4>
+                        <p style="font-size: 0.8rem; color: #4A5568;">Approving locks the database and uploads the
+                            report cards onto the student login panels.</p>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <button class="action-btn btn-reject" style="padding:10px 15px;" onclick="rejectWholeClass()">🔴
+                            Reject & Return Sheet to Teacher</button>
+                        <button class="action-btn btn-approve" style="padding:10px 15px;"
+                            onclick="finalizeUploadGlobally()">🔵 Approve & Upload Term Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Staff registry management helpers (Local state management)
+        function addStaffMember(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-staff-name').value;
+            const email = document.getElementById('new-staff-email').value;
+            const tbody = document.getElementById('staff-registry-rows');
+
+            tbody.innerHTML += `<tr>
+                <td>${name}</td>
+                <td>${email}</td>
+                <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete Account</button></td>
+            </tr>`;
+            alert("Staff profile registered successfully!");
+            document.getElementById('new-staff-name').value = '';
+            document.getElementById('new-staff-email').value = '';
+        }
+
+        function deleteStaff(btn) {
+            if (confirm("Confirm account deletion? This action instantly revokes all login rights.")) {
+                btn.closest('tr').remove();
+            }
+        }
+
+        function assignTeacherTask(e) {
+            e.preventDefault();
+            const staff = document.getElementById('assign-staff-select').value;
+            const cls = document.getElementById('assign-class').value;
+            alert(`Assignment Secured!\nTeacher: ${staff}\nAssigned Desk: ${cls}`);
+        }
+
+        function approveStudent(btn, name) {
+            const zNum = "Z26" + Math.floor(1000 + Math.random() * 9000);
+            alert(`Student Verified!\nName: ${name}\nGenerated Number: ${zNum}`);
+            btn.closest('tr').remove();
+        }
+
+        function rejectWholeClass() {
+            prompt("Provide re-evaluation notes for the Class Teacher:");
+            alert("Results rejected and sent back to staff dashboard level.");
+        }
+
+        function finalizeUploadGlobally() {
+            alert("CRITICAL OPERATION SUCCESSFUL!\nReport ledger verified, stamped, and globally uploaded.");
+        }
+
+        // CONNECTED TO THE SERVER DATABASE:
+        async function loadClassScoresToScreen(cls) {
+            const wrapper = document.getElementById('matrix-display-wrapper');
+            const tbody = document.getElementById('matrix-rows');
+
+            // If the user selects the default blank option, hide the layout
+            if (!cls) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
+            try {
+                // Request student entries from Node.js database API
+                const response = await fetch('/api/admin/students');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to fetch student data.");
+                }
+
+                tbody.innerHTML = "";
+
+                // Keep only the rows corresponding to the selected class (e.g. "JSS 1")
+                // Our database saves it as "JSS 1", so we check if it matches
+                const normalizedClassSelection = cls === "JSS1" ? "JSS 1" : cls;
+                const filteredStudents = data.students.filter(st => st.class_level === normalizedClassSelection);
+
+                if (filteredStudents.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#718096;">No records found for this class table in the database.</td></tr>`;
+                } else {
+                    filteredStudents.forEach(st => {
+                        const totalMark = st.math_score + st.english_score; // Biology & Civic can display as — if not stored
+                        const calculatedAvg = ((totalMark / 200) * 100).toFixed(1) + "%";
+
+                        tbody.innerHTML += `<tr>
+                            <td>${st.admission_number}</td>
+                            <td style="text-align:left; font-weight:600;">${st.name}</td>
+                            <td>${st.math_score}</td>
+                            <td>${st.english_score}</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td style="font-weight:bold;">${totalMark}</td>
+                            <td style="color:var(--accent-red); font-weight:bold;">${calculatedAvg}</td>
+                        </tr>`;
+                    });
+                }
+
+                wrapper.classList.remove('hidden');
+            } catch (error) {
+                console.error("Database Connection Failure:", error);
+                alert("Could not load database rows. Make sure 'node server.js' terminal is active.");
+            }
+        }
+        function printBroadsheet() {
+            // 1. Get the selected class name (e.g., JSS1, SS1)
+            const selector = document.getElementById('broadsheet-selector');
+            const currentClass = selector.options[selector.selectedIndex].text;
+
+            if (!selector.value) {
+                alert("Please select a class ledger first before printing!");
+                return;
+            }
+
+            // 2. Target your exact scores table element
+            const tableHtml = document.querySelector('.matrix-table').outerHTML;
+
+            // 3. Open the printable window pop-up
+            const printWindow = window.open('', '_blank', 'height=700,width=1000');
+
+            printWindow.document.write(`
+        <html>
+        <head>
+            <title>Broadsheet - ${currentClass}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 30px; color: #000; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+                .header h2 { margin: 5px 0; font-size: 16px; font-weight: normal; }
+                .meta { display: flex; justify-content: space-between; font-weight: bold; margin-top: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; }
+                
+                /* Clean Table Styling for Paper Output */
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+                th, td { border: 1px solid #000; padding: 8px 5px; text-align: center; }
+                th { background-color: #f2f2f2; font-weight: bold; }
+                
+                @page { size: landscape; margin: 0.5in; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Zenbliss School Portal</h1>
+                <h2>Official Academic Broadsheet</h2>
+                <div class="meta">
+                    <span>Sheet: ${currentClass}</span>
+                    <span>Date Generated: ${new Date().toLocaleDateString()}</span>
+                </div>
+            </div>
+            <div>
+                ${tableHtml}
+            </div>
+        </body>
+        </html>
+    `);
+
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        }
+    </script>
+
+</body>
+
+</html>
