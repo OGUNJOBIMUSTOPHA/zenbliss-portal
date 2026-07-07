@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenbliss School - Portal Registration</title>
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --background-color: #f4f7fe;
+            --text-color: #2b3674;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .register-container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* Logo Styling */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 100px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #707eae;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e5f2;
+            border-radius: 12px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background-color: #fff;
+            color: var(--text-color);
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .register-btn:hover {
+            background-color: #3751d7;
+        }
+
+        /* Link back to login styling */
+        .login-redirect {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #707eae;
+        }
+
+        .login-redirect a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-redirect a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-container">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="Zenbliss School Logo" onerror="this.style.display='none';">
+        </div>
+
+        <h2>Student Registration</h2>
+        <p class="subtitle">Create an account to submit your details for ID generation.</p>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" required placeholder="e.g., John Doe">
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" id="phoneNumber" required placeholder="e.g., 08012345678">
+            </div>
+
+            <div class="form-group">
+                <label for="classSelect">Class</label>
+                <select id="classSelect" required>
+                    <option value="">Select Class</option>
+                    <option value="JSS1">JSS 1</option>
+                    <option value="JSS2">JSS 2</option>
+                    <option value="JSS3">JSS 3</option>
+                    <option value="SS1">SS 1</option>
+                    <option value="SS2">SS 2</option>
+                    <option value="SS3">SS 3</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="departmentGroup">
+                <label for="departmentSelect">Department</label>
+                <select id="departmentSelect">
+                    <option value="">Select Department</option>
+                    <option value="Science and technology">Science and technology</option>
+                    <option value="Science">Science</option>
+                    <option value="Humanity">Humanity</option>
+                    <option value="Commercial">Commercial</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Create Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="register-btn">Submit Request</button>
+        </form>
+
+        <div class="login-redirect">
+            Can't log in or already have an account? <br>
+            <a href="index.html">Return to Portal Login</a>
+        </div>
+    </div>
+
+    <script>
+        const classCodeMap = {
+            "JSS1": "021",
+            "JSS2": "022",
+            "JSS3": "023",
+            "SS1": "011",
+            "SS2": "012",
+            "SS3": "013"
+        };
+
+        const classSelect = document.getElementById('classSelect');
+        const departmentGroup = document.getElementById('departmentGroup');
+        const departmentSelect = document.getElementById('departmentSelect');
+
+        classSelect.addEventListener('change', function () {
+            const selectedClass = this.value;
+            if (selectedClass.startsWith('SS')) {
+                departmentGroup.classList.remove('hidden');
+                departmentSelect.setAttribute('required', 'required');
+            } else {
+                departmentGroup.classList.add('hidden');
+                departmentSelect.removeAttribute('required');
+                departmentSelect.value = "";
+            }
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const selectedClass = document.getElementById('classSelect').value;
+            const department = departmentSelect.value || "None (Junior Section)";
+            const assignedClassCode = classCodeMap[selectedClass];
+
+            let message = `Thank you, ${fullName}!\nYour details have been sent to your ${selectedClass} teacher.`;
+            if (selectedClass.startsWith('SS')) {
+                message += `\nDepartment: ${department}`;
+            }
+            message += `\nYour generated class prefix code is: Z${assignedClassCode}`;
+
+            alert(message);
+
+            this.reset();
+            departmentGroup.classList.add('hidden');
+            departmentSelect.removeAttribute('required');
+        });
+    </script>
+
+</body>
+
+</html>

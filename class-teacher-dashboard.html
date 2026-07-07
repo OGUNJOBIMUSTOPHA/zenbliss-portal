@@ -374,11 +374,81 @@
                 <div class="report-card-section">
                     <div class="form-row-three">
                         <div class="form-group">
-                            <label>Punctuality Rating (1-5)</label>
-                            <select id="card-punctual">
-                                <option value="5">5 - Excellent</option>
-                                <option value="4">4 - Very Good</option>
-                            </select>
+                            <p>
+                                OBSERVATION ON CONDUCT
+                            <p>
+                                <label>Punctuality Rating (1-5)</label>
+                                <select id="card-punctual">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            <p>
+                                <label>Leadership Rating (1-5)</label>
+                                <select id="card-leadership">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            <p>
+                            <p>
+                                <label>Maturity Rating (1-5)</label>
+                                <select id="card-maturity">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            </p>
+                            <p>
+                                <label>Cleanliness Rating (1-5)</label>
+                                <select id="card-cleanliness">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            </p>
+                            <p>
+                                -----------------------------------
+                            </p>
+                            PERFORMANCE IN PHYSICAL SKILLS
+                            <p>
+                                <label>Handwriting (1-5)</label>
+                                <select id="card-Handwriting">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            </p>
+                            <p>
+                                <label>Hardwork (1-5)</label>
+                                <select id="card-Hardwork">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            </p>
+                            <p>
+                                <label>Sport (1-5)</label>
+                                <select id="card-sport">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Worse</option>
+                                </select>
+                            </p>
                         </div>
                         <div class="form-group">
                             <label>Days Present (Max 90)</label>
@@ -401,6 +471,8 @@
                     </div>
                 </div>
             </div>
+            <button onclick="saveBroadsheetProgress()" class="Broadsheet"
+                style="margin-left: 10px; padding: 5px 10px;">Save Progress</button>
 
             <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅️ Close Workspace</button>
         </div>
@@ -408,6 +480,21 @@
     </div>
 
     <script>
+        // 1. Master list at the top here as well
+        const classCodeMap = {
+            "JSS1": "021",
+            "JSS2": "022",
+            "JSS3": "023",
+            "SS1": "011",
+            "SS2": "012",
+            "SS3": "013"
+        };
+
+        // Example: If this teacher handles SS2, look up "SS2" to get "012"
+        const currentTeacherClass = "SS2";
+        const assignedClassCode = classCodeMap[currentTeacherClass];
+
+        // Your function to load students then uses that 'assignedClassCode' to filter the list
         const studentDatabaseRegistry = { "Z26001": "ADENIRAN TOBI" };
         let activeRowReference = null;
 
@@ -519,6 +606,25 @@
                 console.error("Transmission Error:", error);
                 alert("Could not connect to the database server. Ensure 'node server.js' is running!");
             }
+        }
+        function saveBroadsheetProgress() {
+            // 1. Grab whatever values are currently in the inputs
+            const test1 = document.getElementById('test1')?.value.trim() || "";
+            const test2 = document.getElementById('test2')?.value.trim() || "";
+            const examScore = document.getElementById('examScore')?.value.trim() || "";
+            const conductRating = document.getElementById('studentConduct').value;
+            const skillsRating = document.getElementById('physicalSkills').value;
+
+            // 2. Check if absolutely nothing has been touched
+            if (test1 === "" && test2 === "" && examScore === "" && conductRating === "" && skillsRating === "") {
+                alert("The row is empty. Please enter at least one score or rating before saving.");
+                return;
+            }
+
+            // 3. If she made a difference somewhere, save it successfully
+            console.log("Saving progress with current inputs...");
+
+            alert("Progress saved! You can update or fill in the rest of the scores later.");
         }
     </script>
 </body>
