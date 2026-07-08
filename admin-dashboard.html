@@ -166,18 +166,6 @@
                         </tr>
                     </thead>
                     <tbody id="staff-registry-rows">
-                        <tr>
-                            <td>Mrs. Alao</td>
-                            <td>alao@zenbliss.com</td>
-                            <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete
-                                    Account</button></td>
-                        </tr>
-                        <tr>
-                            <td>Mr. Benson</td>
-                            <td>benson@zenbliss.com</td>
-                            <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete
-                                    Account</button></td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -185,13 +173,11 @@
             <div class="control-box">
                 <h2>Assign Class Responsibilities</h2>
                 <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Bind a registered teacher directly
-                    to a specific class level management desk.</p>
+                    to up to two specific class levels.</p>
                 <form class="portal-form" onsubmit="assignTeacherTask(event)">
                     <div class="form-group">
                         <label>Select Teacher</label>
                         <select id="assign-staff-select" required>
-                            <option value="Mrs. Alao">Mrs. Alao</option>
-                            <option value="Mr. Benson">Mr. Benson</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -218,20 +204,11 @@
                 <thead>
                     <tr>
                         <th>Applicant Name</th>
-                        <th>Applied Class Level / Department</th>
+                        <th>Applied Class Level</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>ADENIRAN TOBI</td>
-                        <td>SS1 — <span style="color:var(--accent-red); font-weight:bold;">Science</span></td>
-                        <td>
-                            <button class="action-btn btn-approve"
-                                onclick="approveStudent(this, 'ADENIRAN TOBI')">Approve & Issue Z-ID</button>
-                            <button class="action-btn btn-delete" onclick="this.closest('tr').remove()">Reject</button>
-                        </td>
-                    </tr>
+                <tbody id="pending-students-rows">
                 </tbody>
             </table>
         </div>
@@ -290,91 +267,248 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // Staff registry management helpers (Local state management)
-        function addStaffMember(e) {
+        // Initialize Supabase Client Connection
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co/rest/v1/";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Fetch application states automatically when browser finishes loading page
+        window.onload = function () {
+            fetchTeachers();
+            fetchPendingApplications();
+        };
+
+        // ==========================================
+        // 1. STAFF REGISTRY (ADD / DELETE TEACHERS)
+        // ==========================================
+        async function fetchTeachers() {
+            const tbody = document.getElementById('staff-registry-rows');
+            const selectBox = document.getElementById('assign-staff-select');
+
+            const { data: teachers, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('role', 'teacher');
+
+            if (error) {
+                console.error("Error loading teachers:", error);
+                return;
+            }
+
+            tbody.innerHTML = "";
+            selectBox.innerHTML = "";
+
+            teachers.forEach(teacher => {
+                tbody.innerHTML += `<tr>
+                    <td>${teacher.name}</td>
+                    <td>${teacher.email}</td>
+                    <td><button class="action-btn btn-delete" onclick="deleteStaff('${teacher.id}')">Delete Account</button></td>
+                </tr>`;
+
+                selectBox.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
+            });
+        }
+
+        async function addStaffMember(e) {
             e.preventDefault();
             const name = document.getElementById('new-staff-name').value;
             const email = document.getElementById('new-staff-email').value;
-            const tbody = document.getElementById('staff-registry-rows');
 
-            tbody.innerHTML += `<tr>
-                <td>${name}</td>
-                <td>${email}</td>
-                <td><button class="action-btn btn-delete" onclick="deleteStaff(this)">Delete Account</button></td>
-            </tr>`;
-            alert("Staff profile registered successfully!");
-            document.getElementById('new-staff-name').value = '';
-            document.getElementById('new-staff-email').value = '';
-        }
+            const teacherID = "TCH" + Math.floor(1000 + Math.random() * 9000);
 
-        function deleteStaff(btn) {
-            if (confirm("Confirm account deletion? This action instantly revokes all login rights.")) {
-                btn.closest('tr').remove();
+            const { error } = await supabase
+                .from('users')
+                .insert([
+                    {
+                        name: name,
+                        email: email,
+                        role: 'teacher',
+                        admission_number: teacherID,
+                        is_approved: true
+                    }
+                ]);
+
+            if (error) {
+                alert("Failed to add teacher: " + error.message);
+            } else {
+                alert(`Staff registered successfully!\nTheir Login ID is: ${teacherID}`);
+                document.getElementById('new-staff-name').value = '';
+                document.getElementById('new-staff-email').value = '';
+                fetchTeachers();
             }
         }
 
-        function assignTeacherTask(e) {
+        async function deleteStaff(id) {
+            if (confirm("Confirm account deletion? This action instantly revokes all login rights.")) {
+                const { error } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Error deleting staff: " + error.message);
+                } else {
+                    alert("Staff account deleted.");
+                    fetchTeachers();
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. ASSIGN CLASS RESPONSIBILITIES (UP TO 2)
+        // ==========================================
+        async function assignTeacherTask(e) {
             e.preventDefault();
-            const staff = document.getElementById('assign-staff-select').value;
+            const teacherId = document.getElementById('assign-staff-select').value;
             const cls = document.getElementById('assign-class').value;
-            alert(`Assignment Secured!\nTeacher: ${staff}\nAssigned Desk: ${cls}`);
+
+            const { data: teacher } = await supabase
+                .from('users')
+                .select('assigned_classes')
+                .eq('id', teacherId)
+                .single();
+
+            let classesArray = teacher.assigned_classes || [];
+
+            if (classesArray.includes(cls)) {
+                alert("This teacher is already assigned to this class!");
+                return;
+            }
+
+            if (classesArray.length >= 2) {
+                alert("A teacher can only be assigned to a maximum of 2 classes. Removing oldest allocation.");
+                classesArray.shift();
+            }
+
+            classesArray.push(cls);
+
+            const { error } = await supabase
+                .from('users')
+                .update({ assigned_classes: classesArray })
+                .eq('id', teacherId);
+
+            if (error) {
+                alert("Error assigning class: " + error.message);
+            } else {
+                alert("Assignment Secured successfully!");
+            }
         }
 
-        function approveStudent(btn, name) {
+        // ==========================================
+        // 3. PENDING STUDENT APPLICATIONS & APPROVAL
+        // ==========================================
+        async function fetchPendingApplications() {
+            const tbody = document.getElementById('pending-students-rows');
+
+            const { data: pendingStudents, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('role', 'student')
+                .eq('is_approved', false);
+
+            if (error) {
+                console.error("Error loading applications:", error);
+                return;
+            }
+
+            tbody.innerHTML = "";
+
+            if (pendingStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">No pending applications found.</td></tr>`;
+                return;
+            }
+
+            pendingStudents.forEach(student => {
+                tbody.innerHTML += `<tr>
+                    <td>${student.name}</td>
+                    <td>Pending Admission</td>
+                    <td>
+                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}', '${student.name}')">Approve & Issue Z-ID</button>
+                        <button class="action-btn btn-delete" onclick="deleteStudent('${student.id}')">Delete Account</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        async function approveStudent(id, name) {
             const zNum = "Z26" + Math.floor(1000 + Math.random() * 9000);
-            alert(`Student Verified!\nName: ${name}\nGenerated Number: ${zNum}`);
-            btn.closest('tr').remove();
+
+            const { error } = await supabase
+                .from('users')
+                .update({
+                    is_approved: true,
+                    admission_number: zNum
+                })
+                .eq('id', id);
+
+            if (error) {
+                alert("Approval error: " + error.message);
+            } else {
+                alert(`Student Verified!\nName: ${name}\nGenerated Admission Number: ${zNum}`);
+                fetchPendingApplications();
+            }
         }
 
-        function rejectWholeClass() {
-            prompt("Provide re-evaluation notes for the Class Teacher:");
-            alert("Results rejected and sent back to staff dashboard level.");
+        async function deleteStudent(id) {
+            if (confirm("Are you sure you want to permanently delete this student account? This action cannot be undone.")) {
+                const { error } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Error deleting student: " + error.message);
+                } else {
+                    alert("Student account successfully deleted.");
+                    fetchPendingApplications();
+                }
+            }
         }
 
-        function finalizeUploadGlobally() {
-            alert("CRITICAL OPERATION SUCCESSFUL!\nReport ledger verified, stamped, and globally uploaded.");
-        }
-
-        // CONNECTED TO THE SERVER DATABASE:
+        // ==========================================
+        // 4. SCORES AND BROADSHEETS
+        // ==========================================
         async function loadClassScoresToScreen(cls) {
             const wrapper = document.getElementById('matrix-display-wrapper');
             const tbody = document.getElementById('matrix-rows');
 
-            // If the user selects the default blank option, hide the layout
             if (!cls) {
                 wrapper.classList.add('hidden');
                 return;
             }
 
             try {
-                // Request student entries from Node.js database API
-                const response = await fetch('/api/admin/students');
-                const data = await response.json();
+                const normalizedClassSelection = cls === "JSS1" ? "JSS 1" : cls;
 
-                if (!response.ok) {
-                    throw new Error(data.error || "Failed to fetch student data.");
-                }
+                const { data: students, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('role', 'student')
+                    .eq('is_approved', true);
+
+                if (error) throw error;
 
                 tbody.innerHTML = "";
 
-                // Keep only the rows corresponding to the selected class (e.g. "JSS 1")
-                // Our database saves it as "JSS 1", so we check if it matches
-                const normalizedClassSelection = cls === "JSS1" ? "JSS 1" : cls;
-                const filteredStudents = data.students.filter(st => st.class_level === normalizedClassSelection);
+                const filteredStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(normalizedClassSelection));
 
                 if (filteredStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#718096;">No records found for this class table in the database.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#718096;">No records found for this class level.</td></tr>`;
                 } else {
                     filteredStudents.forEach(st => {
-                        const totalMark = st.math_score + st.english_score; // Biology & Civic can display as — if not stored
+                        const math = st.math_score || 0;
+                        const english = st.english_score || 0;
+                        const totalMark = math + english;
                         const calculatedAvg = ((totalMark / 200) * 100).toFixed(1) + "%";
 
                         tbody.innerHTML += `<tr>
-                            <td>${st.admission_number}</td>
+                            <td>${st.admission_number || '—'}</td>
                             <td style="text-align:left; font-weight:600;">${st.name}</td>
-                            <td>${st.math_score}</td>
-                            <td>${st.english_score}</td>
+                            <td>${math}</td>
+                            <td>${english}</td>
                             <td>—</td>
                             <td>—</td>
                             <td style="font-weight:bold;">${totalMark}</td>
@@ -386,11 +520,20 @@
                 wrapper.classList.remove('hidden');
             } catch (error) {
                 console.error("Database Connection Failure:", error);
-                alert("Could not load database rows. Make sure 'node server.js' terminal is active.");
+                alert("Could not load database rows: " + error.message);
             }
         }
+
+        function rejectWholeClass() {
+            prompt("Provide re-evaluation notes for the Class Teacher:");
+            alert("Results rejected and sent back to staff dashboard level.");
+        }
+
+        function finalizeUploadGlobally() {
+            alert("CRITICAL OPERATION SUCCESSFUL!\nReport ledger verified, stamped, and globally uploaded.");
+        }
+
         function printBroadsheet() {
-            // 1. Get the selected class name (e.g., JSS1, SS1)
             const selector = document.getElementById('broadsheet-selector');
             const currentClass = selector.options[selector.selectedIndex].text;
 
@@ -399,46 +542,38 @@
                 return;
             }
 
-            // 2. Target your exact scores table element
             const tableHtml = document.querySelector('.matrix-table').outerHTML;
-
-            // 3. Open the printable window pop-up
             const printWindow = window.open('', '_blank', 'height=700,width=1000');
 
             printWindow.document.write(`
-        <html>
-        <head>
-            <title>Broadsheet - ${currentClass}</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 30px; color: #000; }
-                .header { text-align: center; margin-bottom: 20px; }
-                .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
-                .header h2 { margin: 5px 0; font-size: 16px; font-weight: normal; }
-                .meta { display: flex; justify-content: space-between; font-weight: bold; margin-top: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; }
-                
-                /* Clean Table Styling for Paper Output */
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-                th, td { border: 1px solid #000; padding: 8px 5px; text-align: center; }
-                th { background-color: #f2f2f2; font-weight: bold; }
-                
-                @page { size: landscape; margin: 0.5in; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>Zenbliss School Portal</h1>
-                <h2>Official Academic Broadsheet</h2>
-                <div class="meta">
-                    <span>Sheet: ${currentClass}</span>
-                    <span>Date Generated: ${new Date().toLocaleDateString()}</span>
-                </div>
-            </div>
-            <div>
-                ${tableHtml}
-            </div>
-        </body>
-        </html>
-    `);
+                <html>
+                <head>
+                    <title>Broadsheet - ${currentClass}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 30px; color: #000; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+                        .header h2 { margin: 5px 0; font-size: 16px; font-weight: normal; }
+                        .meta { display: flex; justify-content: space-between; font-weight: bold; margin-top: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+                        th, td { border: 1px solid #000; padding: 8px 5px; text-align: center; }
+                        th { background-color: #f2f2f2; font-weight: bold; }
+                        @page { size: landscape; margin: 0.5in; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Zenbliss School Portal</h1>
+                        <h2>Official Academic Broadsheet</h2>
+                        <div class="meta">
+                            <span>Sheet: ${currentClass}</span>
+                            <span>Date Generated: ${new Date().toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <div>${tableHtml}</div>
+                </body>
+                </html>
+            `);
 
             printWindow.document.close();
             printWindow.focus();
@@ -449,7 +584,6 @@
             }, 250);
         }
     </script>
-
 </body>
 
 </html>

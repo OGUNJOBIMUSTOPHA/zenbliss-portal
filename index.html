@@ -180,16 +180,16 @@
 
             <div class="login-card">
                 <h3>Student Login</h3>
-                <form onsubmit="return handleStudentLogin(event)" action="student-dashboard.html" method="GET"></form>
-                <div class="form-group">
-                    <label for="student-id">Admission Number (Z-ID)</label>
-                    <input type="text" id="student-id" placeholder="e.g. Z26001" required>
-                </div>
-                <div class="form-group">
-                    <label for="student-pass">Password</label>
-                    <input type="password" id="student-pass" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-submit">Login to Student Portal</button>
+                <form onsubmit="handleStudentLogin(event)">
+                    <div class="form-group">
+                        <label for="student-id">Admission Number (Z-ID)</label>
+                        <input type="text" id="student-id" placeholder="e.g. Z26001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student-pass">Password</label>
+                        <input type="password" id="student-pass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Login to Student Portal</button>
                 </form>
                 <div class="register-link"
                     style="text-align: center; margin-top: 20px; font-size: 14px; color: #707eae;">
@@ -201,10 +201,10 @@
 
             <div class="login-card">
                 <h3>Staff & Faculty Login</h3>
-                <form action="class-teacher-dashboard.html" method="GET">
+                <form onsubmit="handleTeacherLogin(event)">
                     <div class="form-group">
                         <label for="teacher-email">Staff ID / Email Address</label>
-                        <input type="text" id="teacher-email" placeholder="e.g. TS2605" required>
+                        <input type="text" id="teacher-email" placeholder="e.g. TCH1234 or email@domain.com" required>
                     </div>
                     <div class="form-group">
                         <label for="teacher-pass">Password</label>
@@ -220,7 +220,83 @@
     <footer class="footer-notice">
         &copy; 2026 Zenbliss Schools & College. Secured Academic Portal Terminal.
     </footer>
-    <script src="app.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Initialize Supabase Client Connection
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co/rest/v1/";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 1. Handle Student Login Validation
+        async function handleStudentLogin(event) {
+            event.preventDefault();
+            const admissionId = document.getElementById('student-id').value.trim();
+            const password = document.getElementById('student-pass').value;
+
+            // Fetch match from users table
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('admission_number', admissionId)
+                .eq('role', 'student')
+                .single();
+
+            if (error || !user) {
+                alert("Invalid Student Admission Number. Please try again.");
+                return;
+            }
+
+            // Check authorization state
+            if (!user.is_approved) {
+                alert("Your account application is still pending review by the School Administration.");
+                return;
+            }
+
+            // Note: Replace '123456' with your password verification field if you decide to add custom passwords later.
+            if (password !== "123456") {
+                alert("Incorrect Password.");
+                return;
+            }
+
+            // Success: Store student ID locally and redirect
+            localStorage.setItem('current_student_id', user.id);
+            window.location.href = "student-dashboard.html";
+        }
+
+        // 2. Handle Teacher Login Validation
+        async function handleTeacherLogin(event) {
+            event.preventDefault();
+            const credentialInput = document.getElementById('teacher-email').value.trim();
+            const password = document.getElementById('teacher-pass').value;
+
+            // Check if teacher logged in using their generated Staff ID or their account Email
+            let query = supabase.from('users').select('*').eq('role', 'teacher');
+
+            if (credentialInput.includes('@')) {
+                query = query.eq('email', credentialInput);
+            } else {
+                query = query.eq('admission_number', credentialInput);
+            }
+
+            const { data: user, error } = await query.maybeSingle();
+
+            if (error || !user) {
+                alert("Invalid Staff ID or Email Address.");
+                return;
+            }
+
+            if (password !== "123456") {
+                alert("Incorrect Password.");
+                return;
+            }
+
+            // Success: Store teacher ID locally and redirect
+            localStorage.setItem('current_teacher_id', user.id);
+            window.location.href = "class-teacher-dashboard.html";
+        }
+    </script>
 </body>
 
 </html>
