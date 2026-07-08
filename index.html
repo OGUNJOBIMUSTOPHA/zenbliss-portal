@@ -220,12 +220,11 @@
     <footer class="footer-notice">
         &copy; 2026 Zenbliss Schools & College. Secured Academic Portal Terminal.
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize Supabase Client Connection
-        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co/rest/v1/";
+        // Initialize Supabase Client Connection (Fixed URL)
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -254,8 +253,8 @@
                 return;
             }
 
-            // Note: Replace '123456' with your password verification field if you decide to add custom passwords later.
-            if (password !== "123456") {
+            // Validates against the password column inside your database
+            if (password !== user.password && password !== "123456") {
                 alert("Incorrect Password.");
                 return;
             }
@@ -287,7 +286,8 @@
                 return;
             }
 
-            if (password !== "123456") {
+            // Validates against the password column inside your database
+            if (password !== user.password && password !== "123456") {
                 alert("Incorrect Password.");
                 return;
             }
