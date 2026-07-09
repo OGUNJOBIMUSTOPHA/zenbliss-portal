@@ -151,7 +151,8 @@
                     <div class="form-row">
                         <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
                             style="flex:2;">
-                        <input type="email" id="new-staff-pass" placeholder="Create password" required style="flex:2;">
+                        <input type="email" id="new-staff-password" placeholder="Create password" required
+                            style="flex:2;">
                         <button type="submit" class="btn-submit primary-blue" style="margin:0; padding:10px;">Add
                             Staff</button>
                     </div>
@@ -161,7 +162,7 @@
                     <thead>
                         <tr>
                             <th>Teacher Name</th>
-                            <th>Email</th>
+                            <th>Password</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -289,7 +290,7 @@
 
             // We take the name input and use it as the credential identifier
             const staffName = document.getElementById('new-staff-name').value.trim();
-            const staffPassword = document.getElementById('new-staff-pass').value;
+            const staffPassword = document.getElementById('new-staff-password').value;
 
             const { data, error } = await supabaseClient
                 .from('users')
@@ -316,7 +317,7 @@
         async function addStaffMember(e) {
             e.preventDefault();
             const name = document.getElementById('new-staff-name').value;
-            const email = document.getElementById('new-staff-email').value;
+            const password = document.getElementById('new-staff-password').value;
 
             const teacherID = "TCH" + Math.floor(1000 + Math.random() * 9000);
 
@@ -325,7 +326,7 @@
                 .insert([
                     {
                         name: name,
-                        email: email,
+                        password: password,
                         role: 'teacher',
                         admission_number: teacherID,
                         is_approved: true
@@ -337,7 +338,7 @@
             } else {
                 alert(`Staff registered successfully!\nTheir Login ID is: ${teacherID}`);
                 document.getElementById('new-staff-name').value = '';
-                document.getElementById('new-staff-email').value = '';
+                document.getElementById('new-staff-password').value = '';
                 fetchTeachers();
             }
         }
