@@ -27,18 +27,18 @@
         }
 
         .control-box {
-            background: var(--background-white);
+            background: var(--background-white, #ffffff);
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, #e2e8f0);
             padding: 25px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         }
 
         .control-box h2 {
-            color: var(--primary-blue);
+            color: var(--primary-blue, #1a365d);
             font-size: 1.25rem;
             margin-bottom: 15px;
-            border-bottom: 2px solid var(--light-gray);
+            border-bottom: 2px solid var(--light-gray, #edf2f7);
             padding-bottom: 8px;
         }
 
@@ -52,13 +52,13 @@
         .data-table td {
             padding: 10px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
             font-size: 0.85rem;
         }
 
         .data-table th {
-            background-color: var(--light-gray);
-            color: var(--primary-blue);
+            background-color: var(--light-gray, #edf2f7);
+            color: var(--primary-blue, #1a365d);
         }
 
         .action-btn {
@@ -68,6 +68,7 @@
             font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
+            margin-right: 4px;
         }
 
         .btn-delete {
@@ -86,9 +87,9 @@
         }
 
         .broadsheet-card {
-            background: var(--background-white);
+            background: var(--background-white, #ffffff);
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, #e2e8f0);
             padding: 25px;
             margin-top: 30px;
         }
@@ -107,12 +108,12 @@
         .matrix-table td {
             padding: 8px;
             text-align: center;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color, #e2e8f0);
             font-size: 0.85rem;
         }
 
         .matrix-table th {
-            background-color: var(--primary-blue);
+            background-color: var(--primary-blue, #1a365d);
             color: white;
         }
 
@@ -126,18 +127,51 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Top Left Logout Styling Layout Overrides */
+        .portal-header {
+            position: relative;
+        }
+
+        .btn-logout {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc2626;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
 
     <header class="portal-header">
-        <div class="header-container">
-            <div class="logo-branding">
-                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img">
+        <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+
+        <div class="header-container" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+            <div class="logo-branding" style="display: flex; align-items: center; gap: 15px;">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" style="max-height: 50px;">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
-            <span class="portal-badge" style="background-color: var(--accent-red);">Proprietress Terminal</span>
+            <span class="portal-badge"
+                style="background-color: var(--accent-red, #e11d48); margin-left: 20px; padding: 5px 10px; color: white; border-radius: 4px;">Proprietress
+                Terminal</span>
         </div>
     </header>
 
@@ -147,13 +181,14 @@
 
             <div class="control-box">
                 <h2>Staff Registry (Add / Delete Teachers)</h2>
-                <form class="portal-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
-                    <div class="form-row">
+                <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
+                    <div class="form-row" style="display: flex; gap: 10px;">
                         <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
-                            style="flex:2;">
-                        <input type="password" id="new-staff-password" placeholder="Create password" required
-                            style="flex:2;">
-                        <button type="submit" class="btn-submit primary-blue" style="margin:0; padding:10px;">Add
+                            style="flex:2; padding: 10px;">
+                        <input type="password" id="new-staff-pass" placeholder="Create password" required
+                            style="flex:2; padding: 10px;">
+                        <button type="submit" class="btn-submit primary-blue"
+                            style="margin:0; padding:10px 20px; background-color: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Add
                             Staff</button>
                     </div>
                 </form>
@@ -176,24 +211,26 @@
                 <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Bind a registered teacher directly
                     to up to two specific class levels.</p>
                 <form class="portal-form" onsubmit="assignTeacherTask(event)">
-                    <div class="form-group">
-                        <label>Select Teacher</label>
-                        <select id="assign-staff-select" required>
+                    <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column;">
+                        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Select Teacher</label>
+                        <select id="assign-staff-select" required style="padding: 10px;">
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Target Class Allocation</label>
-                        <select id="assign-class" required>
-                            <option value="JSS1">JSS 1</option>
-                            <option value="JSS2">JSS 2</option>
-                            <option value="JSS3">JSS 3</option>
-                            <option value="SS1">SS 1</option>
-                            <option value="SS2">SS 2</option>
-                            <option value="SS3">SS 3</option>
+                    <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column;">
+                        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Target Class
+                            Allocation</label>
+                        <select id="assign-class" required style="padding: 10px;">
+                            <option value="JSS 1">JSS 1</option>
+                            <option value="JSS 2">JSS 2</option>
+                            <option value="JSS 3">JSS 3</option>
+                            <option value="SS 1">SS 1</option>
+                            <option value="SS 2">SS 2</option>
+                            <option value="SS 3">SS 3</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-submit primary-blue" style="margin-top:10px;">Assign Class
-                        Desk</button>
+                    <button type="submit" class="btn-submit primary-blue"
+                        style="padding: 10px 20px; background-color: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top:10px;">Assign
+                        Class Desk</button>
                 </form>
             </div>
 
@@ -221,13 +258,18 @@
             </p>
 
             <div style="margin-bottom: 20px;">
-                <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)">
+                <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)" style="padding: 8px;">
                     <option value="">-- Choose Class Ledger --</option>
-                    <option value="JSS1">JSS 1 Master Sheet</option>
-                    <option value="SS1">SS 1 Master Sheet</option>
+                    <option value="JSS 1">JSS 1 Master Sheet</option>
+                    <option value="JSS 2">JSS 2 Master Sheet</option>
+                    <option value="JSS 3">JSS 3 Master Sheet</option>
+                    <option value="SS 1">SS 1 Master Sheet</option>
+                    <option value="SS 2">SS 2 Master Sheet</option>
+                    <option value="SS 3">SS 3 Master Sheet</option>
                 </select>
-                <button onclick="printBroadsheet()" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">Print
-                    Class Broadsheet</button>
+                <button onclick="printBroadsheet()"
+                    style="margin-left: 10px; padding: 8px 15px; cursor: pointer; font-weight: bold;">Print Class
+                    Broadsheet</button>
             </div>
 
             <div id="matrix-display-wrapper" class="hidden">
@@ -252,9 +294,10 @@
 
                 <div class="global-upload-bar">
                     <div>
-                        <h4 style="color: var(--primary-blue);">Finalize & Upload Results Globally</h4>
-                        <p style="font-size: 0.8rem; color: #4A5568;">Approving locks the database and uploads the
-                            report cards onto the student login panels.</p>
+                        <h4 style="color: var(--primary-blue, #1a365d); margin: 0 0 5px 0;">Finalize & Upload Results
+                            Globally</h4>
+                        <p style="font-size: 0.8rem; color: #4A5568; margin: 0;">Approving locks the database and
+                            uploads the report cards onto the student login panels.</p>
                     </div>
                     <div style="display:flex; gap:12px;">
                         <button class="action-btn btn-reject" style="padding:10px 15px;" onclick="rejectWholeClass()">🔴
@@ -272,9 +315,9 @@
 
     <script>
         // Initialize Supabase Client Connection
-        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co/rest/v1/";
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Fetch application states automatically when browser finishes loading page
         window.onload = function () {
@@ -283,20 +326,71 @@
         };
 
         // ==========================================
+        // LOGOUT UTILITY
+        // ==========================================
+        function handleLogout() {
+            if (confirm("Are you sure you want to log out of the control terminal?")) {
+                localStorage.clear();
+                window.location.href = "index.html"; // Adjust to your actual main entry or login filename
+            }
+        }
+
+        // ==========================================
         // 1. STAFF REGISTRY (ADD / DELETE TEACHERS)
         // ==========================================
-        async function addStaffMember(event) {
-            event.preventDefault();
+        async function fetchTeachers() {
+            const tbody = document.getElementById('staff-registry-rows');
+            const selectDropdown = document.getElementById('assign-staff-select');
+            if (!tbody) return;
 
-            // We take the name input and use it as the credential identifier
+            const { data: teachers, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'teacher');
+
+            if (error) {
+                console.error("Error loading teachers:", error.message);
+                return;
+            }
+
+            tbody.innerHTML = "";
+            if (selectDropdown) selectDropdown.innerHTML = `<option value="">-- Choose Staff Profile --</option>`;
+
+            if (teachers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">No teachers registered yet.</td></tr>`;
+                return;
+            }
+
+            teachers.forEach(teacher => {
+                // Table row setup
+                tbody.innerHTML += `<tr>
+                    <td style="font-weight: 600;">${teacher.admission_number || '—'}</td>
+                    <td>••••••••</td>
+                    <td>
+                        <button class="action-btn btn-delete" onclick="deleteStaff('${teacher.id}')">Delete Account</button>
+                    </td>
+                </tr>`;
+
+                // Allocation selector dropdown update populate hook
+                if (selectDropdown) {
+                    selectDropdown.innerHTML += `<option value="${teacher.id}">${teacher.admission_number}</option>`;
+                }
+            });
+        }
+
+        async function addStaffMember(event) {
+            // Stops form out from crashing and instantly clearing updates
+            event.preventDefault();
+            event.stopPropagation();
+
             const staffName = document.getElementById('new-staff-name').value.trim();
-            const staffPassword = document.getElementById('new-staff-password').value;
+            const staffPassword = document.getElementById('new-staff-pass').value;
 
             const { data, error } = await supabaseClient
                 .from('users')
                 .insert([
                     {
-                        admission_number: staffName, // Saves their name here for logging in
+                        admission_number: staffName,
                         password: staffPassword,
                         role: 'teacher',
                         is_approved: true
@@ -304,48 +398,18 @@
                 ]);
 
             if (error) {
-                alert("Error creating account: " + error.message);
+                alert("Failed to add teacher: " + error.message);
                 return;
             }
 
-            alert(`Teacher account for ${staffName} created successfully!`);
-
-            // Clear inputs
-            document.getElementById('new-staff-name').value = '';
-            document.getElementById('new-staff-pass').value = '';
-        }
-        async function addStaffMember(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-staff-name').value;
-            const password = document.getElementById('new-staff-password').value;
-
-            const teacherID = "TCH" + Math.floor(1000 + Math.random() * 9000);
-
-            const { error } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        name: name,
-                        password: password,
-                        role: 'teacher',
-                        admission_number: teacherID,
-                        is_approved: true
-                    }
-                ]);
-
-            if (error) {
-                alert("Failed to add teacher: " + error.message);
-            } else {
-                alert(`Staff registered successfully!\nTheir Login ID is: ${teacherID}`);
-                document.getElementById('new-staff-name').value = '';
-                document.getElementById('new-staff-password').value = '';
-                fetchTeachers();
-            }
+            alert(`Staff account for ${staffName} registered successfully!`);
+            document.getElementById('Staff-form').reset();
+            fetchTeachers();
         }
 
         async function deleteStaff(id) {
-            if (confirm("Confirm account deletion? This action instantly revokes all login rights.")) {
-                const { error } = await supabase
+            if (confirm("Confirm account deletion? This action instantly revokes all login rights for this teacher profile.")) {
+                const { error } = await supabaseClient
                     .from('users')
                     .delete()
                     .eq('id', id);
@@ -353,7 +417,7 @@
                 if (error) {
                     alert("Error deleting staff: " + error.message);
                 } else {
-                    alert("Staff account deleted.");
+                    alert("Staff account permanently removed from node records.");
                     fetchTeachers();
                 }
             }
@@ -367,11 +431,21 @@
             const teacherId = document.getElementById('assign-staff-select').value;
             const cls = document.getElementById('assign-class').value;
 
-            const { data: teacher } = await supabase
+            if (!teacherId) {
+                alert("Please select a valid teacher first.");
+                return;
+            }
+
+            const { data: teacher, error: fetchErr } = await supabaseClient
                 .from('users')
                 .select('assigned_classes')
                 .eq('id', teacherId)
                 .single();
+
+            if (fetchErr) {
+                alert("Error pulling allocation profiles: " + fetchErr.message);
+                return;
+            }
 
             let classesArray = teacher.assigned_classes || [];
 
@@ -387,7 +461,7 @@
 
             classesArray.push(cls);
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('users')
                 .update({ assigned_classes: classesArray })
                 .eq('id', teacherId);
@@ -404,15 +478,16 @@
         // ==========================================
         async function fetchPendingApplications() {
             const tbody = document.getElementById('pending-students-rows');
+            if (!tbody) return;
 
-            const { data: pendingStudents, error } = await supabase
+            const { data: pendingStudents, error } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
                 .eq('is_approved', false);
 
             if (error) {
-                console.error("Error loading applications:", error);
+                console.error("Error loading applications:", error.message);
                 return;
             }
 
@@ -425,10 +500,10 @@
 
             pendingStudents.forEach(student => {
                 tbody.innerHTML += `<tr>
-                    <td>${student.name}</td>
-                    <td>Pending Admission</td>
+                    <td>${student.admission_number || 'Unnamed Applicant'}</td>
+                    <td>Pending Terminal Admission</td>
                     <td>
-                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}', '${student.name}')">Approve & Issue Z-ID</button>
+                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}', '${student.admission_number}')">Approve & Issue Z-ID</button>
                         <button class="action-btn btn-delete" onclick="deleteStudent('${student.id}')">Delete Account</button>
                     </td>
                 </tr>`;
@@ -438,11 +513,11 @@
         async function approveStudent(id, name) {
             const zNum = "Z26" + Math.floor(1000 + Math.random() * 9000);
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('users')
                 .update({
                     is_approved: true,
-                    admission_number: zNum
+                    admission_number: zNum // Replaces submission tag with dynamic code
                 })
                 .eq('id', id);
 
@@ -455,8 +530,8 @@
         }
 
         async function deleteStudent(id) {
-            if (confirm("Are you sure you want to permanently delete this student account? This action cannot be undone.")) {
-                const { error } = await supabase
+            if (confirm("Are you sure you want to permanently delete this student account from the database? This action cannot be undone.")) {
+                const { error } = await supabaseClient
                     .from('users')
                     .delete()
                     .eq('id', id);
@@ -483,9 +558,7 @@
             }
 
             try {
-                const normalizedClassSelection = cls === "JSS1" ? "JSS 1" : cls;
-
-                const { data: students, error } = await supabase
+                const { data: students, error } = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('role', 'student')
@@ -495,7 +568,8 @@
 
                 tbody.innerHTML = "";
 
-                const filteredStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(normalizedClassSelection));
+                // Filters data arrays based on target class values inside assigned_classes column
+                const filteredStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(cls));
 
                 if (filteredStudents.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#718096;">No records found for this class level.</td></tr>`;
@@ -507,14 +581,14 @@
                         const calculatedAvg = ((totalMark / 200) * 100).toFixed(1) + "%";
 
                         tbody.innerHTML += `<tr>
-                            <td>${st.admission_number || '—'}</td>
-                            <td style="text-align:left; font-weight:600;">${st.name}</td>
+                            <td>${st.id}</td>
+                            <td style="text-align:left; font-weight:600;">${st.admission_number || '—'}</td>
                             <td>${math}</td>
                             <td>${english}</td>
                             <td>—</td>
                             <td>—</td>
                             <td style="font-weight:bold;">${totalMark}</td>
-                            <td style="color:var(--accent-red); font-weight:bold;">${calculatedAvg}</td>
+                            <td style="color:#e11d48; font-weight:bold;">${calculatedAvg}</td>
                         </tr>`;
                     });
                 }
@@ -527,8 +601,10 @@
         }
 
         function rejectWholeClass() {
-            prompt("Provide re-evaluation notes for the Class Teacher:");
-            alert("Results rejected and sent back to staff dashboard level.");
+            const note = prompt("Provide re-evaluation notes for the Class Teacher:");
+            if (note) {
+                alert("Results rejected and sent back to staff dashboard level.");
+            }
         }
 
         function finalizeUploadGlobally() {
