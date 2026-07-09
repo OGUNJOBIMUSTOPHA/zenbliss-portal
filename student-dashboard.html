@@ -368,11 +368,16 @@
     <script>
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        let supabaseClient = null;
         let globalActiveStudentData = null;
 
         window.onload = function () {
+            // Safe fallback initialization for modern browsers
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } else {
+                console.error("Supabase CDN failed to initialize properly in window context.");
+            }
             validateAndLoadStudentProfile();
         };
 
@@ -388,6 +393,16 @@
                     alert("Session terminated. Please login again.");
                     window.location.href = "index.html";
                     return;
+                }
+
+                if (!supabaseClient) {
+                    // Try re-initializing inline if DOM race conditions occurred
+                    if (typeof supabase !== 'undefined') {
+                        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    } else {
+                        alert("Database configuration handshake failed. Please refresh the page.");
+                        return;
+                    }
                 }
 
                 const { data: student, error } = await supabaseClient
@@ -430,14 +445,16 @@
         function revealLiveReportCard() {
             try {
                 if (!globalActiveStudentData) {
-                    alert("Account details not fully initialized. Please refresh the page.");
+                    alert("Account details are still initializing. Please wait 2 seconds or refresh the page.");
                     return;
                 }
 
                 const student = globalActiveStudentData;
                 const chosenTerm = document.getElementById('selected-term-archive').value;
 
-                if (student.math_score === null || student.math_score === undefined || student.math_score === -1) {
+                // Flexible check targeting database configuration indicators
+                const mCheck = student.math_score;
+                if (mCheck === null || mCheck === undefined || String(mCheck) === "-1" || String(mCheck).trim() === "") {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
                     return;
                 }
@@ -467,87 +484,98 @@
                 const bioScore = Number(student.biology_score) || 0;
 
                 const tbody = document.getElementById('dynamic-grades-body');
-                tbody.innerHTML = "";
+                if (tbody) {
+                    tbody.innerHTML = "";
 
-                let mGrade = determineGradeLetter(mathScore);
-                tbody.innerHTML += `<tr>
-                    <td style="text-align: left; font-weight: 600;">Mathematics</td>
-                    <td>Data Synced</td>
-                    <td>${mathScore}</td>
-                    <td style="font-weight: bold;">${mathScore}</td>
-                    <td style="font-weight: bold; color: ${mGrade.color};">${mGrade.letter}</td>
-                </tr>`;
-
-                let eGrade = determineGradeLetter(engScore);
-                tbody.innerHTML += `<tr>
-                    <td style="text-align: left; font-weight: 600;">English Language</td>
-                    <td>Data Synced</td>
-                    <td>${engScore}</td>
-                    <td style="font-weight: bold;">${engScore}</td>
-                    <td style="font-weight: bold; color: ${eGrade.color};">${eGrade.letter}</td>
-                </tr>`;
-
-                let dynamicTotalScore = mathScore + engScore;
-                let denominatorValue = 200;
-
-                if (lockBio) {
+                    let mGrade = determineGradeLetter(mathScore);
                     tbody.innerHTML += `<tr>
-                        <td style="text-align: left; font-weight: 600; color:#a0aec0;">Biology</td>
-                        <td colspan="4" style="color:#a0aec0; font-style:italic;">Not Offered (Exempted via Department Path)</td>
-                    </tr>`;
-                } else {
-                    let bGrade = determineGradeLetter(bioScore);
-                    dynamicTotalScore += bioScore;
-                    denominatorValue = 300;
-                    tbody.innerHTML += `<tr>
-                        <td style="text-align: left; font-weight: 600;">Biology</td>
+                        <td style="text-align: left; font-weight: 600;">Mathematics</td>
                         <td>Data Synced</td>
-                        <td>${bioScore}</td>
-                        <td style="font-weight: bold;">${bioScore}</td>
-                        <td style="font-weight: bold; color: ${bGrade.color};">${bGrade.letter}</td>
+                        <td>${mathScore}</td>
+                        <td style="font-weight: bold;">${mathScore}</td>
+                        <td style="font-weight: bold; color: ${mGrade.color};">${mGrade.letter}</td>
                     </tr>`;
-                }
 
-                const exactAverage = ((dynamicTotalScore / denominatorValue) * 100);
-                document.getElementById('display-target-avg').innerText = exactAverage.toFixed(1) + "%";
+                    let eGrade = determineGradeLetter(engScore);
+                    tbody.innerHTML += `<tr>
+                        <td style="text-align: left; font-weight: 600;">English Language</td>
+                        <td>Data Synced</td>
+                        <td>${engScore}</td>
+                        <td style="font-weight: bold;">${engScore}</td>
+                        <td style="font-weight: bold; color: ${eGrade.color};">${eGrade.letter}</td>
+                    </tr>`;
 
-                const statusBox = document.getElementById('display-outcome-status');
-                if (exactAverage >= 40) {
-                    statusBox.innerText = "PASS";
-                    statusBox.style.color = "green";
-                } else {
-                    statusBox.innerText = "FAIL / RETAKE";
-                    statusBox.style.color = "var(--accent-red)";
-                }
+                    let dynamicTotalScore = mathScore + engScore;
+                    let denominatorValue = 200;
 
-                document.getElementById('rate-punctual').innerText = (student.punctuality_rating || "5") + " / 5";
-                document.getElementById('rate-leadership').innerText = (student.leadership_rating || "5") + " / 5";
-                document.getElementById('rate-maturity').innerText = (student.maturity_rating || "5") + " / 5";
-                document.getElementById('rate-cleanliness').innerText = (student.cleanliness_rating || "5") + " / 5";
-                document.getElementById('rate-handwriting').innerText = (student.handwriting_rating || "5") + " / 5";
-                document.getElementById('rate-hardwork').innerText = (student.hardwork_rating || "5") + " / 5";
-                document.getElementById('rate-sport').innerText = (student.sport_rating || "5") + " / 5";
-                document.getElementById('rate-pop').innerText = student.class_total_students || "N/A";
+                    if (lockBio) {
+                        tbody.innerHTML += `<tr>
+                            <td style="text-align: left; font-weight: 600; color:#a0aec0;">Biology</td>
+                            <td colspan="4" style="color:#a0aec0; font-style:italic;">Not Offered (Exempted via Department Path)</td>
+                        </tr>`;
+                    } else {
+                        let bGrade = determineGradeLetter(bioScore);
+                        dynamicTotalScore += bioScore;
+                        denominatorValue = 300;
+                        tbody.innerHTML += `<tr>
+                            <td style="text-align: left; font-weight: 600;">Biology</td>
+                            <td>Data Synced</td>
+                            <td>${bioScore}</td>
+                            <td style="font-weight: bold;">${bioScore}</td>
+                            <td style="font-weight: bold; color: ${bGrade.color};">${bGrade.letter}</td>
+                        </tr>`;
+                    }
 
-                document.getElementById('card-display-teacher-remark').innerText = student.teacher_comment ? `"${student.teacher_comment}"` : `"No remark provided yet."`;
+                    const exactAverage = ((dynamicTotalScore / denominatorValue) * 100);
+                    document.getElementById('display-target-avg').innerText = exactAverage.toFixed(1) + "%";
 
-                const principalCommentElement = document.getElementById('card-display-principal-remark');
-                if (exactAverage >= 75) {
-                    principalCommentElement.innerText = `"An outstanding performance. This exceptional standard reflects brilliant focus and ability. Well done."`;
-                } else if (exactAverage >= 50) {
-                    principalCommentElement.innerText = `"Good effort. Promising results, with more focus you can achieve greater scores across your structural criteria paths."`;
-                } else {
-                    principalCommentElement.innerText = `"Performance is below average. Intense academic revision is recommended to establish stable baseline tracks."`;
+                    const statusBox = document.getElementById('display-outcome-status');
+                    if (statusBox) {
+                        if (exactAverage >= 40) {
+                            statusBox.innerText = "PASS";
+                            statusBox.style.color = "green";
+                        } else {
+                            statusBox.innerText = "FAIL / RETAKE";
+                            statusBox.style.color = "var(--accent-red)";
+                        }
+                    }
+
+                    document.getElementById('rate-punctual').innerText = (student.punctuality_rating || "5") + " / 5";
+                    document.getElementById('rate-leadership').innerText = (student.leadership_rating || "5") + " / 5";
+                    document.getElementById('rate-maturity').innerText = (student.maturity_rating || "5") + " / 5";
+                    document.getElementById('rate-cleanliness').innerText = (student.cleanliness_rating || "5") + " / 5";
+                    document.getElementById('rate-handwriting').innerText = (student.handwriting_rating || "5") + " / 5";
+                    document.getElementById('rate-hardwork').innerText = (student.hardwork_rating || "5") + " / 5";
+                    document.getElementById('rate-sport').innerText = (student.sport_rating || "5") + " / 5";
+                    document.getElementById('rate-pop').innerText = student.class_total_students || "N/A";
+
+                    document.getElementById('card-display-teacher-remark').innerText = student.teacher_comment ? `"${student.teacher_comment}"` : `"No remark provided yet."`;
+
+                    const principalCommentElement = document.getElementById('card-display-principal-remark');
+                    if (principalCommentElement) {
+                        if (exactAverage >= 75) {
+                            principalCommentElement.innerText = `"An outstanding performance. This exceptional standard reflects brilliant focus and ability. Well done."`;
+                        } else if (exactAverage >= 50) {
+                            principalCommentElement.innerText = `"Good effort. Promising results, with more focus you can achieve greater scores across your structural criteria paths."`;
+                        } else {
+                            principalCommentElement.innerText = `"Performance is below average. Intense academic revision is recommended to establish stable baseline tracks."`;
+                        }
+                    }
                 }
 
                 document.getElementById('result-gate').classList.add('hidden');
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
-                console.error("Crash during report generation:", err);
-                alert("An error occurred while building the report card data arrays. Please check the developer console.");
+                console.error("Crash during report generation handling:", err);
+                alert("An error occurred while building report arrays. Please clear browser storage or refresh.");
             }
         }
 
         function returnToGate() {
             document.getElementById('report-card-view').classList.add('hidden');
-            document.getElementById('result-gate').
+            document.getElementById('result-gate').classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>
