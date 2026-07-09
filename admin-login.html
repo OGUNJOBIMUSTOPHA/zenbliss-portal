@@ -92,17 +92,22 @@
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Query exactly matching the schema from your third screenshot
+            // Debugging alert: Let's see what the code is actually sending
+            alert("Sending to database - Username: '" + usernameInput + "'");
+
+            // Standardized query
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', usernameInput)
-                .eq('role', 'admin');
+                .eq('admission_number', usernameInput); // Let's match purely on username first
 
             if (error) {
                 alert("Database Error: " + error.message);
                 return;
             }
+
+            // Debugging alert: Let's see how many rows returned
+            alert("Rows found: " + (user ? user.length : 0));
 
             if (!user || user.length === 0) {
                 alert("Access Denied: Invalid Admin Login ID.");
@@ -110,6 +115,9 @@
             }
 
             const currentAdmin = user[0];
+
+            // Check what role came back
+            alert("Role found in DB: '" + currentAdmin.role + "'");
 
             if (passwordInput !== currentAdmin.password) {
                 alert("Access Denied: Incorrect Password.");
