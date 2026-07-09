@@ -92,22 +92,17 @@
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Debugging alert: Let's see what the code is actually sending
-            alert("Sending to database - Username: '" + usernameInput + "'");
-
-            // Standardized query
+            // Direct query without mid-way alerts
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', usernameInput); // Let's match purely on username first
+                .eq('admission_number', usernameInput)
+                .eq('role', 'admin');
 
             if (error) {
                 alert("Database Error: " + error.message);
                 return;
             }
-
-            // Debugging alert: Let's see how many rows returned
-            alert("Rows found: " + (user ? user.length : 0));
 
             if (!user || user.length === 0) {
                 alert("Access Denied: Invalid Admin Login ID.");
@@ -116,14 +111,12 @@
 
             const currentAdmin = user[0];
 
-            // Check what role came back
-            alert("Role found in DB: '" + currentAdmin.role + "'");
-
             if (passwordInput !== currentAdmin.password) {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
 
+            // Single fast success confirmation
             alert("Secure tokens verified. Initializing control dashboard...");
             localStorage.setItem('current_admin_id', currentAdmin.id.toString());
             window.location.href = "admin-dashboard.html";
