@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Teacher Master Ledger — Zenbliss Schools</title>
     <style>
-        /* Embedded Core Styles to prevent white screen issues */
         :root {
             --primary-blue: #1A365D;
             --accent-red: #9B2C2C;
@@ -49,7 +48,14 @@
         .logo-branding {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+        }
+
+        .school-logo-img {
+            max-height: 50px;
+            border-radius: 4px;
+            background: white;
+            padding: 2px;
         }
 
         .school-logo-text {
@@ -102,7 +108,8 @@
         .term-selector-wrapper {
             margin: 20px 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             gap: 15px;
         }
 
@@ -111,7 +118,7 @@
             border-radius: 6px;
             border: 1px solid #CBD5E0;
             font-size: 0.9rem;
-            width: 280px;
+            width: 320px;
         }
 
         .summary-banner {
@@ -141,10 +148,10 @@
 
         .ledger-table th,
         .ledger-table td {
-            padding: 6px;
+            padding: 10px 6px;
             text-align: center;
             border: 1px solid var(--border-color);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
 
         .ledger-table th {
@@ -158,8 +165,8 @@
         }
 
         .score-input {
-            width: 42px;
-            padding: 4px;
+            width: 50px;
+            padding: 6px;
             text-align: center;
             border: 1px solid #CBD5E0;
             border-radius: 4px;
@@ -168,7 +175,7 @@
         .student-name-cell {
             text-align: left;
             font-weight: 600;
-            min-width: 140px;
+            min-width: 180px;
             background-color: #F7FAFC;
         }
 
@@ -248,6 +255,7 @@
     <header class="portal-header">
         <div class="header-container">
             <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
             <span class="portal-badge">Class Teacher Terminal</span>
@@ -258,46 +266,56 @@
 
         <div class="profile-card">
             <div>
-                <h2 style="color: var(--primary-blue); margin:0;">Welcome, Mrs. Alao</h2>
-                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">Designation: Form Teacher Desk |
-                    Assigned Level: JSS 1</p>
+                <h2 style="color: var(--primary-blue); margin:0;" id="teacher-profile-name">Loading Profile...</h2>
+                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">
+                    Designation: Form Teacher Desk | Assigned Levels: <span id="teacher-assigned-classes"
+                        style="font-weight:bold; color:var(--accent-red);">None</span>
+                </p>
             </div>
             <div class="profile-actions">
                 <span
                     style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
                     2026/2027</span>
-                <a href="index.html" class="btn-submit accent-red" style="padding:8px 15px; font-size:0.85rem;">🚪 Log
-                    Out</a>
+                <button onclick="handleLogout()" class="btn-submit accent-red"
+                    style="padding:8px 15px; font-size:0.85rem;">🚪 Log Out</button>
             </div>
         </div>
 
         <div id="ledger-gate" class="gate-card">
             <h3 style="color: var(--primary-blue); margin-bottom: 10px;">Select Class Management Target</h3>
-            <p style="color: #718096; font-size: 0.9rem;">Choose the targeted compilation framework to open the scores
-                upload matrix sheets.</p>
+            <p style="color: #718096; font-size: 0.9rem;">Choose the class and targeted compilation ledger to update the
+                grades database.</p>
 
             <div class="term-selector-wrapper">
-                <select id="target-compilation-term" class="term-select">
-                    <option value="JSS1_3rd">JSS 1 — Third Term Ledger (Current)</option>
-                    <option value="JSS1_2nd">JSS 1 — Second Term Ledger</option>
-                    <option value="JSS1_1st">JSS 1 — First Term Ledger</option>
-                </select>
+                <div>
+                    <label style="font-weight:bold; font-size:0.85rem; margin-bottom:5px; display:block;">Select
+                        Assigned Workspace Class:</label>
+                    <select id="teacher-class-selector" class="term-select">
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight:bold; font-size:0.85rem; margin-bottom:5px; display:block;">Select Target
+                        Term Ledger:</label>
+                    <select id="target-compilation-term" class="term-select">
+                        <option value="3rd Term">Third Term Ledger (Current)</option>
+                        <option value="2nd Term">Second Term Ledger</option>
+                        <option value="1st Term">First Term Ledger</option>
+                    </select>
+                </div>
             </div>
 
             <button class="btn-submit primary-blue" style="padding: 12px 30px;" onclick="loadClassLedgerWorkspace()">📝
-                Open & Upload Results</button>
+                Open & Load Students</button>
         </div>
 
         <div id="master-workspace" class="hidden">
 
             <div class="summary-banner">
                 <div>
-                    <h2 style="margin:0; font-size:1.4rem;" id="active-banner-title">Assigned Level: JSS 1 Ledger</h2>
+                    <h2 style="margin:0; font-size:1.4rem;" id="active-banner-title">Assigned Level Ledger</h2>
                     <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
-                        (60) across all subjects.</p>
+                        (60) across all fields.</p>
                 </div>
-                <button id="admin-submit-btn" class="btn-submit accent-red hidden" onclick="submitToAdminTerminal()">🚀
-                    Submit Complete Ledger to Admin</button>
             </div>
 
             <div class="compilation-card">
@@ -307,14 +325,13 @@
                     <table class="ledger-table">
                         <thead>
                             <tr>
-                                <th rowspan="2">Admission No</th>
-                                <th rowspan="2">Student Name</th>
+                                <th rowspan="2">Student Full Name</th>
                                 <th colspan="4" class="subject-header-group">Mathematics</th>
                                 <th colspan="4" class="subject-header-group">English Language</th>
                                 <th colspan="4" class="subject-header-group">Biology</th>
                                 <th rowspan="2" style="background:#2D3748;">Global Total<br>(300)</th>
                                 <th rowspan="2" style="background:#2D3748;">Global Average<br>(%)</th>
-                                <th rowspan="2">Action</th>
+                                <th rowspan="2">Action Operations</th>
                             </tr>
                             <tr>
                                 <th>CA1 (20)</th>
@@ -331,38 +348,7 @@
                                 <th>Tot</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="ledger-row">
-                                <td><input type="text" class="score-input stud-id" placeholder="Z26001"
-                                        onchange="lookupStudentName(this)" style="width:75px; font-weight:bold;"></td>
-                                <td class="student-name-cell">— Input ID —</td>
-                                <td><input type="number" class="score-input m-ca1" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input m-ca2" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input m-ex" min="0" max="60"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><span class="sub-total-span m-tot">0</span></td>
-                                <td><input type="number" class="score-input e-ca1" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input e-ca2" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input e-ex" min="0" max="60"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><span class="sub-total-span e-tot">0</span></td>
-                                <td><input type="number" class="score-input b-ca1" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input b-ca2" min="0" max="20"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><input type="number" class="score-input b-ex" min="0" max="60"
-                                        oninput="calculateMatrixRow(this)"></td>
-                                <td><span class="sub-total-span b-tot">0</span></td>
-                                <td><span class="row-total" style="font-weight:bold;">0</span></td>
-                                <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">0.0%</span>
-                                </td>
-                                <td><button type="button" style="padding:4px 8px; cursor:pointer;"
-                                        onclick="loadToReportCardView(this)">Configure Card</button></td>
-                            </tr>
+                        <tbody id="dynamic-student-rows">
                         </tbody>
                     </table>
                 </div>
@@ -374,9 +360,8 @@
                 <div class="report-card-section">
                     <div class="form-row-three">
                         <div class="form-group">
-                            <p>
-                                OBSERVATION ON CONDUCT
-                            <p>
+                            <h4 style="margin-bottom: 10px; color: var(--primary-blue);">OBSERVATION ON CONDUCT</h4>
+                            <p style="margin-bottom:8px;">
                                 <label>Punctuality Rating (1-5)</label>
                                 <select id="card-punctual">
                                     <option value="5">5 - Excellent</option>
@@ -385,7 +370,8 @@
                                     <option value="2">2 - Poor</option>
                                     <option value="1">1 - Worse</option>
                                 </select>
-                            <p>
+                            </p>
+                            <p style="margin-bottom:8px;">
                                 <label>Leadership Rating (1-5)</label>
                                 <select id="card-leadership">
                                     <option value="5">5 - Excellent</option>
@@ -394,8 +380,8 @@
                                     <option value="2">2 - Poor</option>
                                     <option value="1">1 - Worse</option>
                                 </select>
-                            <p>
-                            <p>
+                            </p>
+                            <p style="margin-bottom:8px;">
                                 <label>Maturity Rating (1-5)</label>
                                 <select id="card-maturity">
                                     <option value="5">5 - Excellent</option>
@@ -405,7 +391,7 @@
                                     <option value="1">1 - Worse</option>
                                 </select>
                             </p>
-                            <p>
+                            <p style="margin-bottom:8px;">
                                 <label>Cleanliness Rating (1-5)</label>
                                 <select id="card-cleanliness">
                                     <option value="5">5 - Excellent</option>
@@ -415,13 +401,12 @@
                                     <option value="1">1 - Worse</option>
                                 </select>
                             </p>
-                            <p>
-                                -----------------------------------
-                            </p>
-                            PERFORMANCE IN PHYSICAL SKILLS
-                            <p>
+
+                            <h4 style="margin: 15px 0 10px 0; color: var(--primary-blue);">PHYSICAL SKILLS PERFORMANCE
+                            </h4>
+                            <p style="margin-bottom:8px;">
                                 <label>Handwriting (1-5)</label>
-                                <select id="card-Handwriting">
+                                <select id="card-handwriting">
                                     <option value="5">5 - Excellent</option>
                                     <option value="4">4 - Good</option>
                                     <option value="3">3 - Fair</option>
@@ -429,9 +414,9 @@
                                     <option value="1">1 - Worse</option>
                                 </select>
                             </p>
-                            <p>
+                            <p style="margin-bottom:8px;">
                                 <label>Hardwork (1-5)</label>
-                                <select id="card-Hardwork">
+                                <select id="card-hardwork">
                                     <option value="5">5 - Excellent</option>
                                     <option value="4">4 - Good</option>
                                     <option value="3">3 - Fair</option>
@@ -439,7 +424,7 @@
                                     <option value="1">1 - Worse</option>
                                 </select>
                             </p>
-                            <p>
+                            <p style="margin-bottom:8px;">
                                 <label>Sport (1-5)</label>
                                 <select id="card-sport">
                                     <option value="5">5 - Excellent</option>
@@ -452,13 +437,15 @@
                         </div>
                         <div class="form-group">
                             <label>Days Present (Max 90)</label>
-                            <input type="number" id="card-attendance" min="0" max="90" placeholder="e.g. 85">
+                            <input type="number" id="card-attendance" min="0" max="90" placeholder="e.g. 85"
+                                style="padding:10px; border-radius:6px; border:1px solid #CBD5E0;">
                         </div>
                     </div>
                     <div class="report-card-grid">
                         <div class="form-group">
                             <label>Class Teacher's Remarks</label>
-                            <textarea id="card-teacher-comment" class="comment-box" rows="3"></textarea>
+                            <textarea id="card-teacher-comment" class="comment-box" rows="4"
+                                placeholder="Enter academic feedback metrics..."></textarea>
                         </div>
                         <div class="form-group">
                             <label>Auto-Generated Principal Comment</label>
@@ -466,165 +453,270 @@
                         </div>
                     </div>
                     <div style="text-align:right; margin-top:15px;">
-                        <button class="btn-submit primary-blue" onclick="commitStudentReportMetrics()">Apply
-                            Parameters</button>
+                        <button class="btn-submit primary-blue" id="commit-btn-sync">Save & Sync Student
+                            Metrics</button>
                     </div>
                 </div>
             </div>
-            <button onclick="saveBroadsheetProgress()" class="Broadsheet"
-                style="margin-left: 10px; padding: 5px 10px;">Save Progress</button>
 
-            <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅️ Close Workspace</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅️ Close Ledger
+                    Workspace</button>
+            </div>
         </div>
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // 1. Master list at the top here as well
-        const classCodeMap = {
-            "JSS1": "021",
-            "JSS2": "022",
-            "JSS3": "023",
-            "SS1": "011",
-            "SS2": "012",
-            "SS3": "013"
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentTeacherProfile = null;
+        let selectedTargetStudentId = null;
+
+        window.onload = function () {
+            verifyAndLoadTeacherSession();
         };
 
-        // Example: If this teacher handles SS2, look up "SS2" to get "012"
-        const currentTeacherClass = "SS2";
-        const assignedClassCode = classCodeMap[currentTeacherClass];
+        function handleLogout() {
+            if (confirm("Are you sure you want to log out?")) {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
+        }
 
-        // Your function to load students then uses that 'assignedClassCode' to filter the list
-        const studentDatabaseRegistry = { "Z26001": "ADENIRAN TOBI" };
-        let activeRowReference = null;
+        async function verifyAndLoadTeacherSession() {
+            const teacherId = localStorage.getItem('current_teacher_id');
+            if (!teacherId) {
+                alert("Session expired. Please log in again.");
+                window.location.href = "index.html";
+                return;
+            }
 
-        function loadClassLedgerWorkspace() {
+            const { data: user, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', teacherId)
+                .single();
+
+            if (error || !user) {
+                alert("Error authenticating faculty terminal profile.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            currentTeacherProfile = user;
+            document.getElementById('teacher-profile-name').innerText = "Welcome, " + (user.admission_number || "Teacher");
+
+            const assignedClasses = user.assigned_classes || [];
+            const displaySpan = document.getElementById('teacher-assigned-classes');
+            const classSelector = document.getElementById('teacher-class-selector');
+
+            if (assignedClasses.length === 0) {
+                displaySpan.innerText = "No classes assigned yet by admin.";
+                classSelector.innerHTML = '<option value="">No classes available</option>';
+                return;
+            }
+
+            displaySpan.innerText = assignedClasses.join(', ');
+
+            classSelector.innerHTML = '';
+            assignedClasses.forEach(cls => {
+                classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
+            });
+        }
+
+        async function loadClassLedgerWorkspace() {
+            const chosenClass = document.getElementById('teacher-class-selector').value;
+            const chosenTerm = document.getElementById('target-compilation-term').value;
+
+            if (!chosenClass) {
+                alert("Please select a valid assigned class configuration level first.");
+                return;
+            }
+
+            document.getElementById('active-banner-title').innerText = `Assigned Level Ledger: ${chosenClass} (${chosenTerm})`;
+
+            const tbody = document.getElementById('dynamic-student-rows');
+            tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;">Querying database records...</td></tr>`;
+
+            const { data: students, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'student')
+                .eq('is_approved', true);
+
+            if (error) {
+                alert("Failed to query student database rows: " + error.message);
+                return;
+            }
+
+            const classStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(chosenClass));
+            tbody.innerHTML = "";
+
+            if (classStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; color:#a0aec0;">No approved students found registered under ${chosenClass} configuration.</td></tr>`;
+                return;
+            }
+
+            classStudents.forEach(student => {
+                const mathScore = student.math_score || 0;
+                const engScore = student.english_score || 0;
+                const bioScore = student.biology_score || 0;
+
+                const dept = student.department ? student.department.trim() : "None";
+
+                let lockBiology = false;
+                if (chosenClass.startsWith("SS") && (dept === "Commercial" || dept === "Humanity")) {
+                    lockBiology = true;
+                }
+
+                const bioDisabledAttr = lockBiology ? "disabled style='background:#edf2f7; cursor:not-allowed;'" : "";
+                const bioValueCA1 = lockBiology ? "" : "0";
+                const bioValueCA2 = lockBiology ? "" : "0";
+                const bioValueEx = lockBiology ? "" : bioScore;
+                const bioDisplayTot = lockBiology ? "N/A" : bioScore;
+
+                const globalTotal = mathScore + engScore + (lockBiology ? 0 : bioScore);
+                const maxPossibleSubjects = lockBiology ? 2 : 3;
+                const globalAvg = ((globalTotal / (maxPossibleSubjects * 100)) * 100).toFixed(1) + "%";
+
+                tbody.innerHTML += `
+                    <tr class="ledger-row" data-id="${student.id}" data-dept="${dept}">
+                        <td class="student-name-cell">
+                            ${student.admission_number || 'Unnamed Student'}
+                            <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
+                        </td>
+                        <td><input type="number" class="score-input m-ca1" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ca2" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ex" min="0" max="60" value="${mathScore}" oninput="calculateMatrixRow(this)"></td>
+                        <td><span class="sub-total-span m-tot">${mathScore}</span></td>
+                        <td><input type="number" class="score-input e-ca1" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ca2" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ex" min="0" max="60" value="${engScore}" oninput="calculateMatrixRow(this)"></td>
+                        <td><span class="sub-total-span e-tot">${engScore}</span></td>
+                        <td><input type="number" class="score-input b-ca1" min="0" max="20" value="${bioValueCA1}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input b-ca2" min="0" max="20" value="${bioValueCA2}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input b-ex" min="0" max="60" value="${bioValueEx}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><span class="sub-total-span b-tot">${bioDisplayTot}</span></td>
+                        <td><span class="row-total" style="font-weight:bold;">${globalTotal}</span></td>
+                        <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">${globalAvg}</span></td>
+                        <td>
+                            <button type="button" style="padding:6px 10px; cursor:pointer; font-weight:bold; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;" 
+                                onclick="loadToReportCardView('${student.id}', '${student.admission_number}')">Configure Card</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
             document.getElementById('ledger-gate').classList.add('hidden');
             document.getElementById('master-workspace').classList.remove('hidden');
         }
 
         function returnToGate() {
             document.getElementById('master-workspace').classList.add('hidden');
+            document.getElementById('report-card-box').classList.add('hidden');
             document.getElementById('ledger-gate').classList.remove('hidden');
-        }
-
-        function lookupStudentName(inputField) {
-            const row = inputField.closest('tr');
-            const idValue = inputField.value.trim().toUpperCase();
-            const nameCell = row.querySelector('.student-name-cell');
-            if (studentDatabaseRegistry[idValue]) {
-                nameCell.innerText = studentDatabaseRegistry[idValue];
-            } else {
-                nameCell.innerText = "NOT FOUND";
-            }
         }
 
         function calculateMatrixRow(element) {
             const row = element.closest('tr');
-            // --- LIVE TYPING GUARD WITH ALERT ---
             const maxVal = parseFloat(element.getAttribute('max'));
             const currentVal = parseFloat(element.value) || 0;
 
             if (maxVal && currentVal > maxVal) {
-                element.value = element.value.slice(0, -1);
-                alert(`The entered score exceeds the maximum limit of ${maxVal} marks for this field.`);
+                element.value = 0;
+                alert(`The entered score exceeds the maximum allowed limit of ${maxVal} marks for this section.`);
+                return;
             }
-            // --- END OF LIVE TYPING GUARD ---
+
             const m = (parseFloat(row.querySelector('.m-ca1').value) || 0) + (parseFloat(row.querySelector('.m-ca2').value) || 0) + (parseFloat(row.querySelector('.m-ex').value) || 0);
             row.querySelector('.m-tot').innerText = m;
 
             const e = (parseFloat(row.querySelector('.e-ca1').value) || 0) + (parseFloat(row.querySelector('.e-ca2').value) || 0) + (parseFloat(row.querySelector('.e-ex').value) || 0);
             row.querySelector('.e-tot').innerText = e;
 
-            const b = (parseFloat(row.querySelector('.b-ca1').value) || 0) + (parseFloat(row.querySelector('.b-ca2').value) || 0) + (parseFloat(row.querySelector('.b-ex').value) || 0);
-            row.querySelector('.b-tot').innerText = b;
+            const bioInputCheck = row.querySelector('.b-ex');
+            let b = 0;
+            let totalSubjects = 3;
+
+            if (bioInputCheck.disabled) {
+                row.querySelector('.b-tot').innerText = "N/A";
+                totalSubjects = 2;
+            } else {
+                b = (parseFloat(row.querySelector('.b-ca1').value) || 0) + (parseFloat(row.querySelector('.b-ca2').value) || 0) + (parseFloat(row.querySelector('.b-ex').value) || 0);
+                row.querySelector('.b-tot').innerText = b;
+            }
 
             const tot = m + e + b;
             row.querySelector('.row-total').innerText = tot;
-            row.querySelector('.row-avg').innerText = (tot / 3).toFixed(1) + "%";
-            checkLedgerCompletionStatus();
+            row.querySelector('.row-avg').innerText = ((tot / (totalSubjects * 100)) * 100).toFixed(1) + "%";
         }
 
-        function loadToReportCardView(btn) {
-            const row = btn.closest('tr');
-            const name = row.querySelector('.student-name-cell').innerText;
-            const avg = parseFloat(row.querySelector('.row-avg').innerText) || 0;
-            activeRowReference = row;
+        function loadToReportCardView(studentId, name) {
+            selectedTargetStudentId = studentId;
+            const row = document.querySelector(`tr[data-id="${studentId}"]`);
+
+            const mathTotal = parseInt(row.querySelector('.m-tot').innerText) || 0;
+            const engTotal = parseInt(row.querySelector('.e-tot').innerText) || 0;
+            const bioInput = row.querySelector('.b-ex');
+
+            let bioTotal = 0;
+            let denominator = 200;
+
+            if (!bioInput.disabled) {
+                bioTotal = parseInt(row.querySelector('.b-tot').innerText) || 0;
+                denominator = 300;
+            }
+
+            const totalScore = mathTotal + engTotal + bioTotal;
+            const avgPercentage = (totalScore / denominator) * 100;
+
             document.getElementById('active-student-card-title').innerText = name;
-            document.getElementById('card-principal-comment').innerText = avg >= 50 ? "Commendable effort." : "Needs serious improvement.";
+
+            const principalCommentBox = document.getElementById('card-principal-comment');
+            if (avgPercentage >= 75) {
+                principalCommentBox.innerText = "An outstanding performance. Keep maintaining this standard of excellence.";
+            } else if (avgPercentage >= 50) {
+                principalCommentBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
+            } else {
+                principalCommentBox.innerText = "Performance is below average. Intense academic revision is recommended.";
+            }
+
             document.getElementById('report-card-box').classList.remove('hidden');
+            document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('commit-btn-sync').onclick = function () {
+                commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, bioInput.disabled);
+            };
         }
 
-        function commitStudentReportMetrics() {
-            alert("Metrics Applied!");
-            document.getElementById('report-card-box').classList.add('hidden');
-        }
-
-        function checkLedgerCompletionStatus() {
-            const total = parseFloat(document.querySelector('.row-total').innerText) || 0;
-            if (total > 0) document.getElementById('admin-submit-btn').classList.remove('hidden');
-        }
-
-        // CONNECTED TO THE SERVER DATABASE:
-        async function submitToAdminTerminal() {
-            // Target the active row in the table
-            const row = document.querySelector('.ledger-row');
-
-            // Collect the inputs
-            const studentData = {
-                name: row.querySelector('.student-name-cell').innerText,
-                admission_number: row.querySelector('.stud-id').value.trim(),
-                class_level: "JSS 1",
-                term: "Third Term",
-                math_score: parseInt(row.querySelector('.m-tot').innerText) || 0,
-                english_score: parseInt(row.querySelector('.e-tot').innerText) || 0
+        async function commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, isBioLocked) {
+            const updatePayload = {
+                math_score: mathTotal,
+                english_score: engTotal
             };
 
-            // Validation: stop if no student ID has been entered yet
-            if (!studentData.admission_number || studentData.name === "NOT FOUND" || studentData.name === "— Input ID —") {
-                alert("Please enter a valid Admission Number first!");
+            if (!isBioLocked) {
+                updatePayload.biology_score = bioTotal;
+            }
+
+            const { error } = await supabaseClient
+                .from('users')
+                .update(updatePayload)
+                .eq('id', studentId);
+
+            if (error) {
+                alert("Failed to synchronize metrics onto cloud servers: " + error.message);
                 return;
             }
 
-            try {
-                // Post data to our Node server endpoint
-                const response = await fetch('/api/students', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(studentData)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert("✨ Success! " + result.message);
-                    returnToGate();
-                } else {
-                    alert("Error saving data: " + result.error);
-                }
-            } catch (error) {
-                console.error("Transmission Error:", error);
-                alert("Could not connect to the database server. Ensure 'node server.js' is running!");
-            }
-        }
-        function saveBroadsheetProgress() {
-            // 1. Grab whatever values are currently in the inputs
-            const test1 = document.getElementById('test1')?.value.trim() || "";
-            const test2 = document.getElementById('test2')?.value.trim() || "";
-            const examScore = document.getElementById('examScore')?.value.trim() || "";
-            const conductRating = document.getElementById('studentConduct').value;
-            const skillsRating = document.getElementById('physicalSkills').value;
-
-            // 2. Check if absolutely nothing has been touched
-            if (test1 === "" && test2 === "" && examScore === "" && conductRating === "" && skillsRating === "") {
-                alert("The row is empty. Please enter at least one score or rating before saving.");
-                return;
-            }
-
-            // 3. If she made a difference somewhere, save it successfully
-            console.log("Saving progress with current inputs...");
-
-            alert("Progress saved! You can update or fill in the rest of the scores later.");
+            alert("Student parameters successfully saved and synchronized onto cloud profiles!");
+            document.getElementById('report-card-box').classList.add('hidden');
+            loadClassLedgerWorkspace();
         }
     </script>
 </body>
