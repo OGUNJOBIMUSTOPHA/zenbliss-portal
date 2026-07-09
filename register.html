@@ -35,7 +35,6 @@
             max-width: 450px;
         }
 
-        /* Logo Styling */
         .logo-container {
             text-align: center;
             margin-bottom: 20px;
@@ -67,7 +66,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         label {
@@ -114,7 +113,6 @@
             background-color: #3751d7;
         }
 
-        /* Link back to login styling */
         .login-redirect {
             text-align: center;
             margin-top: 25px;
@@ -142,7 +140,7 @@
         </div>
 
         <h2>Student Registration</h2>
-        <p class="subtitle">Create an account to submit your details for ID generation.</p>
+        <p class="subtitle">Create an account to submit your details for approval.</p>
 
         <form id="registrationForm">
             <div class="form-group">
@@ -159,12 +157,12 @@
                 <label for="classSelect">Class</label>
                 <select id="classSelect" required>
                     <option value="">Select Class</option>
-                    <option value="JSS1">JSS 1</option>
-                    <option value="JSS2">JSS 2</option>
-                    <option value="JSS3">JSS 3</option>
-                    <option value="SS1">SS 1</option>
-                    <option value="SS2">SS 2</option>
-                    <option value="SS3">SS 3</option>
+                    <option value="JSS 1">JSS 1</option>
+                    <option value="JSS 2">JSS 2</option>
+                    <option value="JSS 3">JSS 3</option>
+                    <option value="SS 1">SS 1</option>
+                    <option value="SS 2">SS 2</option>
+                    <option value="SS 3">SS 3</option>
                 </select>
             </div>
 
@@ -193,15 +191,13 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        const classCodeMap = {
-            "JSS1": "021",
-            "JSS2": "022",
-            "JSS3": "023",
-            "SS1": "011",
-            "SS2": "012",
-            "SS3": "013"
-        };
+        // Synchronized Supabase instance references
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const classSelect = document.getElementById('classSelect');
         const departmentGroup = document.getElementById('departmentGroup');
@@ -219,23 +215,38 @@
             }
         });
 
-        document.getElementById('registrationForm').addEventListener('submit', function (e) {
+        document.getElementById('registrationForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const fullName = document.getElementById('fullName').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
             const selectedClass = document.getElementById('classSelect').value;
-            const department = departmentSelect.value || "None (Junior Section)";
-            const assignedClassCode = classCodeMap[selectedClass];
+            const department = departmentSelect.value || "None";
+            const userPassword = document.getElementById('password').value;
 
-            let message = `Thank you, ${fullName}!\nYour details have been sent to your ${selectedClass} teacher.`;
-            if (selectedClass.startsWith('SS')) {
-                message += `\nDepartment: ${department}`;
+            // Direct cloud pipeline transmission 
+            const { data, error } = await supabaseClient
+                .from('users')
+                .insert([
+                    {
+                        admission_number: fullName, // Saves Name into layout field token slot directly
+                        password: userPassword,
+                        role: 'student',
+                        is_approved: false, // Ensures row appears on Admin pending screen
+                        assigned_classes: [selectedClass], // Matched array allocation 
+                        department: department,
+                        phone: phoneNumber // Land tracking data asset field row mapping safely
+                    }
+                ]);
+
+            if (error) {
+                alert("Registration Submission Failed: " + error.message);
+                return;
             }
-            message += `\nYour generated class prefix code is: Z${assignedClassCode}`;
 
-            alert(message);
+            alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
 
+            // Resetting view layers cleanly
             this.reset();
             departmentGroup.classList.add('hidden');
             departmentSelect.removeAttribute('required');
