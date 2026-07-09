@@ -230,6 +230,7 @@
         // 1. Handle Student Login Validation
         async function handleStudentLogin(event) {
             event.preventDefault();
+            event.stopPropagation(); //
             const admissionId = document.getElementById('student-id').value.trim();
             const password = document.getElementById('student-pass').value;
 
@@ -267,6 +268,7 @@
         // 2. Handle Teacher Login Validation
         async function handleTeacherLogin(event) {
             event.preventDefault();
+            event.stopPropagation(); //
             const credentialInput = document.getElementById('teacher-email').value.trim();
             const password = document.getElementById('teacher-pass').value;
 
