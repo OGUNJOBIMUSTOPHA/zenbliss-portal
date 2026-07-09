@@ -128,7 +128,6 @@
             align-items: center;
         }
 
-        /* Top Left Logout Styling Layout Overrides */
         .portal-header {
             position: relative;
         }
@@ -241,8 +240,8 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Applicant Name</th>
-                        <th>Applied Class Level</th>
+                        <th>Student Name</th>
+                        <th>Applied Class & Dept</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -277,7 +276,6 @@
                     <table class="matrix-table">
                         <thead>
                             <tr>
-                                <th>Admission ID</th>
                                 <th>Student Name</th>
                                 <th>Math</th>
                                 <th>English</th>
@@ -314,29 +312,24 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize Supabase Client Connection
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Fetch application states automatically when browser finishes loading page
         window.onload = function () {
             fetchTeachers();
             fetchPendingApplications();
         };
 
-        // ==========================================
-        // LOGOUT UTILITY
-        // ==========================================
         function handleLogout() {
-            if (confirm("Are you sure you want to log out of the control terminal?")) {
+            if (confirm("Are you sure you want to log out?")) {
                 localStorage.clear();
-                window.location.href = "index.html"; // Adjust to your actual main entry or login filename
+                window.location.href = "index.html";
             }
         }
 
         // ==========================================
-        // 1. STAFF REGISTRY (ADD / DELETE TEACHERS)
+        // 1. STAFF REGISTRY MANAGEMENT
         // ==========================================
         async function fetchTeachers() {
             const tbody = document.getElementById('staff-registry-rows');
@@ -362,7 +355,6 @@
             }
 
             teachers.forEach(teacher => {
-                // Table row setup
                 tbody.innerHTML += `<tr>
                     <td style="font-weight: 600;">${teacher.admission_number || '—'}</td>
                     <td>••••••••</td>
@@ -371,7 +363,6 @@
                     </td>
                 </tr>`;
 
-                // Allocation selector dropdown update populate hook
                 if (selectDropdown) {
                     selectDropdown.innerHTML += `<option value="${teacher.id}">${teacher.admission_number}</option>`;
                 }
@@ -379,7 +370,6 @@
         }
 
         async function addStaffMember(event) {
-            // Stops form out from crashing and instantly clearing updates
             event.preventDefault();
             event.stopPropagation();
 
@@ -408,7 +398,7 @@
         }
 
         async function deleteStaff(id) {
-            if (confirm("Confirm account deletion? This action instantly revokes all login rights for this teacher profile.")) {
+            if (confirm("Confirm account deletion? This will revoke all access for this teacher.")) {
                 const { error } = await supabaseClient
                     .from('users')
                     .delete()
@@ -417,14 +407,14 @@
                 if (error) {
                     alert("Error deleting staff: " + error.message);
                 } else {
-                    alert("Staff account permanently removed from node records.");
+                    alert("Staff account permanently deleted.");
                     fetchTeachers();
                 }
             }
         }
 
         // ==========================================
-        // 2. ASSIGN CLASS RESPONSIBILITIES (UP TO 2)
+        // 2. ASSIGN CLASS RESPONSIBILITIES
         // ==========================================
         async function assignTeacherTask(e) {
             e.preventDefault();
@@ -432,7 +422,7 @@
             const cls = document.getElementById('assign-class').value;
 
             if (!teacherId) {
-                alert("Please select a valid teacher first.");
+                alert("Please select a teacher.");
                 return;
             }
 
@@ -443,7 +433,7 @@
                 .single();
 
             if (fetchErr) {
-                alert("Error pulling allocation profiles: " + fetchErr.message);
+                alert("Error pulling profiles: " + fetchErr.message);
                 return;
             }
 
@@ -455,7 +445,7 @@
             }
 
             if (classesArray.length >= 2) {
-                alert("A teacher can only be assigned to a maximum of 2 classes. Removing oldest allocation.");
+                alert("A teacher can only manage 2 classes. Removing oldest allocation.");
                 classesArray.shift();
             }
 
@@ -469,12 +459,12 @@
             if (error) {
                 alert("Error assigning class: " + error.message);
             } else {
-                alert("Assignment Secured successfully!");
+                alert("Assignment saved successfully!");
             }
         }
 
         // ==========================================
-        // 3. PENDING STUDENT APPLICATIONS & APPROVAL
+        // 3. PENDING STUDENT APPLICATIONS
         // ==========================================
         async function fetchPendingApplications() {
             const tbody = document.getElementById('pending-students-rows');
@@ -499,11 +489,14 @@
             }
 
             pendingStudents.forEach(student => {
+                const classApplied = (student.assigned_classes && student.assigned_classes[0]) || 'Unassigned';
+                const deptApplied = student.department || 'None';
+
                 tbody.innerHTML += `<tr>
-                    <td>${student.admission_number || 'Unnamed Applicant'}</td>
-                    <td>Pending Terminal Admission</td>
+                    <td style="font-weight: 600;">${student.admission_number || 'Unnamed Applicant'}</td>
+                    <td>${classApplied} (${deptApplied})</td>
                     <td>
-                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}', '${student.admission_number}')">Approve & Issue Z-ID</button>
+                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}', '${student.admission_number}')">Approve</button>
                         <button class="action-btn btn-delete" onclick="deleteStudent('${student.id}')">Delete Account</button>
                     </td>
                 </tr>`;
@@ -511,26 +504,21 @@
         }
 
         async function approveStudent(id, name) {
-            const zNum = "Z26" + Math.floor(1000 + Math.random() * 9000);
-
             const { error } = await supabaseClient
                 .from('users')
-                .update({
-                    is_approved: true,
-                    admission_number: zNum // Replaces submission tag with dynamic code
-                })
+                .update({ is_approved: true })
                 .eq('id', id);
 
             if (error) {
                 alert("Approval error: " + error.message);
             } else {
-                alert(`Student Verified!\nName: ${name}\nGenerated Admission Number: ${zNum}`);
+                alert(`Student Verified! ${name} is now approved to log in.`);
                 fetchPendingApplications();
             }
         }
 
         async function deleteStudent(id) {
-            if (confirm("Are you sure you want to permanently delete this student account from the database? This action cannot be undone.")) {
+            if (confirm("Are you sure you want to permanently delete this student account? This cannot be undone.")) {
                 const { error } = await supabaseClient
                     .from('users')
                     .delete()
@@ -568,11 +556,10 @@
 
                 tbody.innerHTML = "";
 
-                // Filters data arrays based on target class values inside assigned_classes column
                 const filteredStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(cls));
 
                 if (filteredStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#718096;">No records found for this class level.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#718096;">No records found for this class.</td></tr>`;
                 } else {
                     filteredStudents.forEach(st => {
                         const math = st.math_score || 0;
@@ -581,7 +568,6 @@
                         const calculatedAvg = ((totalMark / 200) * 100).toFixed(1) + "%";
 
                         tbody.innerHTML += `<tr>
-                            <td>${st.id}</td>
                             <td style="text-align:left; font-weight:600;">${st.admission_number || '—'}</td>
                             <td>${math}</td>
                             <td>${english}</td>
@@ -595,7 +581,7 @@
 
                 wrapper.classList.remove('hidden');
             } catch (error) {
-                console.error("Database Connection Failure:", error);
+                console.error("Database connection failure:", error);
                 alert("Could not load database rows: " + error.message);
             }
         }
@@ -603,12 +589,12 @@
         function rejectWholeClass() {
             const note = prompt("Provide re-evaluation notes for the Class Teacher:");
             if (note) {
-                alert("Results rejected and sent back to staff dashboard level.");
+                alert("Results rejected and returned to the teacher.");
             }
         }
 
         function finalizeUploadGlobally() {
-            alert("CRITICAL OPERATION SUCCESSFUL!\nReport ledger verified, stamped, and globally uploaded.");
+            alert("Success! Report cards verified and uploaded to student panels.");
         }
 
         function printBroadsheet() {

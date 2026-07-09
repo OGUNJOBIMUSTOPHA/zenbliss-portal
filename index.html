@@ -29,7 +29,6 @@
             min-height: 100vh;
         }
 
-        /* Top Branding Header with Logo Placement */
         .portal-header {
             background-color: var(--primary-blue);
             color: var(--background-white);
@@ -66,7 +65,6 @@
             letter-spacing: 1px;
         }
 
-        /* Main Login Area */
         .main-hero {
             flex: 1;
             display: flex;
@@ -182,8 +180,8 @@
                 <h3>Student Login</h3>
                 <form onsubmit="handleStudentLogin(event); return false;">
                     <div class="form-group">
-                        <label for="student-id">Admission Number (Z-ID)</label>
-                        <input type="text" id="student-id" placeholder="e.g. Z26001" required>
+                        <label for="student-name">Student Full Name</label>
+                        <input type="text" id="student-name" placeholder="Enter your full registered name" required>
                     </div>
                     <div class="form-group">
                         <label for="student-pass">Password</label>
@@ -203,8 +201,8 @@
                 <h3>Staff & Faculty Login</h3>
                 <form onsubmit="handleTeacherLogin(event); return false;">
                     <div class="form-group">
-                        <label for="teacher-email">Staff ID / Email Address</label>
-                        <input type="text" id="teacher-email" placeholder="e.g. TCH1234 or email@domain.com" required>
+                        <label for="teacher-name">Staff Full Name</label>
+                        <input type="text" id="teacher-name" placeholder="Enter Teacher Name (e.g. Mrs. Alao)" required>
                     </div>
                     <div class="form-group">
                         <label for="teacher-pass">Password</label>
@@ -224,30 +222,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize Supabase Client Connection safely using a unique variable name
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
-
-        // FIX: We name this 'supabaseClient' so it doesn't conflict with the global library name
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 1. Handle Student Login Validation
+        // 1. Student Login Logic Flow
         async function handleStudentLogin(event) {
             event.preventDefault();
             event.stopPropagation();
 
-            const admissionId = document.getElementById('student-id').value.trim();
+            const typedName = document.getElementById('student-name').value.trim();
             const password = document.getElementById('student-pass').value;
 
-            // Updated to use supabaseClient
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', admissionId)
+                .eq('admission_number', typedName) // Reading name from admission_number field
                 .eq('role', 'student');
 
             if (error || !user || user.length === 0) {
-                alert("Invalid Student Admission Number. Please try again.");
+                alert("Invalid Student Name. Please try again or check registration spelling.");
                 return;
             }
 
@@ -267,27 +261,29 @@
             window.location.href = "student-dashboard.html";
         }
 
-        // 2. Handle Teacher Login Validation
+        // 2. Staff & Admin Login Logic Flow
         async function handleTeacherLogin(event) {
             event.preventDefault();
             event.stopPropagation();
 
-            const credentialInput = document.getElementById('teacher-email').value.trim();
+            const typedStaffName = document.getElementById('teacher-name').value.trim();
             const password = document.getElementById('teacher-pass').value;
 
-            // Updated to use supabaseClient
-            let query = supabaseClient.from('users').select('*').eq('role', 'teacher');
-
-            if (credentialInput.includes('@')) {
-                query = query.eq('email', credentialInput);
-            } else {
-                query = query.eq('admission_number', credentialInput);
+            // Administrative Master Key bypass routing shortcut check
+            if (typedStaffName.toLowerCase() === 'admin' && password === 'admin123') {
+                window.location.href = "admin-dashboard.html"; // Routing to the updated panel
+                return;
             }
 
-            const { data: user, error } = await query;
+            // Normal teacher query directly checking names
+            const { data: user, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('admission_number', typedStaffName)
+                .eq('role', 'teacher');
 
             if (error || !user || user.length === 0) {
-                alert("Invalid Staff ID or Email Address.");
+                alert("Invalid Staff Name. Access Denied.");
                 return;
             }
 
