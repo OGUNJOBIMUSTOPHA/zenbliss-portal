@@ -704,10 +704,20 @@
                 updatePayload.biology_score = bioTotal;
             }
 
+            // Show visual saving indicator on the confirmation engine
+            const saveBtn = document.getElementById('commit-btn-sync');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = "Syncing with cloud...";
+            saveBtn.disabled = true;
+
             const { error } = await supabaseClient
                 .from('users')
                 .update(updatePayload)
                 .eq('id', studentId);
+
+            // Restore button properties
+            saveBtn.innerText = originalText;
+            saveBtn.disabled = false;
 
             if (error) {
                 alert("Failed to synchronize metrics onto cloud servers: " + error.message);
@@ -715,8 +725,25 @@
             }
 
             alert("Student parameters successfully saved and synchronized onto cloud profiles!");
+
+            // Hide configuration drawer panel
             document.getElementById('report-card-box').classList.add('hidden');
-            loadClassLedgerWorkspace();
+
+            // Updates internal text targets inside the active row for totals without dropping CA inputs to 0
+            const row = document.querySelector(`tr[data-id="${studentId}"]`);
+            if (row) {
+                row.querySelector('.m-tot').innerText = mathTotal;
+                row.querySelector('.e-tot').innerText = engTotal;
+                if (!isBioLocked) {
+                    row.querySelector('.b-tot').innerText = bioTotal;
+                }
+
+                const finalTotal = mathTotal + engTotal + (isBioLocked ? 0 : bioTotal);
+                const totalSubjects = isBioLocked ? 2 : 3;
+
+                row.querySelector('.row-total').innerText = finalTotal;
+                row.querySelector('.row-avg').innerText = ((finalTotal / (totalSubjects * 100)) * 100).toFixed(1) + "%";
+            }
         }
     </script>
 </body>
