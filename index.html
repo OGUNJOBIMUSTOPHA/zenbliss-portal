@@ -224,10 +224,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize Supabase Client Connection with capital 'S'
+        // Initialize Supabase Client Connection safely using a unique variable name
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // FIX: We name this 'supabaseClient' so it doesn't conflict with the global library name
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // 1. Handle Student Login Validation
         async function handleStudentLogin(event) {
@@ -237,14 +239,13 @@
             const admissionId = document.getElementById('student-id').value.trim();
             const password = document.getElementById('student-pass').value;
 
-            // Fetch match from users table
-            const { data: user, error } = await supabase
+            // Updated to use supabaseClient
+            const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('admission_number', admissionId)
                 .eq('role', 'student');
 
-            // Safely check if the user array is empty
             if (error || !user || user.length === 0) {
                 alert("Invalid Student Admission Number. Please try again.");
                 return;
@@ -252,19 +253,16 @@
 
             const currentUser = user[0];
 
-            // Check authorization state
             if (!currentUser.is_approved) {
                 alert("Your account application is still pending review by the School Administration.");
                 return;
             }
 
-            // Validates against the password column inside your database
             if (password !== currentUser.password && password !== "123456") {
                 alert("Incorrect Password.");
                 return;
             }
 
-            // Success: Store student ID locally and redirect
             localStorage.setItem('current_student_id', currentUser.id.toString());
             window.location.href = "student-dashboard.html";
         }
@@ -277,8 +275,8 @@
             const credentialInput = document.getElementById('teacher-email').value.trim();
             const password = document.getElementById('teacher-pass').value;
 
-            // Check if teacher logged in using their generated Staff ID or their account Email
-            let query = supabase.from('users').select('*').eq('role', 'teacher');
+            // Updated to use supabaseClient
+            let query = supabaseClient.from('users').select('*').eq('role', 'teacher');
 
             if (credentialInput.includes('@')) {
                 query = query.eq('email', credentialInput);
@@ -288,7 +286,6 @@
 
             const { data: user, error } = await query;
 
-            // FIXED: Safely check if the user array is empty to prevent page refresh crashes
             if (error || !user || user.length === 0) {
                 alert("Invalid Staff ID or Email Address.");
                 return;
@@ -296,13 +293,11 @@
 
             const currentUser = user[0];
 
-            // Validates against the password column inside your database
             if (password !== currentUser.password && password !== "123456") {
                 alert("Incorrect Password.");
                 return;
             }
 
-            // Success: Store teacher ID locally and redirect
             localStorage.setItem('current_teacher_id', currentUser.id.toString());
             window.location.href = "class-teacher-dashboard.html";
         }
