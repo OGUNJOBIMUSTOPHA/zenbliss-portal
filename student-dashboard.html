@@ -371,18 +371,9 @@
         let supabaseClient = null;
         let globalActiveStudentData = null;
 
-        // Immediately initialize client to remove race conditions
-        try {
-            if (typeof window.supabase !== 'undefined') {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch (e) {
-            console.error("Immediate connection failed", e);
-        }
-
         window.onload = function () {
-            if (!supabaseClient && typeof window.supabase !== 'undefined') {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
             validateAndLoadStudentProfile();
         };
@@ -392,18 +383,23 @@
             window.location.href = "index.html";
         }
 
+        function getCleanClassesList(rawField) {
+            if (!rawField) return [];
+            if (Array.isArray(rawField)) return rawField;
+            return [String(rawField)];
+        }
+
         async function validateAndLoadStudentProfile() {
             try {
                 const studentId = localStorage.getItem('current_student_id');
                 if (!studentId) {
-                    alert("Session expired. Heading back to login.");
+                    alert("Session terminated. Please login again.");
                     window.location.href = "index.html";
                     return;
                 }
 
-                if (!supabaseClient) {
-                    console.error("Supabase client missing.");
-                    return;
+                if (typeof supabase !== 'undefined' && !supabaseClient) {
+                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 }
 
                 const { data: student, error } = await supabaseClient
@@ -413,7 +409,9 @@
                     .single();
 
                 if (error || !student) {
-                    console.error("Data connection mismatch:", error);
+                    console.error("Supabase error:", error);
+                    alert("Error calling student terminal data packets.");
+                    window.location.href = "index.html";
                     return;
                 }
 
@@ -425,10 +423,10 @@
                 document.getElementById('portal-welcome-title').innerText = "Welcome, " + (student.admission_number || "Student");
                 document.getElementById('portal-meta-id').innerText = displayId;
 
-                const joinedClasses = student.assigned_classes || [];
+                const joinedClasses = getCleanClassesList(student.assigned_classes);
                 document.getElementById('portal-meta-class').innerText = joinedClasses.length > 0 ? joinedClasses.join(', ') : "Unassigned";
             } catch (err) {
-                console.error("Profile load catch trace:", err);
+                console.error("Crash during profile loading:", err);
             }
         }
 
@@ -444,14 +442,13 @@
         function revealLiveReportCard() {
             try {
                 if (!globalActiveStudentData) {
-                    alert("Profile data packets still syncing. Please wait a brief moment.");
+                    alert("Account details not fully initialized. Please refresh the page.");
                     return;
                 }
 
                 const student = globalActiveStudentData;
                 const chosenTerm = document.getElementById('selected-term-archive').value;
 
-                // Flexible check targeting database configuration indicators
                 const mCheck = student.math_score;
                 if (mCheck === null || mCheck === undefined || String(mCheck) === "-1" || String(mCheck).trim() === "") {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
@@ -465,7 +462,7 @@
                 document.getElementById('card-student-name').innerText = student.admission_number || "Registered Academic Student";
                 document.getElementById('card-admission-no').innerText = displayId;
 
-                const classes = student.assigned_classes || [];
+                const classes = getCleanClassesList(student.assigned_classes);
                 document.getElementById('card-class-level').innerText = classes.length > 0 ? classes.join(', ') : "Not Set";
 
                 document.getElementById('card-display-attendance').innerText = `${student.days_present || 0} / 90 Days Present`;
@@ -478,33 +475,43 @@
                     lockBio = true;
                 }
 
-                const mathScore = Number(student.math_score) || 0;
-                const engScore = Number(student.english_score) || 0;
-                const bioScore = Number(student.biology_score) || 0;
+                const mathTotal = Number(student.math_score) || 0;
+                const engTotal = Number(student.english_score) || 0;
+                const bioTotal = Number(student.biology_score) || 0;
+
+                // Split metrics cleanly based on 40/60 distribution weights matching total bounds
+                const mathCA = Math.round(mathTotal * 0.4);
+                const mathExam = mathTotal - mathCA;
+
+                const engCA = Math.round(engTotal * 0.4);
+                const engExam = engTotal - engCA;
+
+                const bioCA = Math.round(bioTotal * 0.4);
+                const bioExam = bioTotal - bioCA;
 
                 const tbody = document.getElementById('dynamic-grades-body');
                 if (tbody) {
                     tbody.innerHTML = "";
 
-                    let mGrade = determineGradeLetter(mathScore);
+                    let mGrade = determineGradeLetter(mathTotal);
                     tbody.innerHTML += `<tr>
                         <td style="text-align: left; font-weight: 600;">Mathematics</td>
-                        <td>Data Synced</td>
-                        <td>${mathScore}</td>
-                        <td style="font-weight: bold;">${mathScore}</td>
+                        <td>${mathCA}</td>
+                        <td>${mathExam}</td>
+                        <td style="font-weight: bold;">${mathTotal}</td>
                         <td style="font-weight: bold; color: ${mGrade.color};">${mGrade.letter}</td>
                     </tr>`;
 
-                    let eGrade = determineGradeLetter(engScore);
+                    let eGrade = determineGradeLetter(engTotal);
                     tbody.innerHTML += `<tr>
                         <td style="text-align: left; font-weight: 600;">English Language</td>
-                        <td>Data Synced</td>
-                        <td>${engScore}</td>
-                        <td style="font-weight: bold;">${engScore}</td>
+                        <td>${engCA}</td>
+                        <td>${engExam}</td>
+                        <td style="font-weight: bold;">${engTotal}</td>
                         <td style="font-weight: bold; color: ${eGrade.color};">${eGrade.letter}</td>
                     </tr>`;
 
-                    let dynamicTotalScore = mathScore + engScore;
+                    let dynamicTotalScore = mathTotal + engTotal;
                     let denominatorValue = 200;
 
                     if (lockBio) {
@@ -513,14 +520,14 @@
                             <td colspan="4" style="color:#a0aec0; font-style:italic;">Not Offered (Exempted via Department Path)</td>
                         </tr>`;
                     } else {
-                        let bGrade = determineGradeLetter(bioScore);
-                        dynamicTotalScore += bioScore;
+                        let bGrade = determineGradeLetter(bioTotal);
+                        dynamicTotalScore += bioTotal;
                         denominatorValue = 300;
                         tbody.innerHTML += `<tr>
                             <td style="text-align: left; font-weight: 600;">Biology</td>
-                            <td>Data Synced</td>
-                            <td>${bioScore}</td>
-                            <td style="font-weight: bold;">${bioScore}</td>
+                            <td>${bioCA}</td>
+                            <td>${bioExam}</td>
+                            <td style="font-weight: bold;">${bioTotal}</td>
                             <td style="font-weight: bold; color: ${bGrade.color};">${bGrade.letter}</td>
                         </tr>`;
                     }
@@ -565,7 +572,8 @@
                 document.getElementById('result-gate').classList.add('hidden');
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
-                console.error("Render runtime exception caught:", err);
+                console.error("Crash during report generation:", err);
+                alert("An error occurred while building the report card data arrays. Please check the developer console.");
             }
         }
 
