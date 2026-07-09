@@ -449,8 +449,20 @@
                 const student = globalActiveStudentData;
                 const chosenTerm = document.getElementById('selected-term-archive').value;
 
-                const mCheck = student.math_score;
-                if (mCheck === null || mCheck === undefined || String(mCheck) === "-1" || String(mCheck).trim() === "") {
+                const mathTotal = Number(student.math_score) || 0;
+                const engTotal = Number(student.english_score) || 0;
+                const bioTotal = Number(student.biology_score) || 0;
+
+                // ABSOLUTE SECURITY LOCK: 
+                // Blocks access if results_released is false/null, OR if scores are untouched, or if scores are completely zero.
+                if (
+                    student.results_released !== true ||
+                    student.math_score === null ||
+                    student.math_score === undefined ||
+                    String(student.math_score) === "-1" ||
+                    String(student.math_score).trim() === "" ||
+                    (mathTotal === 0 && engTotal === 0 && bioTotal === 0)
+                ) {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
                     return;
                 }
@@ -474,10 +486,6 @@
                 if (targetClassStr.startsWith("SS") && (deptStr === "Commercial" || deptStr === "Humanity")) {
                     lockBio = true;
                 }
-
-                const mathTotal = Number(student.math_score) || 0;
-                const engTotal = Number(student.english_score) || 0;
-                const bioTotal = Number(student.biology_score) || 0;
 
                 // Split metrics cleanly based on 40/60 distribution weights matching total bounds
                 const mathCA = Math.round(mathTotal * 0.4);
