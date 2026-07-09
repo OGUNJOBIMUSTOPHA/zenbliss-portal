@@ -79,21 +79,44 @@
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        function handleAdminLogin(event) {
+        // Initialize connection to your Supabase instance
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function handleAdminLogin(event) {
             event.preventDefault();
 
-            const user = document.getElementById('admin-user').value.trim();
-            const pass = document.getElementById('admin-pass').value;
+            const usernameInput = document.getElementById('admin-user').value.trim();
+            const passwordInput = document.getElementById('admin-pass').value;
 
-            // 1. Enforce strict Admin Username and Password checking
-            if (user.toLowerCase() !== "admin" || pass !== "Proprietress2026") {
-                alert("Access Denied: Invalid Admin Credentials.");
-                return; // Stops the function execution completely!
+            // Fetch match from users table where role is admin
+            const { data: user, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('admission_number', usernameInput)
+                .eq('role', 'admin');
+
+            // 1. Verify if user exists
+            if (error || !user || user.length === 0) {
+                alert("Access Denied: Invalid Admin Username.");
+                return;
             }
 
-            // 2. Success path
-            alert("Secure credentials verified. Initializing control dashboard...");
+            const currentAdmin = user[0];
+
+            // 2. Verify the database password match
+            if (passwordInput !== currentAdmin.password) {
+                alert("Access Denied: Incorrect Password.");
+                return;
+            }
+
+            // Success path
+            alert("Secure tokens verified. Initializing control dashboard...");
+            localStorage.setItem('current_admin_id', currentAdmin.id.toString());
             window.location.href = "admin-dashboard.html";
         }
     </script>
