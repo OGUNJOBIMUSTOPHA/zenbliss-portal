@@ -82,10 +82,18 @@
     <script>
         function handleAdminLogin(event) {
             event.preventDefault();
-            const user = document.getElementById('admin-user').value;
-            alert("Verifying secure token for admin user: " + user);
 
-            // This instantly forwards the administrator into the control dashboard file
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-pass').value;
+
+            // 1. Enforce strict Admin Username and Password checking
+            if (user.toLowerCase() !== "admin" || pass !== "Proprietress2026") {
+                alert("Access Denied: Invalid Admin Credentials.");
+                return; // Stops the function execution completely!
+            }
+
+            // 2. Success path
+            alert("Secure credentials verified. Initializing control dashboard...");
             window.location.href = "admin-dashboard.html";
         }
     </script>
