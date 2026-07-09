@@ -78,22 +78,22 @@
                 Dashboard</button>
         </form>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Initialize connection to your Supabase instance
+        // Standardized connection to your Supabase instance
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function handleAdminLogin(event) {
             event.preventDefault();
+            event.stopPropagation();
 
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Fetch match from users table where role is admin
+            // Standardized query: Checks the admission_number column for all roles
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -102,7 +102,7 @@
 
             // 1. Verify if user exists
             if (error || !user || user.length === 0) {
-                alert("Access Denied: Invalid Admin Username.");
+                alert("Access Denied: Invalid Admin Login ID.");
                 return;
             }
 
