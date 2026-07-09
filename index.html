@@ -201,7 +201,7 @@
 
             <div class="login-card">
                 <h3>Staff & Faculty Login</h3>
-                <form onsubmit="handleTeacherLogin(event)">
+                <form onsubmit="handleTeacherLogin(event); return false;">
                     <div class="form-group">
                         <label for="teacher-email">Staff ID / Email Address</label>
                         <input type="text" id="teacher-email" placeholder="e.g. TCH1234 or email@domain.com" required>
@@ -227,45 +227,43 @@
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         // 1. Handle Student Login Validation
-        async function handleStudentLogin(event) { return; }
-        event.preventDefault();
-        const admissionId = document.getElementById('student-id').value.trim();
-        const password = document.getElementById('student-pass').value;
+        async function handleStudentLogin(event) {
+            event.preventDefault();
+            const admissionId = document.getElementById('student-id').value.trim();
+            const password = document.getElementById('student-pass').value;
 
-        // Fetch match from users table
-        const { data: user, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('admission_number', admissionId)
-            .eq('role', 'student');
+            // Fetch match from users table
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('admission_number', admissionId)
+                .eq('role', 'student');
 
-        // FIXED: Safely check if the user array is empty before checking anything else
-        if (error || !user || user.length === 0) {
-            alert("Invalid Student Admission Number. Please try again.");
-            return;
+            // Safely check if the user array is empty
+            if (error || !user || user.length === 0) {
+                alert("Invalid Student Admission Number. Please try again.");
+                return;
+            }
+
+            const currentUser = user[0];
+
+            // Check authorization state
+            if (!currentUser.is_approved) {
+                alert("Your account application is still pending review by the School Administration.");
+                return;
+            }
+
+            // Validates against the password column inside your database
+            if (password !== currentUser.password && password !== "123456") {
+                alert("Incorrect Password.");
+                return;
+            }
+
+            // Success: Store student ID locally and redirect
+            localStorage.setItem('current_student_id', currentUser.id);
+            window.location.href = "student-dashboard.html";
         }
-
-        // Get the actual user object out of the array safely
-        const currentUser = user[0];
-
-        // Check authorization state
-        if (!currentUser.is_approved) {
-            alert("Your account application is still pending review by the School Administration.");
-            return;
-        }
-
-        // Validates against the password column inside your database
-        if (password !== currentUser.password && password !== "123456") {
-            alert("Incorrect Password.");
-            return;
-        }
-
-        // Success: Store student ID locally and redirect
-        localStorage.setItem('current_student_id', currentUser.id);
-        window.location.href = "student-dashboard.html";
-
         // 2. Handle Teacher Login Validation
         async function handleTeacherLogin(event) {
             event.preventDefault();
