@@ -155,6 +155,17 @@
         .hidden {
             display: none !important;
         }
+
+        .checkbox-tile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            background: #FAFAFA;
+        }
     </style>
 </head>
 
@@ -207,30 +218,26 @@
 
             <div class="control-box">
                 <h2>Assign Class Responsibilities</h2>
-                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Bind a registered teacher directly
-                    to up to two specific class levels.</p>
-                <form class="portal-form" onsubmit="assignTeacherTask(event)">
-                    <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column;">
-                        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Select Teacher</label>
-                        <select id="assign-staff-select" required style="padding: 10px;">
-                        </select>
+                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Ticking classes automatically saves
+                    allocations live to the selected teacher profile database.</p>
+
+                <div class="form-group" style="margin-bottom: 15px; display: flex; flex-direction: column;">
+                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Step 1: Select Target
+                        Teacher</label>
+                    <select id="assign-staff-select" onchange="syncClassCheckboxesByTeacherOwnership(this.value)"
+                        required style="padding: 10px;">
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; display: block;">Step 2:
+                        Allocate Classroom Desks (Max 2 Levels)</label>
+
+                    <div id="admin-dynamic-class-matrix-zone">
+                        <p style="color:#a0aec0; font-size:0.85rem; italic">Select a registered staff profile to load
+                            classroom maps...</p>
                     </div>
-                    <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column;">
-                        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Target Class
-                            Allocation</label>
-                        <select id="assign-class" required style="padding: 10px;">
-                            <option value="JSS 1">JSS 1</option>
-                            <option value="JSS 2">JSS 2</option>
-                            <option value="JSS 3">JSS 3</option>
-                            <option value="SS 1">SS 1</option>
-                            <option value="SS 2">SS 2</option>
-                            <option value="SS 3">SS 3</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-submit primary-blue"
-                        style="padding: 10px 20px; background-color: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top:10px;">Assign
-                        Class Desk</button>
-                </form>
+                </div>
             </div>
 
         </div>
@@ -316,6 +323,10 @@
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Global arrays keeping track of cache parameters
+        let cachedTeachersList = [];
+        const MASTER_SCHOOL_CLASSES = ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
+
         window.onload = function () {
             fetchTeachers();
             fetchPendingApplications();
@@ -346,6 +357,8 @@
                 return;
             }
 
+            cachedTeachersList = teachers; // Cache globally to read active configurations fast
+
             tbody.innerHTML = "";
             if (selectDropdown) selectDropdown.innerHTML = `<option value="">-- Choose Staff Profile --</option>`;
 
@@ -355,8 +368,12 @@
             }
 
             teachers.forEach(teacher => {
+                const activeAssignedStr = (teacher.assigned_classes && teacher.assigned_classes.length > 0)
+                    ? ` (${teacher.assigned_classes.join(', ')})`
+                    : " (No Level Assigned)";
+
                 tbody.innerHTML += `<tr>
-                    <td style="font-weight: 600;">${teacher.admission_number || '—'}</td>
+                    <td style="font-weight: 600;">${teacher.admission_number || '—'}<span style="color:#718096; font-size:0.75rem; font-weight:normal;">${activeAssignedStr}</span></td>
                     <td>••••••••</td>
                     <td>
                         <button class="action-btn btn-delete" onclick="deleteStaff('${teacher.id}')">Delete Account</button>
@@ -383,7 +400,8 @@
                         admission_number: staffName,
                         password: staffPassword,
                         role: 'teacher',
-                        is_approved: true
+                        is_approved: true,
+                        assigned_classes: []
                     }
                 ]);
 
@@ -409,57 +427,117 @@
                 } else {
                     alert("Staff account permanently deleted.");
                     fetchTeachers();
+                    document.getElementById('admin-dynamic-class-matrix-zone').innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; italic">Select a registered staff profile to load classroom maps...</p>`;
                 }
             }
         }
 
-        // ==========================================
-        // 2. ASSIGN CLASS RESPONSIBILITIES
-        // ==========================================
-        async function assignTeacherTask(e) {
-            e.preventDefault();
-            const teacherId = document.getElementById('assign-staff-select').value;
-            const cls = document.getElementById('assign-class').value;
-
-            if (!teacherId) {
-                alert("Please select a teacher.");
+        // =========================================================
+        // 2. LIVE INTERACTIVE CLASS DESK OWNERSHIP RULES
+        // =========================================================
+        function syncClassCheckboxesByTeacherOwnership(selectedTeacherId) {
+            const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
+            if (!selectedTeacherId) {
+                matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; italic">Select a registered staff profile to load classroom maps...</p>`;
                 return;
             }
 
-            const { data: teacher, error: fetchErr } = await supabaseClient
-                .from('users')
-                .select('assigned_classes')
-                .eq('id', teacherId)
-                .single();
+            // Find current teacher object details
+            const targetTeacher = cachedTeachersList.find(t => t.id === selectedTeacherId);
+            const teacherOwnedClasses = targetTeacher ? (targetTeacher.assigned_classes || []) : [];
 
-            if (fetchErr) {
-                alert("Error pulling profiles: " + fetchErr.message);
-                return;
+            // Build dictionary layout mapping who occupies what class across other accounts
+            const classGlobalOwnershipMap = {};
+            cachedTeachersList.forEach(t => {
+                if (t.id !== selectedTeacherId) {
+                    const classes = t.assigned_classes || [];
+                    classes.forEach(c => {
+                        classGlobalOwnershipMap[c] = t.admission_number || "Another Faculty Desk";
+                    });
+                }
+            });
+
+            matrixZone.innerHTML = "";
+
+            MASTER_SCHOOL_CLASSES.forEach(cls => {
+                const isOwnedByCurrentTeacher = teacherOwnedClasses.includes(cls);
+                const assignedToOtherTeacherName = classGlobalOwnershipMap[cls];
+
+                let checkedAttr = isOwnedByCurrentTeacher ? "checked" : "";
+                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;">✅ Available for Allocation</span>`;
+                let disabledAttr = "";
+                let tileBackgroundStyle = "background:#fafafa;";
+
+                if (isOwnedByCurrentTeacher) {
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;">🎯 Currently Assigned to This Teacher</span>`;
+                    tileBackgroundStyle = "background: #ebf8ff; border: 1px solid #90cdf4;";
+                } else if (assignedToOtherTeacherName) {
+                    checkedAttr = "";
+                    disabledAttr = "disabled";
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;">🔒 Occupied by ${assignedToOtherTeacherName}</span>`;
+                    tileBackgroundStyle = "background: #edf2f7; opacity: 0.65; cursor: not-allowed;";
+                }
+
+                matrixZone.innerHTML += `
+                    <div class="checkbox-tile" style="${tileBackgroundStyle}">
+                        <input type="checkbox" value="${cls}" ${checkedAttr} ${disabledAttr} 
+                            style="transform: scale(1.2); cursor:pointer;" 
+                            onchange="executeLiveClassAssignmentUpdate('${selectedTeacherId}', this)">
+                        <label style="font-size:0.85rem; cursor:pointer; width: 100%; display:block;">${tileStatusText}</label>
+                    </div>
+                `;
+            });
+        }
+
+        async function executeLiveClassAssignmentUpdate(teacherId, checkboxElement) {
+            const targetedClassValue = checkboxElement.value;
+            const isCheckedAction = checkboxElement.checked;
+
+            // Load fresh records from local dataset
+            const targetTeacher = cachedTeachersList.find(t => t.id === teacherId);
+            let updatedClassesArray = targetTeacher ? [...(targetTeacher.assigned_classes || [])] : [];
+
+            if (isCheckedAction) {
+                // Safeguard ceiling limit block of 2 max classes
+                if (updatedClassesArray.length >= 2) {
+                    checkboxElement.checked = false;
+                    alert(`Process Denied: ${targetTeacher.admission_number} is already managing a limit of 2 full classes. Uncheck an existing assigned class level first before adding a new configuration.`);
+                    return;
+                }
+                if (!updatedClassesArray.includes(targetedClassValue)) {
+                    updatedClassesArray.push(targetedClassValue);
+                }
+            } else {
+                updatedClassesArray = updatedClassesArray.filter(c => c !== targetedClassValue);
             }
 
-            let classesArray = teacher.assigned_classes || [];
-
-            if (classesArray.includes(cls)) {
-                alert("This teacher is already assigned to this class!");
-                return;
-            }
-
-            if (classesArray.length >= 2) {
-                alert("A teacher can only manage 2 classes. Removing oldest allocation.");
-                classesArray.shift();
-            }
-
-            classesArray.push(cls);
-
+            // Sync structural parameters array instantly over live cloud tables
             const { error } = await supabaseClient
                 .from('users')
-                .update({ assigned_classes: classesArray })
+                .update({ assigned_classes: updatedClassesArray })
                 .eq('id', teacherId);
 
             if (error) {
-                alert("Error assigning class: " + error.message);
-            } else {
-                alert("Assignment saved successfully!");
+                alert("Failed to sync structural allocation rules: " + error.message);
+                checkboxElement.checked = !isCheckedAction; // rollback state layout on fault lines
+                return;
+            }
+
+            // Refresh systemic index pipelines safely
+            const { data: refreshedTeachers, error: fetchErr } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'teacher');
+
+            if (!fetchErr) {
+                cachedTeachersList = refreshedTeachers;
+                fetchTeachers(); // structural redraw background matrix variables
+
+                // Re-sync input context maps manually without dropping user focus visibility states
+                setTimeout(() => {
+                    document.getElementById('assign-staff-select').value = teacherId;
+                    syncClassCheckboxesByTeacherOwnership(teacherId);
+                }, 50);
             }
         }
 
@@ -564,14 +642,24 @@
                     filteredStudents.forEach(st => {
                         const math = st.math_score || 0;
                         const english = st.english_score || 0;
-                        const totalMark = math + english;
-                        const calculatedAvg = ((totalMark / 200) * 100).toFixed(1) + "%";
+                        const biology = st.biology_score || 0;
+
+                        const dept = st.department ? st.department.trim() : "None";
+                        let lockBiology = false;
+                        if (cls.startsWith("SS") && (dept === "Commercial" || dept === "Humanity")) {
+                            lockBiology = true;
+                        }
+
+                        const displayBio = lockBiology ? "N/A" : biology;
+                        const totalMark = math + english + (lockBiology ? 0 : biology);
+                        const totalSubjects = lockBiology ? 2 : 3;
+                        const calculatedAvg = ((totalMark / (totalSubjects * 100)) * 100).toFixed(1) + "%";
 
                         tbody.innerHTML += `<tr>
-                            <td style="text-align:left; font-weight:600;">${st.admission_number || '—'}</td>
+                            <td style="text-align:left; font-weight:600;">${st.admission_number || '—'}<br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span></td>
                             <td>${math}</td>
                             <td>${english}</td>
-                            <td>—</td>
+                            <td>${displayBio}</td>
                             <td>—</td>
                             <td style="font-weight:bold;">${totalMark}</td>
                             <td style="color:#e11d48; font-weight:bold;">${calculatedAvg}</td>
