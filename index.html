@@ -180,7 +180,7 @@
 
             <div class="login-card">
                 <h3>Student Login</h3>
-                <form onsubmit="handleStudentLogin(event)">
+                <form onsubmit="handleStudentLogin(event); return false;">
                     <div class="form-group">
                         <label for="student-id">Admission Number (Z-ID)</label>
                         <input type="text" id="student-id" placeholder="e.g. Z26001" required>
@@ -262,7 +262,7 @@
             }
 
             // Success: Store student ID locally and redirect
-            localStorage.setItem('current_student_id', currentUser.id);
+            localStorage.setItem('current_student_id', currentUser.id.toString());
             window.location.href = "student-dashboard.html";
         }
         // 2. Handle Teacher Login Validation
@@ -298,7 +298,7 @@
             }
 
             // Success: Store teacher ID locally and redirect
-            localStorage.setItem('current_teacher_id', currentUser.id);
+            localStorage.setItem('current_teacher_id', currentUser.id.toString());
             window.location.href = "class-teacher-dashboard.html";
         }
     </script>
