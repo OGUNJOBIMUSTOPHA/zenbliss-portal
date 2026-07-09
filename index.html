@@ -229,40 +229,42 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // 1. Handle Student Login Validation
-        async function handleStudentLogin(event) {
-            event.preventDefault();
-            const admissionId = document.getElementById('student-id').value.trim();
-            const password = document.getElementById('student-pass').value;
+        async function handleStudentLogin(event) { return; }
+        event.preventDefault();
+        const admissionId = document.getElementById('student-id').value.trim();
+        const password = document.getElementById('student-pass').value;
 
-            // Fetch match from users table
-            const { data: user, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('admission_number', admissionId)
-                .eq('role', 'student')
-                .single();
+        // Fetch match from users table
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('admission_number', admissionId)
+            .eq('role', 'student');
 
-            if (error || !user) {
-                alert("Invalid Student Admission Number. Please try again.");
-                return;
-            }
-
-            // Check authorization state
-            if (!user.is_approved) {
-                alert("Your account application is still pending review by the School Administration.");
-                return;
-            }
-
-            // Validates against the password column inside your database
-            if (password !== user.password && password !== "123456") {
-                alert("Incorrect Password.");
-                return;
-            }
-
-            // Success: Store student ID locally and redirect
-            localStorage.setItem('current_student_id', user.id);
-            window.location.href = "student-dashboard.html";
+        // FIXED: Safely check if the user array is empty before checking anything else
+        if (error || !user || user.length === 0) {
+            alert("Invalid Student Admission Number. Please try again.");
+            return;
         }
+
+        // Get the actual user object out of the array safely
+        const currentUser = user[0];
+
+        // Check authorization state
+        if (!currentUser.is_approved) {
+            alert("Your account application is still pending review by the School Administration.");
+            return;
+        }
+
+        // Validates against the password column inside your database
+        if (password !== currentUser.password && password !== "123456") {
+            alert("Incorrect Password.");
+            return;
+        }
+
+        // Success: Store student ID locally and redirect
+        localStorage.setItem('current_student_id', currentUser.id);
+        window.location.href = "student-dashboard.html";
 
         // 2. Handle Teacher Login Validation
         async function handleTeacherLogin(event) {
@@ -279,21 +281,24 @@
                 query = query.eq('admission_number', credentialInput);
             }
 
-            const { data: user, error } = await query.maybeSingle();
+            const { data: user, error } = await query;
 
-            if (error || !user) {
+            // FIXED: Safely check if the user array is empty to prevent page refresh crashes
+            if (error || !user || user.length === 0) {
                 alert("Invalid Staff ID or Email Address.");
                 return;
             }
 
+            const currentUser = user[0];
+
             // Validates against the password column inside your database
-            if (password !== user.password && password !== "123456") {
+            if (password !== currentUser.password && password !== "123456") {
                 alert("Incorrect Password.");
                 return;
             }
 
             // Success: Store teacher ID locally and redirect
-            localStorage.setItem('current_teacher_id', user.id);
+            localStorage.setItem('current_teacher_id', currentUser.id);
             window.location.href = "class-teacher-dashboard.html";
         }
     </script>
