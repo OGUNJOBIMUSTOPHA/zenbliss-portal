@@ -81,7 +81,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // Standardized connection to your Supabase instance
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -93,28 +92,30 @@
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Standardized query: Checks the admission_number column for all roles
+            // Query exactly matching the schema from your third screenshot
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('admission_number', usernameInput)
                 .eq('role', 'admin');
 
-            // 1. Verify if user exists
-            if (error || !user || user.length === 0) {
+            if (error) {
+                alert("Database Error: " + error.message);
+                return;
+            }
+
+            if (!user || user.length === 0) {
                 alert("Access Denied: Invalid Admin Login ID.");
                 return;
             }
 
             const currentAdmin = user[0];
 
-            // 2. Verify the database password match
             if (passwordInput !== currentAdmin.password) {
                 alert("Access Denied: Incorrect Password.");
                 return;
             }
 
-            // Success path
             alert("Secure tokens verified. Initializing control dashboard...");
             localStorage.setItem('current_admin_id', currentAdmin.id.toString());
             window.location.href = "admin-dashboard.html";
