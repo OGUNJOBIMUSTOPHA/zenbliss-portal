@@ -248,7 +248,7 @@
 
         <div class="profile-card">
             <div>
-                <h2 style="color: var(--primary-blue); margin:0;" id="portal-welcome-title">Loading Account...</h2>
+                <h2 style="color: var(--primary-blue); margin:0;" id="portal-welcome-title">Welcome Student</h2>
                 <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">
                     Admission ID: <span style="font-weight:bold;" id="portal-meta-id">---</span> | Class: <span
                         id="portal-meta-class" style="font-weight:bold;">---</span>
@@ -371,12 +371,18 @@
         let supabaseClient = null;
         let globalActiveStudentData = null;
 
+        // Immediately initialize client to remove race conditions
+        try {
+            if (typeof window.supabase !== 'undefined') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) {
+            console.error("Immediate connection failed", e);
+        }
+
         window.onload = function () {
-            // Safe fallback initialization for modern browsers
-            if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } else {
-                console.error("Supabase CDN failed to initialize properly in window context.");
+            if (!supabaseClient && typeof window.supabase !== 'undefined') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
             validateAndLoadStudentProfile();
         };
@@ -390,19 +396,14 @@
             try {
                 const studentId = localStorage.getItem('current_student_id');
                 if (!studentId) {
-                    alert("Session terminated. Please login again.");
+                    alert("Session expired. Heading back to login.");
                     window.location.href = "index.html";
                     return;
                 }
 
                 if (!supabaseClient) {
-                    // Try re-initializing inline if DOM race conditions occurred
-                    if (typeof supabase !== 'undefined') {
-                        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    } else {
-                        alert("Database configuration handshake failed. Please refresh the page.");
-                        return;
-                    }
+                    console.error("Supabase client missing.");
+                    return;
                 }
 
                 const { data: student, error } = await supabaseClient
@@ -412,9 +413,7 @@
                     .single();
 
                 if (error || !student) {
-                    console.error("Supabase load error:", error);
-                    alert("Error calling student terminal data packets.");
-                    window.location.href = "index.html";
+                    console.error("Data connection mismatch:", error);
                     return;
                 }
 
@@ -429,7 +428,7 @@
                 const joinedClasses = student.assigned_classes || [];
                 document.getElementById('portal-meta-class').innerText = joinedClasses.length > 0 ? joinedClasses.join(', ') : "Unassigned";
             } catch (err) {
-                console.error("Crash during profile loading:", err);
+                console.error("Profile load catch trace:", err);
             }
         }
 
@@ -445,7 +444,7 @@
         function revealLiveReportCard() {
             try {
                 if (!globalActiveStudentData) {
-                    alert("Account details are still initializing. Please wait 2 seconds or refresh the page.");
+                    alert("Profile data packets still syncing. Please wait a brief moment.");
                     return;
                 }
 
@@ -566,8 +565,7 @@
                 document.getElementById('result-gate').classList.add('hidden');
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
-                console.error("Crash during report generation handling:", err);
-                alert("An error occurred while building report arrays. Please clear browser storage or refresh.");
+                console.error("Render runtime exception caught:", err);
             }
         }
 
