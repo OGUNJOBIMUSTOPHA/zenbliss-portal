@@ -226,7 +226,7 @@
         // Initialize Supabase Client Connection (Fixed URL)
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         // 1. Handle Student Login Validation
         async function handleStudentLogin(event) {
             event.preventDefault();
