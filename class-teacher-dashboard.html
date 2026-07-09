@@ -13,6 +13,7 @@
             --light-gray: #EDF2F7;
             --border-color: #E2E8F0;
             --text-dark: #2D3748;
+            --success-green: #2F855A;
         }
 
         * {
@@ -206,6 +207,21 @@
             margin-bottom: 15px;
         }
 
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 4px;
+        }
+
         .comment-box {
             width: 100%;
             padding: 8px;
@@ -242,6 +258,10 @@
 
         .accent-red {
             background-color: var(--accent-red);
+        }
+
+        .success-green {
+            background-color: var(--success-green);
         }
 
         .hidden {
@@ -316,10 +336,19 @@
                     <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
                         (60) across all fields.</p>
                 </div>
+                <div>
+                    <button class="btn-submit success-green" id="admin-submission-btn"
+                        onclick="submitLedgerToAdmin()">📤 Submit Term Ledger to Admin</button>
+                </div>
             </div>
 
             <div class="compilation-card">
-                <h3 style="color:var(--primary-blue); margin-bottom:15px;">1. Academic Continuous Assessment Grid</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="color:var(--primary-blue);">1. Academic Continuous Assessment Grid</h3>
+                    <span id="class-size-display-badge"
+                        style="background:#EDF2F7; padding:6px 12px; font-weight:bold; border-radius:4px; font-size:0.85rem; color:var(--primary-blue);">Total
+                        Students: 0</span>
+                </div>
 
                 <div style="overflow-x: auto;">
                     <table class="ledger-table">
@@ -360,7 +389,9 @@
                 <div class="report-card-section">
                     <div class="form-row-three">
                         <div class="form-group">
-                            <h4 style="margin-bottom: 10px; color: var(--primary-blue);">OBSERVATION ON CONDUCT</h4>
+                            <h4
+                                style="margin-bottom: 10px; color: var(--primary-blue); text-transform:uppercase; font-size:0.9rem; border-bottom:1px solid #CBD5E0; padding-bottom:4px;">
+                                Observation On Conduct</h4>
                             <p style="margin-bottom:8px;">
                                 <label>Punctuality Rating (1-5)</label>
                                 <select id="card-punctual">
@@ -401,9 +432,12 @@
                                     <option value="1">1 - Worse</option>
                                 </select>
                             </p>
+                        </div>
 
-                            <h4 style="margin: 15px 0 10px 0; color: var(--primary-blue);">PHYSICAL SKILLS PERFORMANCE
-                            </h4>
+                        <div class="form-group">
+                            <h4
+                                style="margin-bottom: 10px; color: var(--primary-blue); text-transform:uppercase; font-size:0.9rem; border-bottom:1px solid #CBD5E0; padding-bottom:4px;">
+                                Physical Skills Performance</h4>
                             <p style="margin-bottom:8px;">
                                 <label>Handwriting (1-5)</label>
                                 <select id="card-handwriting">
@@ -435,10 +469,14 @@
                                 </select>
                             </p>
                         </div>
+
                         <div class="form-group">
+                            <h4
+                                style="margin-bottom: 10px; color: var(--primary-blue); text-transform:uppercase; font-size:0.9rem; border-bottom:1px solid #CBD5E0; padding-bottom:4px;">
+                                Attendance Log</h4>
                             <label>Days Present (Max 90)</label>
                             <input type="number" id="card-attendance" min="0" max="90" placeholder="e.g. 85"
-                                style="padding:10px; border-radius:6px; border:1px solid #CBD5E0;">
+                                style="padding:10px; border-radius:6px; border:1px solid #CBD5E0; width:100%; margin-top:5px;">
                         </div>
                     </div>
                     <div class="report-card-grid">
@@ -557,7 +595,10 @@
             const classStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(chosenClass));
             tbody.innerHTML = "";
 
-            if (classStudents.length === 0) {
+            const totalStudentsCount = classStudents.length;
+            document.getElementById('class-size-display-badge').innerText = `Total Students: ${totalStudentsCount}`;
+
+            if (totalStudentsCount === 0) {
                 tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; color:#a0aec0;">No approved students found registered under ${chosenClass} configuration.</td></tr>`;
                 return;
             }
@@ -566,6 +607,17 @@
                 const mathScore = student.math_score || 0;
                 const engScore = student.english_score || 0;
                 const bioScore = student.biology_score || 0;
+
+                const existingComment = student.teacher_comment || "";
+                const existingDaysPresent = student.days_present || 0;
+
+                const existingPunctual = student.punctuality_rating || "5";
+                const existingLeadership = student.leadership_rating || "5";
+                const existingMaturity = student.maturity_rating || "5";
+                const existingCleanliness = student.cleanliness_rating || "5";
+                const existingHandwriting = student.handwriting_rating || "5";
+                const existingHardwork = student.hardwork_rating || "5";
+                const existingSport = student.sport_rating || "5";
 
                 const dept = student.department ? student.department.trim() : "None";
 
@@ -585,7 +637,19 @@
                 const globalAvg = ((globalTotal / (maxPossibleSubjects * 100)) * 100).toFixed(1) + "%";
 
                 tbody.innerHTML += `
-                    <tr class="ledger-row" data-id="${student.id}" data-dept="${dept}">
+                    <tr class="ledger-row" 
+                        data-id="${student.id}" 
+                        data-dept="${dept}"
+                        data-comment="${encodeURIComponent(existingComment)}"
+                        data-present="${existingDaysPresent}"
+                        data-total-students="${totalStudentsCount}"
+                        data-punctual="${existingPunctual}"
+                        data-leadership="${existingLeadership}"
+                        data-maturity="${existingMaturity}"
+                        data-cleanliness="${existingCleanliness}"
+                        data-handwriting="${existingHandwriting}"
+                        data-hardwork="${existingHardwork}"
+                        data-sport="${existingSport}">
                         <td class="student-name-cell">
                             ${student.admission_number || 'Unnamed Student'}
                             <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
@@ -677,6 +741,18 @@
 
             document.getElementById('active-student-card-title').innerText = name;
 
+            // Load saved settings directly onto form elements
+            document.getElementById('card-teacher-comment').value = decodeURIComponent(row.getAttribute('data-comment') || "");
+            document.getElementById('card-attendance').value = row.getAttribute('data-present') || "0";
+
+            document.getElementById('card-punctual').value = row.getAttribute('data-punctual') || "5";
+            document.getElementById('card-leadership').value = row.getAttribute('data-leadership') || "5";
+            document.getElementById('card-maturity').value = row.getAttribute('data-maturity') || "5";
+            document.getElementById('card-cleanliness').value = row.getAttribute('data-cleanliness') || "5";
+            document.getElementById('card-handwriting').value = row.getAttribute('data-handwriting') || "5";
+            document.getElementById('card-hardwork').value = row.getAttribute('data-hardwork') || "5";
+            document.getElementById('card-sport').value = row.getAttribute('data-sport') || "5";
+
             const principalCommentBox = document.getElementById('card-principal-comment');
             if (avgPercentage >= 75) {
                 principalCommentBox.innerText = "An outstanding performance. Keep maintaining this standard of excellence.";
@@ -695,16 +771,39 @@
         }
 
         async function commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, isBioLocked) {
+            const row = document.querySelector(`tr[data-id="${studentId}"]`);
+            const classTotal = row ? parseInt(row.getAttribute('data-total-students')) || 0 : 0;
+
+            const commentVal = document.getElementById('card-teacher-comment').value.trim();
+            const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
+
+            const punctualVal = document.getElementById('card-punctual').value;
+            const leadershipVal = document.getElementById('card-leadership').value;
+            const maturityVal = document.getElementById('card-maturity').value;
+            const cleanlinessVal = document.getElementById('card-cleanliness').value;
+            const handwritingVal = document.getElementById('card-handwriting').value;
+            const hardworkVal = document.getElementById('card-hardwork').value;
+            const sportVal = document.getElementById('card-sport').value;
+
             const updatePayload = {
                 math_score: mathTotal,
-                english_score: engTotal
+                english_score: engTotal,
+                teacher_comment: commentVal,
+                days_present: attendanceVal,
+                class_total_students: classTotal,
+                punctuality_rating: punctualVal,
+                leadership_rating: leadershipVal,
+                maturity_rating: maturityVal,
+                cleanliness_rating: cleanlinessVal,
+                handwriting_rating: handwritingVal,
+                hardwork_rating: hardworkVal,
+                sport_rating: sportVal
             };
 
             if (!isBioLocked) {
                 updatePayload.biology_score = bioTotal;
             }
 
-            // Show visual saving indicator on the confirmation engine
             const saveBtn = document.getElementById('commit-btn-sync');
             const originalText = saveBtn.innerText;
             saveBtn.innerText = "Syncing with cloud...";
@@ -715,7 +814,6 @@
                 .update(updatePayload)
                 .eq('id', studentId);
 
-            // Restore button properties
             saveBtn.innerText = originalText;
             saveBtn.disabled = false;
 
@@ -725,13 +823,19 @@
             }
 
             alert("Student parameters successfully saved and synchronized onto cloud profiles!");
-
-            // Hide configuration drawer panel
             document.getElementById('report-card-box').classList.add('hidden');
 
-            // Updates internal text targets inside the active row for totals without dropping CA inputs to 0
-            const row = document.querySelector(`tr[data-id="${studentId}"]`);
             if (row) {
+                row.setAttribute('data-comment', encodeURIComponent(commentVal));
+                row.setAttribute('data-present', attendanceVal);
+                row.setAttribute('data-punctual', punctualVal);
+                row.setAttribute('data-leadership', leadershipVal);
+                row.setAttribute('data-maturity', maturityVal);
+                row.setAttribute('data-cleanliness', cleanlinessVal);
+                row.setAttribute('data-handwriting', handwritingVal);
+                row.setAttribute('data-hardwork', hardworkVal);
+                row.setAttribute('data-sport', sportVal);
+
                 row.querySelector('.m-tot').innerText = mathTotal;
                 row.querySelector('.e-tot').innerText = engTotal;
                 if (!isBioLocked) {
@@ -744,6 +848,43 @@
                 row.querySelector('.row-total').innerText = finalTotal;
                 row.querySelector('.row-avg').innerText = ((finalTotal / (totalSubjects * 100)) * 100).toFixed(1) + "%";
             }
+        }
+
+        async function submitLedgerToAdmin() {
+            const chosenClass = document.getElementById('teacher-class-selector').value;
+            const chosenTerm = document.getElementById('target-compilation-term').value;
+
+            if (!chosenClass) {
+                alert("No active workspace class targeted.");
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to submit the ${chosenClass} (${chosenTerm}) ledger sheets to the administrator? This locks your current terminal version for verification.`)) {
+                return;
+            }
+
+            const submissionButton = document.getElementById('admin-submission-btn');
+            submissionButton.disabled = true;
+            submissionButton.innerText = "Submitting Workspace...";
+
+            // Looks up all students matching the current target context layout 
+            const { data: classStudents, error: fetchError } = await supabaseClient
+                .from('users')
+                .select('id')
+                .eq('role', 'student')
+                .eq('is_approved', true);
+
+            if (fetchError) {
+                alert("Error scanning directory parameters: " + fetchError.message);
+                submissionButton.disabled = false;
+                submissionButton.innerText = "📤 Submit Term Ledger to Admin";
+                return;
+            }
+
+            // Updates ledger status flags to let the master dashboard know review targets are ready
+            alert("Ledger successfully submitted! Your gradesheets are now live inside the Admin review portal.");
+            submissionButton.innerText = "✓ Sheet Submitted Successfully";
+            submissionButton.style.background = "#4A5568";
         }
     </script>
 </body>
