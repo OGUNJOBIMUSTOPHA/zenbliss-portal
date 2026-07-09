@@ -5,8 +5,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal — Zenbliss Schools</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
+        :root {
+            --primary-blue: #1A365D;
+            --accent-red: #9B2C2C;
+            --background-white: #FFFFFF;
+            --light-gray: #EDF2F7;
+            --border-color: #E2E8F0;
+            --text-dark: #2D3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #F7FAFC;
+            color: var(--text-dark);
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+
+        .portal-header {
+            background-color: var(--primary-blue);
+            color: var(--background-white);
+            padding: 15px 0;
+            border-bottom: 4px solid var(--accent-red);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-branding {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .school-logo-img {
+            max-height: 50px;
+            border-radius: 4px;
+            background: white;
+            padding: 2px;
+        }
+
+        .school-logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .portal-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
         .student-container {
             max-width: 1000px;
             margin: 30px auto;
@@ -30,7 +94,6 @@
             gap: 15px;
         }
 
-        /* Results Gate/Trigger Card */
         .gate-card {
             background: var(--background-white);
             border: 1px solid var(--border-color);
@@ -50,7 +113,7 @@
             border-radius: 6px;
             border: 1px solid #CBD5E0;
             font-size: 0.9rem;
-            width: 250px;
+            width: 320px;
         }
 
         .report-card-mockup {
@@ -103,6 +166,27 @@
             font-size: 0.9rem;
         }
 
+        .btn-submit {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .primary-blue {
+            background-color: var(--primary-blue);
+        }
+
+        .accent-red {
+            background-color: var(--accent-red);
+        }
+
         .print-bar {
             margin-top: 20px;
             display: flex;
@@ -126,6 +210,8 @@
                 top: 0;
                 width: 100%;
                 border: none;
+                box-shadow: none;
+                padding: 0;
             }
 
             .print-bar {
@@ -135,13 +221,13 @@
 
         .report-logo {
             max-width: 120px;
-            /* Keeps the logo a professional size */
             height: auto;
-            /* Prevents stretching */
             display: block;
-            /* Allows centering */
             margin: 0 auto 15px auto;
-            /* Centers it and adds space below */
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -151,7 +237,7 @@
     <header class="portal-header">
         <div class="header-container">
             <div class="logo-branding">
-                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
             <span class="portal-badge" style="background-color: #38A169;">Student Terminal</span>
@@ -162,55 +248,58 @@
 
         <div class="profile-card">
             <div>
-                <h2 style="color: var(--primary-blue); margin:0;">Welcome, ADENIRAN TOBI</h2>
-                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">Admission ID: <span
-                        style="font-weight:bold;">Z26001</span> | Class: JSS 1</p>
+                <h2 style="color: var(--primary-blue); margin:0;" id="portal-welcome-title">Loading Account...</h2>
+                <p style="margin: 5px 0 0 0; color: #718096; font-size: 0.9rem;">
+                    Admission ID: <span style="font-weight:bold;" id="portal-meta-id">---</span> | Class: <span
+                        id="portal-meta-class" style="font-weight:bold;">---</span>
+                </p>
             </div>
             <div class="profile-actions">
-                <span class="badge badge-dept" style="background:#C6F6D5; color:#22543D; padding:8px 12px;">Active
+                <span class="badge badge-dept"
+                    style="background:#C6F6D5; color:#22543D; padding:8px 12px; font-weight:bold; border-radius:4px;">Active
                     Account</span>
-                <a href="index.html" class="btn-submit accent-red"
-                    style="margin:0; padding:8px 15px; text-decoration:none; font-size:0.85rem;">🚪 Log Out</a>
+                <button onclick="handleLogout()" class="btn-submit accent-red"
+                    style="margin:0; padding:8px 15px; font-size:0.85rem;">🚪 Log Out</button>
             </div>
         </div>
 
         <div id="result-gate" class="gate-card">
             <h3 style="color: var(--primary-blue); margin-bottom: 10px;">Access Academic Result Portfolios</h3>
-            <p style="color: #718096; font-size: 0.9rem;">Select an academic year and term level to extract archived
-                reporting indices.</p>
+            <p style="color: #718096; font-size: 0.9rem;">Select an academic year and term level to extract your
+                verified performance report sheets.</p>
 
             <div class="term-selector-wrapper">
                 <select id="selected-term-archive" class="term-select">
-                    <option value="2026_3rd">2026/2027 Session — Third Term (Current)</option>
-                    <option value="2026_2nd">2026/2027 Session — Second Term</option>
-                    <option value="2026_1st">2026/2027 Session — First Term</option>
+                    <option value="3rd Term">2026/2027 Session — Third Term (Current)</option>
+                    <option value="2nd Term">2026/2027 Session — Second Term</option>
+                    <option value="1st Term">2026/2027 Session — First Term</option>
                 </select>
             </div>
 
             <button class="btn-submit primary-blue" style="margin: 0; padding: 12px 30px;"
-                onclick="revealReportCard()">View Term Results</button>
+                onclick="revealLiveReportCard()">View Term Results</button>
         </div>
 
         <div id="report-card-view" class="report-card-mockup hidden">
             <div class="report-header">
-                <img src="logo.jpg" alt="School logo" class="report-logo">
+                <img src="logo.jpg" alt="School logo" class="report-logo" onerror="this.style.display='none';">
                 <h1 style="color: var(--primary-blue); margin: 0 0 5px 0; letter-spacing: 1px;">ZENBLISS SCHOOLS &
-                    COLLEGE</h2>
-                    <small style="font-weight: bold; color: #4A5568; text-transform: uppercase;">Official Student
-                        Terminal
-                        Progress Report</small>
+                    COLLEGE</h1>
+                <small style="font-weight: bold; color: #4A5568; text-transform: uppercase;">Official Student Terminal
+                    Progress Report</small>
             </div>
 
             <div class="report-meta-grid">
                 <div>
-                    <p><strong>Student Name:</strong> ADENIRAN TOBI</p>
-                    <p><strong>Admission Number:</strong> Z26001</p>
-                    <p><strong>Class Level:</strong> JSS 1</p>
+                    <p><strong>Student Name:</strong> <span id="card-student-name">---</span></p>
+                    <p><strong>Admission Number:</strong> <span id="card-admission-no">---</span></p>
+                    <p><strong>Class Level:</strong> <span id="card-class-level">---</span></p>
                 </div>
                 <div style="text-align: right;">
                     <p><strong>Academic Session:</strong> 2026/2027</p>
-                    <p><strong>Term:</strong> <span id="display-target-term">Third Term (End of Session)</span></p>
-                    <p><strong>Days Present:</strong> 88 / 90 Days</p>
+                    <p><strong>Term:</strong> <span id="display-target-term">---</span></p>
+                    <p><strong>Attendance Metrics:</strong> <span id="card-display-attendance">0 / 90 Days
+                            Present</span></p>
                 </div>
             </div>
 
@@ -218,43 +307,50 @@
                 <thead>
                     <tr>
                         <th>Subject Name</th>
-                        <th>1st CA (20)</th>
-                        <th>2nd CA (20)</th>
-                        <th>Examination (60)</th>
+                        <th>Continuous Assessment (40)</th>
+                        <th>Terminal Exam (60)</th>
                         <th>Total Score (100)</th>
-                        <th>Grade</th>
+                        <th>Grade Letter</th>
                     </tr>
                 </thead>
                 <tbody id="dynamic-grades-body">
                 </tbody>
                 <tfoot>
                     <tr style="background-color: #EDF2F7; font-weight: bold;">
-                        <td colspan="4" style="text-align: right;">Cumulative Average Percentage:</td>
-                        <td><span id="display-target-avg">72.7%</span></td>
-                        <td style="color: var(--accent-red);">PASS</td>
+                        <td colspan="3" style="text-align: right;">Cumulative Average Percentage & Summary:</td>
+                        <td><span id="display-target-avg">0.0%</span></td>
+                        <td><span id="display-outcome-status" style="color: var(--accent-red);">---</span></td>
                     </tr>
                 </tfoot>
             </table>
 
             <div class="report-meta-grid" style="margin-bottom: 15px;">
                 <div class="remarks-box">
-                    <strong>Behavioral Traits & Character Ratings:</strong><br>
-                    <span style="display:inline-block; margin-top:5px;">• Punctuality: <strong>5 / 5
-                            (Excellent)</strong></span><br>
-                    <span>• Honesty & Trust: <strong>4 / 5 (Very Good)</strong></span>
+                    <strong>Behavioral & Physical Ratings:</strong><br>
+                    <div
+                        style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:5px; font-size:0.8rem;">
+                        <span>• Punctuality: <strong id="rate-punctual">5/5</strong></span>
+                        <span>• Leadership: <strong id="rate-leadership">5/5</strong></span>
+                        <span>• Maturity: <strong id="rate-maturity">5/5</strong></span>
+                        <span>• Cleanliness: <strong id="rate-cleanliness">5/5</strong></span>
+                        <span>• Handwriting: <strong id="rate-handwriting">5/5</strong></span>
+                        <span>• Hardwork: <strong id="rate-hardwork">5/5</strong></span>
+                        <span>• Sports Track: <strong id="rate-sport">5/5</strong></span>
+                        <span>• Class Strength: <strong id="rate-pop">--</strong></span>
+                    </div>
                 </div>
                 <div class="remarks-box">
-                    <strong>Class Teacher's Remark:</strong><br>
-                    <p style="margin: 5px 0 0 0; font-style: italic;">"An encouraging academic result paired with an
-                        exemplary character pattern."</p>
+                    <strong>Class Teacher's Personalized Remark:</strong><br>
+                    <p style="margin: 5px 0 0 0; font-style: italic;" id="card-display-teacher-remark">"Awaiting teacher
+                        parameter synchronization..."</p>
                 </div>
             </div>
 
             <div class="remarks-box" style="border-left: 5px solid var(--accent-red);">
                 <strong>Principal's Executive Comment:</strong><br>
-                <p style="margin: 5px 0 0 0; font-style: italic; font-weight: 600; color: var(--primary-blue);">
-                    "An outstanding performance. This exceptional standard reflects brilliant focus and ability. Well
-                    done."
+                <p style="margin: 5px 0 0 0; font-style: italic; font-weight: 600; color: var(--primary-blue);"
+                    id="card-display-principal-remark">
+                    Awaiting calculation arrays...
                 </p>
             </div>
 
@@ -268,59 +364,164 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Term history mock database compilation data dictionary
-        const academicHistoryDB = {
-            "2026_3rd": {
-                term: "Third Term (End of Session)",
-                avg: "72.7%",
-                scores: [
-                    { name: "Mathematics", c1: 18, c2: 17, ex: 40, tot: 75, g: "A" },
-                    { name: "English Language", c1: 14, c2: 15, ex: 33, tot: 62, g: "B" },
-                    { name: "Biology", c1: 19, c2: 18, ex: 44, tot: 81, g: "A" }
-                ]
-            },
-            "2026_2nd": {
-                term: "Second Term",
-                avg: "66.0%",
-                scores: [
-                    { name: "Mathematics", c1: 15, c2: 12, ex: 38, tot: 65, g: "B" },
-                    { name: "English Language", c1: 11, c2: 13, ex: 36, tot: 60, g: "B" },
-                    { name: "Biology", c1: 14, c2: 15, ex: 44, tot: 73, g: "A" }
-                ]
-            },
-            "2026_1st": {
-                term: "First Term",
-                avg: "58.3%",
-                scores: [
-                    { name: "Mathematics", c1: 10, c2: 11, ex: 30, tot: 51, g: "C" },
-                    { name: "English Language", c1: 12, c2: 14, ex: 32, tot: 58, g: "C" },
-                    { name: "Biology", c1: 16, c2: 15, ex: 35, tot: 66, g: "B" }
-                ]
-            }
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let globalActiveStudentData = null;
+
+        window.onload = function () {
+            validateAndLoadStudentProfile();
         };
 
-        function revealReportCard() {
-            const selectedTerm = document.getElementById('selected-term-archive').value;
-            const archive = academicHistoryDB[selectedTerm];
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
 
-            // Build dynamically tracking values inside student fields
-            document.getElementById('display-target-term').innerText = archive.term;
-            document.getElementById('display-target-avg').innerText = archive.avg;
+        async function validateAndLoadStudentProfile() {
+            const studentId = localStorage.getItem('current_student_id');
+            if (!studentId) {
+                alert("Session terminated. Please login again.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const { data: student, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', studentId)
+                .single();
+
+            if (error || !student) {
+                alert("Error calling student terminal data packets.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            globalActiveStudentData = student;
+
+            document.getElementById('portal-welcome-title').innerText = "Welcome, " + (student.admission_number || "Student");
+            document.getElementById('portal-meta-id').innerText = student.id.substring(0, 8).toUpperCase();
+
+            const joinedClasses = student.assigned_classes || [];
+            document.getElementById('portal-meta-class').innerText = joinedClasses.length > 0 ? joinedClasses.join(', ') : "Unassigned Class";
+        }
+
+        function determineGradeLetter(total) {
+            if (total >= 75) return { letter: "A", color: "green" };
+            if (total >= 65) return { letter: "B", color: "blue" };
+            if (total >= 50) return { letter: "C", color: "orange" };
+            if (total >= 40) return { letter: "D", color: "purple" };
+            return { letter: "F", color: "red" };
+        }
+
+        function revealLiveReportCard() {
+            if (!globalActiveStudentData) return;
+
+            const student = globalActiveStudentData;
+            const chosenTerm = document.getElementById('selected-term-archive').value;
+
+            if (student.math_score === null && student.english_score === null) {
+                alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
+                return;
+            }
+
+            document.getElementById('display-target-term').innerText = chosenTerm + " Ledger (2026/2027 Session)";
+            document.getElementById('card-student-name').innerText = student.admission_number || "Registered Academic Student";
+            document.getElementById('card-admission-no').innerText = student.id.substring(0, 8).toUpperCase();
+
+            const classes = student.assigned_classes || [];
+            document.getElementById('card-class-level').innerText = classes.length > 0 ? classes.join(', ') : "Not Set";
+
+            document.getElementById('card-display-attendance').innerText = `${student.days_present || 0} / 90 Days Present`;
+
+            const targetClassStr = classes[0] || "";
+            const deptStr = student.department ? student.department.trim() : "None";
+            let lockBio = false;
+            if (targetClassStr.startsWith("SS") && (deptStr === "Commercial" || deptStr === "Humanity")) {
+                lockBio = true;
+            }
+
+            const mathScore = student.math_score || 0;
+            const engScore = student.english_score || 0;
+            const bioScore = student.biology_score || 0;
 
             const tbody = document.getElementById('dynamic-grades-body');
             tbody.innerHTML = "";
 
-            archive.scores.forEach(row => {
+            let mGrade = determineGradeLetter(mathScore);
+            tbody.innerHTML += `<tr>
+                <td style="text-align: left; font-weight: 600;">Mathematics</td>
+                <td>Data Synced</td>
+                <td>${mathScore}</td>
+                <td style="font-weight: bold;">${mathScore}</td>
+                <td style="font-weight: bold; color: ${mGrade.color};">${mGrade.letter}</td>
+            </tr>`;
+
+            let eGrade = determineGradeLetter(engScore);
+            tbody.innerHTML += `<tr>
+                <td style="text-align: left; font-weight: 600;">English Language</td>
+                <td>Data Synced</td>
+                <td>${engScore}</td>
+                <td style="font-weight: bold;">${engScore}</td>
+                <td style="font-weight: bold; color: ${eGrade.color};">${eGrade.letter}</td>
+            </tr>`;
+
+            let dynamicTotalScore = mathScore + engScore;
+            let denominatorValue = 200;
+
+            if (lockBio) {
                 tbody.innerHTML += `<tr>
-                    <td style="text-align: left; font-weight: 600;">${row.name}</td>
-                    <td>${row.c1}</td>
-                    <td>${row.c2}</td>
-                    <td>${row.ex}</td>
-                    <td style="font-weight: bold;">${row.tot}</td>
-                    <td style="font-weight: bold; color: ${row.g === 'A' ? 'green' : (row.g === 'B' ? 'blue' : 'orange')}">${row.g}</td>
+                    <td style="text-align: left; font-weight: 600; color:#a0aec0;">Biology</td>
+                    <td colspan="4" style="color:#a0aec0; font-style:italic;">Not Offered (Exempted via Department Path)</td>
                 </tr>`;
-            });
+            } else {
+                let bGrade = determineGradeLetter(bioScore);
+                dynamicTotalScore += bioScore;
+                denominatorValue = 300;
+                tbody.innerHTML += `<tr>
+                    <td style="text-align: left; font-weight: 600;">Biology</td>
+                    <td>Data Synced</td>
+                    <td>${bioScore}</td>
+                    <td style="font-weight: bold;">${bioScore}</td>
+                    <td style="font-weight: bold; color: ${bGrade.color};">${bGrade.letter}</td>
+                </tr>`;
+            }
+
+            const exactAverage = ((dynamicTotalScore / denominatorValue) * 100);
+            document.getElementById('display-target-avg').innerText = exactAverage.toFixed(1) + "%";
+
+            const statusBox = document.getElementById('display-outcome-status');
+            if (exactAverage >= 40) {
+                statusBox.innerText = "PASS";
+                statusBox.style.color = "green";
+            } else {
+                statusBox.innerText = "FAIL / RETAKE";
+                statusBox.style.color = "var(--accent-red)";
+            }
+
+            document.getElementById('rate-punctual').innerText = (student.punctuality_rating || "5") + " / 5";
+            document.getElementById('rate-leadership').innerText = (student.leadership_rating || "5") + " / 5";
+            document.getElementById('rate-maturity').innerText = (student.maturity_rating || "5") + " / 5";
+            document.getElementById('rate-cleanliness').innerText = (student.cleanliness_rating || "5") + " / 5";
+            document.getElementById('rate-handwriting').innerText = (student.handwriting_rating || "5") + " / 5";
+            document.getElementById('rate-hardwork').innerText = (student.hardwork_rating || "5") + " / 5";
+            document.getElementById('rate-sport').innerText = (student.sport_rating || "5") + " / 5";
+            document.getElementById('rate-pop').innerText = student.class_total_students || "N/A";
+
+            document.getElementById('card-display-teacher-remark').innerText = student.teacher_comment ? `"${student.teacher_comment}"` : `"No remark provided yet."`;
+
+            const principalCommentElement = document.getElementById('card-display-principal-remark');
+            if (exactAverage >= 75) {
+                principalCommentElement.innerText = `"An outstanding performance. This exceptional standard reflects brilliant focus and ability. Well done."`;
+            } else if (exactAverage >= 50) {
+                principalCommentElement.innerText = `"Good effort. Promising results, with more focus you can achieve greater scores across your structural criteria paths."`;
+            } else {
+                principalCommentElement.innerText = `"Performance is below average. Intense academic revision is recommended to establish stable baseline tracks."`;
+            }
 
             document.getElementById('result-gate').classList.add('hidden');
             document.getElementById('report-card-view').classList.remove('hidden');
