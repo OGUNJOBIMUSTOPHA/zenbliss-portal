@@ -369,16 +369,25 @@
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         let supabaseClient = null;
 
-        // Secure client initializer helper
+        // Bulletproof Supabase Client Initializer
         function initSupabase() {
-            if (!supabaseClient) {
-                if (typeof supabase !== 'undefined') {
+            try {
+                if (supabaseClient) return supabaseClient;
+
+                // Check every possible global variable that the CDN could expose
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                } else if (typeof supabase !== 'undefined' && supabase && typeof supabase.createClient === 'function') {
                     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                } else if (typeof Supabase !== 'undefined') {
+                } else if (typeof Supabase !== 'undefined' && Supabase && typeof Supabase.createClient === 'function') {
                     supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 }
+
+                return supabaseClient;
+            } catch (e) {
+                console.error("Supabase init error:", e);
+                return null;
             }
-            return supabaseClient;
         }
 
         window.onload = function () {
@@ -408,7 +417,7 @@
 
                 const client = initSupabase();
                 if (!client) {
-                    console.error("Supabase library missing from window space.");
+                    console.error("Supabase library is not ready or loaded yet.");
                     return;
                 }
 
@@ -419,7 +428,7 @@
                     .single();
 
                 if (error || !student) {
-                    console.error("Supabase error:", error);
+                    console.error("Profile load database error:", error);
                     return;
                 }
 
@@ -432,7 +441,7 @@
                 const joinedClasses = getCleanClassesList(student.assigned_classes);
                 document.getElementById('portal-meta-class').innerText = joinedClasses.length > 0 ? joinedClasses.join(', ') : "Unassigned";
             } catch (err) {
-                console.error("Crash during profile loading:", err);
+                console.error("Crash during initial profile download:", err);
             }
         }
 
@@ -449,25 +458,27 @@
             const btn = document.getElementById('view-result-btn');
             if (!btn) return;
 
+            // UI feedback trigger immediately
+            btn.innerText = "Synchronizing Live Data...";
+            btn.disabled = true;
+
             try {
                 const studentId = localStorage.getItem('current_student_id');
                 if (!studentId) {
-                    alert("Session terminated. Please login again.");
+                    alert("Session expired. Please login again.");
                     window.location.href = "index.html";
                     return;
                 }
 
-                // UI feedback
-                btn.innerText = "Synchronizing Live Data...";
-                btn.disabled = true;
-
                 const client = initSupabase();
                 if (!client) {
-                    alert("Database connector asset error. Please check your internet connection.");
+                    alert("⚠️ Integration Error: The script connector library could not be reached. Please check your network connection and reload the page.");
+                    btn.innerText = "View Term Results";
+                    btn.disabled = false;
                     return;
                 }
 
-                // ALWAYS pull absolute fresh server data row on click event
+                // Fresh Live Server Fetch Execution
                 const { data: student, error } = await client
                     .from('users')
                     .select('*')
@@ -475,8 +486,10 @@
                     .single();
 
                 if (error || !student) {
-                    console.error("Fetch error details:", error);
-                    alert("Failed to sync fresh result packets from server.");
+                    console.error("Database connection fault details:", error);
+                    alert("Failed to sync fresh result packets from the server. Check developer logs.");
+                    btn.innerText = "View Term Results";
+                    btn.disabled = false;
                     return;
                 }
 
@@ -486,12 +499,14 @@
                 const engTotal = Number(student.english_score) || 0;
                 const bioTotal = Number(student.biology_score) || 0;
 
-                // Robust clean mapping logic for truth conditions across types
+                // Safe check formatting across database variant allocations
                 const isReleased = (student.results_released === true || String(student.results_released).toLowerCase() === 'true');
 
                 // UNCOMPROMISING SECURITY GATE
                 if (!isReleased) {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
+                    btn.innerText = "View Term Results";
+                    btn.disabled = false;
                     return;
                 }
 
@@ -515,7 +530,7 @@
                     lockBio = true;
                 }
 
-                // Breakdowns based on standard calculation structures
+                // Calculation Matrix
                 const mathCA = Math.round(mathTotal * 0.4);
                 const mathExam = mathTotal - mathCA;
 
@@ -608,8 +623,8 @@
                 document.getElementById('result-gate').classList.add('hidden');
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
-                console.error("Crash during live compilation sequence:", err);
-                alert("An application exception occurred while building presentation frames.");
+                console.error("Compilation error exception:", err);
+                alert("An unexpected layout error occurred while compiling presentation frameworks. Please see the inspector console for details.");
             } finally {
                 btn.innerText = "View Term Results";
                 btn.disabled = false;
