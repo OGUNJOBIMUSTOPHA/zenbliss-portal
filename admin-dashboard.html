@@ -29,12 +29,12 @@
             padding-bottom: 50px;
         }
 
+        /* FIXED PORTAL HEADER & FLEX COMPONENT SPACING */
         .portal-header {
             background-color: var(--primary-blue);
             color: var(--background-white);
             padding: 15px 0;
             border-bottom: 4px solid var(--accent-red);
-            position: relative;
         }
 
         .header-container {
@@ -44,6 +44,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 20px;
         }
 
         .logo-branding {
@@ -72,6 +73,24 @@
             font-weight: bold;
         }
 
+        /* FIXED LOGOUT BUTTON LAYOUT DESIGN */
+        .btn-logout {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            order: 3;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc2626;
+        }
+
         .admin-container {
             max-width: 1300px;
             margin: 30px auto;
@@ -92,18 +111,18 @@
         }
 
         .control-box {
-            background: var(--background-white, #ffffff);
+            background: var(--background-white);
             border-radius: 8px;
-            border: 1px solid var(--border-color, #e2e8f0);
+            border: 1px solid var(--border-color);
             padding: 25px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         }
 
         .control-box h2 {
-            color: var(--primary-blue, #1a365d);
+            color: var(--primary-blue);
             font-size: 1.25rem;
             margin-bottom: 15px;
-            border-bottom: 2px solid var(--light-gray, #edf2f7);
+            border-bottom: 2px solid var(--light-gray);
             padding-bottom: 8px;
         }
 
@@ -117,13 +136,13 @@
         .data-table td {
             padding: 10px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            border-bottom: 1px solid var(--border-color);
             font-size: 0.85rem;
         }
 
         .data-table th {
-            background-color: var(--light-gray, #edf2f7);
-            color: var(--primary-blue, #1a365d);
+            background-color: var(--light-gray);
+            color: var(--primary-blue);
         }
 
         .action-btn {
@@ -152,9 +171,9 @@
         }
 
         .broadsheet-card {
-            background: var(--background-white, #ffffff);
+            background: var(--background-white);
             border-radius: 8px;
-            border: 1px solid var(--border-color, #e2e8f0);
+            border: 1px solid var(--border-color);
             padding: 25px;
             margin-top: 30px;
         }
@@ -173,12 +192,12 @@
         .matrix-table td {
             padding: 8px;
             text-align: center;
-            border: 1px solid var(--border-color, #e2e8f0);
+            border: 1px solid var(--border-color);
             font-size: 0.85rem;
         }
 
         .matrix-table th {
-            background-color: var(--primary-blue, #1a365d);
+            background-color: var(--primary-blue);
             color: white;
         }
 
@@ -191,26 +210,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .btn-logout {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .btn-logout:hover {
-            background-color: #dc2626;
         }
 
         .hidden {
@@ -233,17 +232,14 @@
 <body>
 
     <header class="portal-header">
-        <button class="btn-logout" onclick="handleLogout()">Log Out</button>
-
-        <div class="header-container" style="display: flex; justify-content: center; align-items: center; width: 100%;">
-            <div class="logo-branding" style="display: flex; align-items: center; gap: 15px;">
-                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" style="max-height: 50px;"
-                    onerror="this.style.display='none';">
+        <div class="header-container">
+            <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
-            <span class="portal-badge"
-                style="background-color: var(--accent-red, #9B2C2C); margin-left: 20px; padding: 5px 10px; color: white; border-radius: 4px;">Proprietress
+            <span class="portal-badge" style="background-color: var(--accent-red); color: white;">Proprietress
                 Terminal</span>
+            <button class="btn-logout" onclick="handleLogout()">Log Out</button>
         </div>
     </header>
 
@@ -294,7 +290,6 @@
                 <div class="form-group">
                     <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; display: block;">Step 2:
                         Allocate Classroom Desks (Max 2 Levels)</label>
-
                     <div id="admin-dynamic-class-matrix-zone">
                         <p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff
                             profile to load classroom maps...</p>
@@ -321,9 +316,8 @@
 
         <div class="broadsheet-card">
             <h2>Review Uploaded Class Results</h2>
-            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">
-                Select a class to review the complete grade metrics updated by the respective Class Teacher.
-            </p>
+            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Select a class to review the complete
+                grade metrics updated by the respective Class Teacher.</p>
 
             <div style="margin-bottom: 20px;">
                 <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)"
@@ -362,8 +356,8 @@
 
                 <div class="global-upload-bar">
                     <div>
-                        <h4 style="color: var(--primary-blue, #1a365d); margin: 0 0 5px 0;">Finalize & Upload Results
-                            Globally</h4>
+                        <h4 style="color: var(--primary-blue); margin: 0 0 5px 0;">Finalize & Upload Results Globally
+                        </h4>
                         <p style="font-size: 0.8rem; color: #4A5568; margin: 0;">Approving locks the database and
                             uploads the report cards onto the student login panels.</p>
                     </div>
@@ -412,13 +406,12 @@
                 .eq('role', 'teacher');
 
             if (error) {
-                console.error("Error loading teachers:", error.message);
+                alert("Database Error Fetching Staff: " + error.message + "\nHint: " + error.hint);
+                console.error("Error loading teachers:", error);
                 return;
             }
 
             cachedTeachersList = teachers;
-
-            // Keep track of whatever drop-down assignment option was actively highlighted
             const previouslySelectedId = selectDropdown ? selectDropdown.value : "";
 
             tbody.innerHTML = "";
@@ -447,18 +440,208 @@
                 }
             });
 
-            // Restore previous drop-down value context to prevent workspace resets
             if (selectDropdown && previouslySelectedId) {
                 selectDropdown.value = previouslySelectedId;
             }
         }
 
         async function addStaffMember(event) {
-            event.preventDefault();
-            const staffName = document.getElementById('new-staff-name').value.trim();
-            const staffPassword = document.getElementById('new-staff-pass').value;
+            try {
+                event.preventDefault(); // Strongly intercept default form submission behavior
 
-            // Added .select() to ensure payload records are compiled natively on return callback loops
-            const { data, error } = await supabaseClient
+                const staffName = document.getElementById('new-staff-name').value.trim();
+                const staffPassword = document.getElementById('new-staff-pass').value;
+
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .insert([
+                        {
+                            admission_number: staffName,
+                            password: staffPassword,
+                            role: 'teacher',
+                            is_approved: true,
+                            assigned_classes: []
+                        }
+                    ]).select();
+
+                if (error) {
+                    alert("Database rejected registration: " + error.message + "\nDetails: " + error.details);
+                    console.error("Supabase error:", error);
+                    return;
+                }
+
+                alert(`Staff account for ${staffName} registered successfully!`);
+                document.getElementById('Staff-form').reset();
+                await fetchTeachers();
+
+            } catch (crashError) {
+                event.preventDefault();
+                alert("JavaScript Engine Error: " + crashError.message);
+                console.error("Full crash dump:", crashError);
+            }
+        }
+
+        async function deleteStaff(id) {
+            if (confirm("Confirm account deletion? This will revoke all access for this teacher.")) {
+                const { error } = await supabaseClient
+                    .from('users')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Error deleting staff: " + error.message);
+                } else {
+                    alert("Staff account permanently deleted.");
+                    await fetchTeachers();
+                    document.getElementById('admin-dynamic-class-matrix-zone').innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
+                }
+            }
+        }
+
+        function syncClassCheckboxesByTeacherOwnership(selectedTeacherId) {
+            const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
+            if (!selectedTeacherId) {
+                matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
+                return;
+            }
+
+            const targetTeacher = cachedTeachersList.find(t => t.id === selectedTeacherId);
+            const teacherOwnedClasses = targetTeacher ? (targetTeacher.assigned_classes || []) : [];
+
+            const classGlobalOwnershipMap = {};
+            cachedTeachersList.forEach(t => {
+                if (t.id !== selectedTeacherId) {
+                    const classes = t.assigned_classes || [];
+                    classes.forEach(c => {
+                        classGlobalOwnershipMap[c] = t.admission_number || "Another Faculty Desk";
+                    });
+                }
+            });
+
+            matrixZone.innerHTML = "";
+
+            MASTER_SCHOOL_CLASSES.forEach(cls => {
+                const isOwnedByCurrentTeacher = teacherOwnedClasses.includes(cls);
+                const assignedToOtherTeacherName = classGlobalOwnershipMap[cls];
+
+                let checkedAttr = isOwnedByCurrentTeacher ? "checked" : "";
+                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;">✅ Available for Allocation</span>`;
+                let disabledAttr = "";
+                let tileBackgroundStyle = "background:#fafafa;";
+
+                if (isOwnedByCurrentTeacher) {
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;">🎯 Currently Assigned to This Teacher</span>`;
+                    tileBackgroundStyle = "background: #ebf8ff; border: 1px solid #90cdf4;";
+                } else if (assignedToOtherTeacherName) {
+                    checkedAttr = "";
+                    disabledAttr = "disabled";
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;">🔒 Occupied by ${assignedToOtherTeacherName}</span>`;
+                    tileBackgroundStyle = "background: #edf2f7; opacity: 0.65; cursor: not-allowed;";
+                }
+
+                matrixZone.innerHTML += `
+                    <div class="checkbox-tile" style="${tileBackgroundStyle}">
+                        <input type="checkbox" value="${cls}" ${checkedAttr} ${disabledAttr} 
+                            style="transform: scale(1.2); cursor:pointer;" 
+                            onchange="executeLiveClassAssignmentUpdate('${selectedTeacherId}', this)">
+                        <label style="font-size:0.85rem; cursor:pointer; width: 100%; display:block;">${tileStatusText}</label>
+                    </div>
+                `;
+            });
+        }
+
+        async function executeLiveClassAssignmentUpdate(teacherId, checkboxElement) {
+            const targetedClassValue = checkboxElement.value;
+            const isCheckedAction = checkboxElement.checked;
+
+            const targetTeacher = cachedTeachersList.find(t => t.id === teacherId);
+            let updatedClassesArray = targetTeacher ? [...(targetTeacher.assigned_classes || [])] : [];
+
+            if (isCheckedAction) {
+                if (updatedClassesArray.length >= 2) {
+                    checkboxElement.checked = false;
+                    alert(`Process Denied: ${targetTeacher.admission_number} is already managing a limit of 2 full classes.`);
+                    return;
+                }
+                if (!updatedClassesArray.includes(targetedClassValue)) {
+                    updatedClassesArray.push(targetedClassValue);
+                }
+            } else {
+                updatedClassesArray = updatedClassesArray.filter(c => c !== targetedClassValue);
+            }
+
+            const { error } = await supabaseClient
                 .from('users')
-                .insert(
+                .update({ assigned_classes: updatedClassesArray })
+                .eq('id', teacherId);
+
+            if (error) {
+                alert("Failed to sync allocation: " + error.message);
+                checkboxElement.checked = !isCheckedAction;
+                return;
+            }
+
+            const { data: refreshedTeachers, error: fetchErr } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'teacher');
+
+            if (!fetchErr) {
+                cachedTeachersList = refreshedTeachers;
+                await fetchTeachers();
+                syncClassCheckboxesByTeacherOwnership(teacherId);
+            }
+        }
+
+        async function fetchPendingApplications() {
+            const tbody = document.getElementById('pending-students-rows');
+            if (!tbody) return;
+
+            const { data: pendingStudents, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'student')
+                .eq('is_approved', false);
+
+            if (error) {
+                console.error("Error fetching students:", error.message);
+                return;
+            }
+
+            tbody.innerHTML = "";
+            if (pendingStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">No pending student applications.</td></tr>`;
+                return;
+            }
+
+            pendingStudents.forEach(student => {
+                const appliedClass = (student.assigned_classes && student.assigned_classes[0]) || "Not Specified";
+                const dept = student.department || "General";
+                tbody.innerHTML += `<tr>
+                    <td>${student.admission_number || 'Unnamed student'}</td>
+                    <td>${appliedClass} (${dept})</td>
+                    <td>
+                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}')">Approve</button>
+                        <button class="action-btn btn-reject" onclick="deleteStaff('${student.id}')">Reject</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        async function approveStudent(id) {
+            const { error } = await supabaseClient
+                .from('users')
+                .update({ is_approved: true })
+                .eq('id', id);
+
+            if (error) {
+                alert("Failed to approve student: " + error.message);
+            } else {
+                alert("Student application approved successfully!");
+                fetchPendingApplications();
+            }
+        }
+    </script>
+</body>
+
+</html>
