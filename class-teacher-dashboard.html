@@ -604,9 +604,9 @@
             }
 
             classStudents.forEach(student => {
-                const mathScore = student.math_score || 0;
-                const engScore = student.english_score || 0;
-                const bioScore = student.biology_score || 0;
+                const mathScore = Number(student.math_score) || 0;
+                const engScore = Number(student.english_score) || 0;
+                const bioScore = Number(student.biology_score) || 0;
 
                 const existingComment = student.teacher_comment || "";
                 const existingDaysPresent = student.days_present || 0;
@@ -741,7 +741,6 @@
 
             document.getElementById('active-student-card-title').innerText = name;
 
-            // Load saved settings directly onto form elements
             document.getElementById('card-teacher-comment').value = decodeURIComponent(row.getAttribute('data-comment') || "");
             document.getElementById('card-attendance').value = row.getAttribute('data-present') || "0";
 
@@ -778,115 +777,4 @@
             const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
 
             const punctualVal = document.getElementById('card-punctual').value;
-            const leadershipVal = document.getElementById('card-leadership').value;
-            const maturityVal = document.getElementById('card-maturity').value;
-            const cleanlinessVal = document.getElementById('card-cleanliness').value;
-            const handwritingVal = document.getElementById('card-handwriting').value;
-            const hardworkVal = document.getElementById('card-hardwork').value;
-            const sportVal = document.getElementById('card-sport').value;
-
-            const updatePayload = {
-                math_score: mathTotal,
-                english_score: engTotal,
-                teacher_comment: commentVal,
-                days_present: attendanceVal,
-                class_total_students: classTotal,
-                punctuality_rating: punctualVal,
-                leadership_rating: leadershipVal,
-                maturity_rating: maturityVal,
-                cleanliness_rating: cleanlinessVal,
-                handwriting_rating: handwritingVal,
-                hardwork_rating: hardworkVal,
-                sport_rating: sportVal
-            };
-
-            if (!isBioLocked) {
-                updatePayload.biology_score = bioTotal;
-            }
-
-            const saveBtn = document.getElementById('commit-btn-sync');
-            const originalText = saveBtn.innerText;
-            saveBtn.innerText = "Syncing with cloud...";
-            saveBtn.disabled = true;
-
-            const { error } = await supabaseClient
-                .from('users')
-                .update(updatePayload)
-                .eq('id', studentId);
-
-            saveBtn.innerText = originalText;
-            saveBtn.disabled = false;
-
-            if (error) {
-                alert("Failed to synchronize metrics onto cloud servers: " + error.message);
-                return;
-            }
-
-            alert("Student parameters successfully saved and synchronized onto cloud profiles!");
-            document.getElementById('report-card-box').classList.add('hidden');
-
-            if (row) {
-                row.setAttribute('data-comment', encodeURIComponent(commentVal));
-                row.setAttribute('data-present', attendanceVal);
-                row.setAttribute('data-punctual', punctualVal);
-                row.setAttribute('data-leadership', leadershipVal);
-                row.setAttribute('data-maturity', maturityVal);
-                row.setAttribute('data-cleanliness', cleanlinessVal);
-                row.setAttribute('data-handwriting', handwritingVal);
-                row.setAttribute('data-hardwork', hardworkVal);
-                row.setAttribute('data-sport', sportVal);
-
-                row.querySelector('.m-tot').innerText = mathTotal;
-                row.querySelector('.e-tot').innerText = engTotal;
-                if (!isBioLocked) {
-                    row.querySelector('.b-tot').innerText = bioTotal;
-                }
-
-                const finalTotal = mathTotal + engTotal + (isBioLocked ? 0 : bioTotal);
-                const totalSubjects = isBioLocked ? 2 : 3;
-
-                row.querySelector('.row-total').innerText = finalTotal;
-                row.querySelector('.row-avg').innerText = ((finalTotal / (totalSubjects * 100)) * 100).toFixed(1) + "%";
-            }
-        }
-
-        async function submitLedgerToAdmin() {
-            const chosenClass = document.getElementById('teacher-class-selector').value;
-            const chosenTerm = document.getElementById('target-compilation-term').value;
-
-            if (!chosenClass) {
-                alert("No active workspace class targeted.");
-                return;
-            }
-
-            if (!confirm(`Are you sure you want to submit the ${chosenClass} (${chosenTerm}) ledger sheets to the administrator? This locks your current terminal version for verification.`)) {
-                return;
-            }
-
-            const submissionButton = document.getElementById('admin-submission-btn');
-            submissionButton.disabled = true;
-            submissionButton.innerText = "Submitting Workspace...";
-
-            // Looks up all students matching the current target context layout 
-            const { data: classStudents, error: fetchError } = await supabaseClient
-                .from('users')
-                .select('id')
-                .eq('role', 'student')
-                .eq('is_approved', true);
-
-            if (fetchError) {
-                alert("Error scanning directory parameters: " + fetchError.message);
-                submissionButton.disabled = false;
-                submissionButton.innerText = "📤 Submit Term Ledger to Admin";
-                return;
-            }
-
-            // Updates ledger status flags to let the master dashboard know review targets are ready
-            alert("Ledger successfully submitted! Your gradesheets are now live inside the Admin review portal.");
-            submissionButton.innerText = "✓ Sheet Submitted Successfully";
-            submissionButton.style.background = "#4A5568";
-        }
-    </script>
-</body>
-
-</html>
+            const leadershipVal
