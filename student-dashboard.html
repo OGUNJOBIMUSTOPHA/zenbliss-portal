@@ -276,7 +276,7 @@
                 </select>
             </div>
 
-            <button class="btn-submit primary-blue" style="margin: 0; padding: 12px 30px;"
+            <button class="btn-submit primary-blue" style="margin: 0; padding: 12px 30px;" id="view-result-btn"
                 onclick="revealLiveReportCard()">View Term Results</button>
         </div>
 
@@ -369,7 +369,6 @@
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         let supabaseClient = null;
-        let globalActiveStudentData = null;
 
         window.onload = function () {
             if (typeof supabase !== 'undefined') {
@@ -415,8 +414,6 @@
                     return;
                 }
 
-                globalActiveStudentData = student;
-
                 const rawId = student.id ? String(student.id) : "";
                 const displayId = rawId.length > 8 ? rawId.substring(0, 8).toUpperCase() : "N/A";
 
@@ -439,33 +436,47 @@
             return { letter: "F", color: "red" };
         }
 
-        function revealLiveReportCard() {
+        async function revealLiveReportCard() {
+            const btn = document.getElementById('view-result-btn');
             try {
-                if (!globalActiveStudentData) {
-                    alert("Account details not fully initialized. Please refresh the page.");
+                const studentId = localStorage.getItem('current_student_id');
+                if (!studentId) {
+                    alert("Session terminated. Please login again.");
+                    window.location.href = "index.html";
                     return;
                 }
 
-                const student = globalActiveStudentData;
+                btn.innerText = "Synchronizing Live Data...";
+                btn.disabled = true;
+
+                // ALWAYS fetch the absolute latest database values instantly on click!
+                const { data: student, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', studentId)
+                    .single();
+
+                if (error || !student) {
+                    alert("Failed to sync fresh result packets. Please check connection.");
+                    btn.innerText = "View Term Results";
+                    btn.disabled = false;
+                    return;
+                }
+
                 const chosenTerm = document.getElementById('selected-term-archive').value;
 
                 const mathTotal = Number(student.math_score) || 0;
                 const engTotal = Number(student.english_score) || 0;
                 const bioTotal = Number(student.biology_score) || 0;
 
-                // Robust check formatting release tokens cleanly across type frameworks
+                // Turn the database field value cleanly into a true boolean check
                 const isReleased = (student.results_released === true || String(student.results_released).toLowerCase() === 'true');
 
-                // SECURE LOCK VALVE
-                if (
-                    !isReleased ||
-                    student.math_score === null ||
-                    student.math_score === undefined ||
-                    String(student.math_score) === "-1" ||
-                    String(student.math_score).trim() === "" ||
-                    (mathTotal === 0 && engTotal === 0 && bioTotal === 0)
-                ) {
+                // UNCOMPROMISING SECURITY GATE: Only cares if admin turned release column to TRUE.
+                if (!isReleased) {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
+                    btn.innerText = "View Term Results";
+                    btn.disabled = false;
                     return;
                 }
 
@@ -489,7 +500,7 @@
                     lockBio = true;
                 }
 
-                // Split metrics cleanly based on 40/60 distribution weights matching total bounds
+                // Mathematical breakdown distributions
                 const mathCA = Math.round(mathTotal * 0.4);
                 const mathExam = mathTotal - mathCA;
 
@@ -583,7 +594,10 @@
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
                 console.error("Crash during report generation:", err);
-                alert("An error occurred while building the report card data arrays. Please check the developer console.");
+                alert("An error occurred while building the report card data arrays.");
+            } finally {
+                btn.innerText = "View Term Results";
+                btn.disabled = false;
             }
         }
 
