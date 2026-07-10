@@ -363,17 +363,26 @@
         </div>
 
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         let supabaseClient = null;
 
-        window.onload = function () {
-            if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Secure client initializer helper
+        function initSupabase() {
+            if (!supabaseClient) {
+                if (typeof supabase !== 'undefined') {
+                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                } else if (typeof Supabase !== 'undefined') {
+                    supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                }
             }
+            return supabaseClient;
+        }
+
+        window.onload = function () {
+            initSupabase();
             validateAndLoadStudentProfile();
         };
 
@@ -397,11 +406,13 @@
                     return;
                 }
 
-                if (typeof supabase !== 'undefined' && !supabaseClient) {
-                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                const client = initSupabase();
+                if (!client) {
+                    console.error("Supabase library missing from window space.");
+                    return;
                 }
 
-                const { data: student, error } = await supabaseClient
+                const { data: student, error } = await client
                     .from('users')
                     .select('*')
                     .eq('id', studentId)
@@ -409,8 +420,6 @@
 
                 if (error || !student) {
                     console.error("Supabase error:", error);
-                    alert("Error calling student terminal data packets.");
-                    window.location.href = "index.html";
                     return;
                 }
 
@@ -438,6 +447,8 @@
 
         async function revealLiveReportCard() {
             const btn = document.getElementById('view-result-btn');
+            if (!btn) return;
+
             try {
                 const studentId = localStorage.getItem('current_student_id');
                 if (!studentId) {
@@ -446,20 +457,26 @@
                     return;
                 }
 
+                // UI feedback
                 btn.innerText = "Synchronizing Live Data...";
                 btn.disabled = true;
 
-                // ALWAYS fetch the absolute latest database values instantly on click!
-                const { data: student, error } = await supabaseClient
+                const client = initSupabase();
+                if (!client) {
+                    alert("Database connector asset error. Please check your internet connection.");
+                    return;
+                }
+
+                // ALWAYS pull absolute fresh server data row on click event
+                const { data: student, error } = await client
                     .from('users')
                     .select('*')
                     .eq('id', studentId)
                     .single();
 
                 if (error || !student) {
-                    alert("Failed to sync fresh result packets. Please check connection.");
-                    btn.innerText = "View Term Results";
-                    btn.disabled = false;
+                    console.error("Fetch error details:", error);
+                    alert("Failed to sync fresh result packets from server.");
                     return;
                 }
 
@@ -469,14 +486,12 @@
                 const engTotal = Number(student.english_score) || 0;
                 const bioTotal = Number(student.biology_score) || 0;
 
-                // Turn the database field value cleanly into a true boolean check
+                // Robust clean mapping logic for truth conditions across types
                 const isReleased = (student.results_released === true || String(student.results_released).toLowerCase() === 'true');
 
-                // UNCOMPROMISING SECURITY GATE: Only cares if admin turned release column to TRUE.
+                // UNCOMPROMISING SECURITY GATE
                 if (!isReleased) {
                     alert(`⚠️ Notice: The results for ${chosenTerm} have not been officially compiled or released by the school administration yet. Please check back later.`);
-                    btn.innerText = "View Term Results";
-                    btn.disabled = false;
                     return;
                 }
 
@@ -500,7 +515,7 @@
                     lockBio = true;
                 }
 
-                // Mathematical breakdown distributions
+                // Breakdowns based on standard calculation structures
                 const mathCA = Math.round(mathTotal * 0.4);
                 const mathExam = mathTotal - mathCA;
 
@@ -593,8 +608,8 @@
                 document.getElementById('result-gate').classList.add('hidden');
                 document.getElementById('report-card-view').classList.remove('hidden');
             } catch (err) {
-                console.error("Crash during report generation:", err);
-                alert("An error occurred while building the report card data arrays.");
+                console.error("Crash during live compilation sequence:", err);
+                alert("An application exception occurred while building presentation frames.");
             } finally {
                 btn.innerText = "View Term Results";
                 btn.disabled = false;
