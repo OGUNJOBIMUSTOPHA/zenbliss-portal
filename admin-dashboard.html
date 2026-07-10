@@ -418,6 +418,9 @@
 
             cachedTeachersList = teachers;
 
+            // Keep track of whatever drop-down assignment option was actively highlighted
+            const previouslySelectedId = selectDropdown ? selectDropdown.value : "";
+
             tbody.innerHTML = "";
             if (selectDropdown) selectDropdown.innerHTML = `<option value="">-- Choose Staff Profile --</option>`;
 
@@ -443,6 +446,11 @@
                     selectDropdown.innerHTML += `<option value="${teacher.id}">${teacher.admission_number}</option>`;
                 }
             });
+
+            // Restore previous drop-down value context to prevent workspace resets
+            if (selectDropdown && previouslySelectedId) {
+                selectDropdown.value = previouslySelectedId;
+            }
         }
 
         async function addStaffMember(event) {
@@ -450,153 +458,7 @@
             const staffName = document.getElementById('new-staff-name').value.trim();
             const staffPassword = document.getElementById('new-staff-pass').value;
 
+            // Added .select() to ensure payload records are compiled natively on return callback loops
             const { data, error } = await supabaseClient
                 .from('users')
-                .insert([
-                    {
-                        admission_number: staffName,
-                        password: staffPassword,
-                        role: 'teacher',
-                        is_approved: true,
-                        assigned_classes: []
-                    }
-                ]);
-
-            if (error) {
-                alert("Failed to add teacher: " + error.message);
-                return;
-            }
-
-            alert(`Staff account for ${staffName} registered successfully!`);
-            document.getElementById('Staff-form').reset();
-            fetchTeachers();
-        }
-
-        async function deleteStaff(id) {
-            if (confirm("Confirm account deletion? This will revoke all access for this teacher.")) {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    alert("Error deleting staff: " + error.message);
-                } else {
-                    alert("Staff account permanently deleted.");
-                    fetchTeachers();
-                    document.getElementById('admin-dynamic-class-matrix-zone').innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
-                }
-            }
-        }
-
-        function syncClassCheckboxesByTeacherOwnership(selectedTeacherId) {
-            const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
-            if (!selectedTeacherId) {
-                matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
-                return;
-            }
-
-            const targetTeacher = cachedTeachersList.find(t => t.id === selectedTeacherId);
-            const teacherOwnedClasses = targetTeacher ? (targetTeacher.assigned_classes || []) : [];
-
-            const classGlobalOwnershipMap = {};
-            cachedTeachersList.forEach(t => {
-                if (t.id !== selectedTeacherId) {
-                    const classes = t.assigned_classes || [];
-                    classes.forEach(c => {
-                        classGlobalOwnershipMap[c] = t.admission_number || "Another Faculty Desk";
-                    });
-                }
-            });
-
-            matrixZone.innerHTML = "";
-
-            MASTER_SCHOOL_CLASSES.forEach(cls => {
-                const isOwnedByCurrentTeacher = teacherOwnedClasses.includes(cls);
-                const assignedToOtherTeacherName = classGlobalOwnershipMap[cls];
-
-                let checkedAttr = isOwnedByCurrentTeacher ? "checked" : "";
-                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;">✅ Available for Allocation</span>`;
-                let disabledAttr = "";
-                let tileBackgroundStyle = "background:#fafafa;";
-
-                if (isOwnedByCurrentTeacher) {
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;">🎯 Currently Assigned to This Teacher</span>`;
-                    tileBackgroundStyle = "background: #ebf8ff; border: 1px solid #90cdf4;";
-                } else if (assignedToOtherTeacherName) {
-                    checkedAttr = "";
-                    disabledAttr = "disabled";
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;">🔒 Occupied by ${assignedToOtherTeacherName}</span>`;
-                    tileBackgroundStyle = "background: #edf2f7; opacity: 0.65; cursor: not-allowed;";
-                }
-
-                matrixZone.innerHTML += `
-                    <div class="checkbox-tile" style="${tileBackgroundStyle}">
-                        <input type="checkbox" value="${cls}" ${checkedAttr} ${disabledAttr} 
-                            style="transform: scale(1.2); cursor:pointer;" 
-                            onchange="executeLiveClassAssignmentUpdate('${selectedTeacherId}', this)">
-                        <label style="font-size:0.85rem; cursor:pointer; width: 100%; display:block;">${tileStatusText}</label>
-                    </div>
-                `;
-            });
-        }
-
-        async function executeLiveClassAssignmentUpdate(teacherId, checkboxElement) {
-            const targetedClassValue = checkboxElement.value;
-            const isCheckedAction = checkboxElement.checked;
-
-            const targetTeacher = cachedTeachersList.find(t => t.id === teacherId);
-            let updatedClassesArray = targetTeacher ? [...(targetTeacher.assigned_classes || [])] : [];
-
-            if (isCheckedAction) {
-                if (updatedClassesArray.length >= 2) {
-                    checkboxElement.checked = false;
-                    alert(`Process Denied: ${targetTeacher.admission_number} is already managing a limit of 2 full classes.`);
-                    return;
-                }
-                if (!updatedClassesArray.includes(targetedClassValue)) {
-                    updatedClassesArray.push(targetedClassValue);
-                }
-            } else {
-                updatedClassesArray = updatedClassesArray.filter(c => c !== targetedClassValue);
-            }
-
-            const { error } = await supabaseClient
-                .from('users')
-                .update({ assigned_classes: updatedClassesArray })
-                .eq('id', teacherId);
-
-            if (error) {
-                alert("Failed to sync allocation: " + error.message);
-                checkboxElement.checked = !isCheckedAction;
-                return;
-            }
-
-            const { data: refreshedTeachers, error: fetchErr } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('role', 'teacher');
-
-            if (!fetchErr) {
-                cachedTeachersList = refreshedTeachers;
-                fetchTeachers();
-
-                setTimeout(() => {
-                    document.getElementById('assign-staff-select').value = teacherId;
-                    syncClassCheckboxesByTeacherOwnership(teacherId);
-                }, 50);
-            }
-        }
-
-        async function fetchPendingApplications() {
-            const tbody = document.getElementById('pending-students-rows');
-            if (!tbody) return;
-
-            const { data: pendingStudents, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('role', 'student')
-                .eq('is_approved', false);
-
-            if (error) {
-                console.error("
+                .insert(
