@@ -527,44 +527,67 @@
         }
 
         async function verifyAndLoadTeacherSession() {
-            const teacherId = localStorage.getItem('current_teacher_id');
-            if (!teacherId) {
-                alert("Session expired. Please log in again.");
-                window.location.href = "index.html";
-                return;
+            try {
+                const teacherId = localStorage.getItem('current_teacher_id');
+                if (!teacherId) {
+                    alert("Session expired. Please log in again.");
+                    window.location.href = "index.html";
+                    return;
+                }
+
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', teacherId)
+                    .single();
+
+                if (error || !user) {
+                    alert("Error authenticating faculty terminal profile.");
+                    window.location.href = "index.html";
+                    return;
+                }
+
+                currentTeacherProfile = user;
+                document.getElementById('teacher-profile-name').innerText = "Welcome, " + (user.admission_number || "Teacher");
+
+                // ADVANCED SAFETY FIX: Parse PostgreSQL text array variations securely
+                let assignedClasses = [];
+                if (user.assigned_classes) {
+                    if (Array.isArray(user.assigned_classes)) {
+                        assignedClasses = user.assigned_classes;
+                    } else if (typeof user.assigned_classes === 'string') {
+                        let cleanStr = user.assigned_classes.trim();
+                        if (cleanStr.startsWith('{') && cleanStr.endsWith('}')) {
+                            assignedClasses = cleanStr.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
+                        } else if (cleanStr.startsWith('[') && cleanStr.endsWith(']')) {
+                            try { assignedClasses = JSON.parse(cleanStr); } catch (e) { assignedClasses = [cleanStr]; }
+                        } else {
+                            assignedClasses = [cleanStr];
+                        }
+                    }
+                }
+
+                const displaySpan = document.getElementById('teacher-assigned-classes');
+                const classSelector = document.getElementById('teacher-class-selector');
+
+                if (assignedClasses.length === 0 || assignedClasses[0] === "") {
+                    displaySpan.innerText = "No classes assigned yet by admin.";
+                    classSelector.innerHTML = '<option value="">No classes available</option>';
+                    return;
+                }
+
+                displaySpan.innerText = assignedClasses.join(', ');
+
+                classSelector.innerHTML = '';
+                assignedClasses.forEach(cls => {
+                    if (cls) {
+                        classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
+                    }
+                });
+            } catch (err) {
+                console.error("Crash during profile layout load:", err);
+                alert("Interface parsing error: " + err.message);
             }
-
-            const { data: user, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('id', teacherId)
-                .single();
-
-            if (error || !user) {
-                alert("Error authenticating faculty terminal profile.");
-                window.location.href = "index.html";
-                return;
-            }
-
-            currentTeacherProfile = user;
-            document.getElementById('teacher-profile-name').innerText = "Welcome, " + (user.admission_number || "Teacher");
-
-            const assignedClasses = user.assigned_classes || [];
-            const displaySpan = document.getElementById('teacher-assigned-classes');
-            const classSelector = document.getElementById('teacher-class-selector');
-
-            if (assignedClasses.length === 0) {
-                displaySpan.innerText = "No classes assigned yet by admin.";
-                classSelector.innerHTML = '<option value="">No classes available</option>';
-                return;
-            }
-
-            displaySpan.innerText = assignedClasses.join(', ');
-
-            classSelector.innerHTML = '';
-            assignedClasses.forEach(cls => {
-                classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
-            });
         }
 
         async function loadClassLedgerWorkspace() {
@@ -592,7 +615,12 @@
                 return;
             }
 
-            const classStudents = students.filter(st => st.assigned_classes && st.assigned_classes.includes(chosenClass));
+            const classStudents = students.filter(st => {
+                if (!st.assigned_classes) return false;
+                if (Array.isArray(st.assigned_classes)) return st.assigned_classes.includes(chosenClass);
+                return st.assigned_classes.toString().includes(chosenClass);
+            });
+
             tbody.innerHTML = "";
 
             const totalStudentsCount = classStudents.length;
@@ -758,23 +786,4 @@
             } else if (avgPercentage >= 50) {
                 principalCommentBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
             } else {
-                principalCommentBox.innerText = "Performance is below average. Intense academic revision is recommended.";
-            }
-
-            document.getElementById('report-card-box').classList.remove('hidden');
-            document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
-
-            document.getElementById('commit-btn-sync').onclick = function () {
-                commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, bioInput.disabled);
-            };
-        }
-
-        async function commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, isBioLocked) {
-            const row = document.querySelector(`tr[data-id="${studentId}"]`);
-            const classTotal = row ? parseInt(row.getAttribute('data-total-students')) || 0 : 0;
-
-            const commentVal = document.getElementById('card-teacher-comment').value.trim();
-            const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
-
-            const punctualVal = document.getElementById('card-punctual').value;
-            const leadershipVal
+                principalCommentBox.innerText = "Performance >
