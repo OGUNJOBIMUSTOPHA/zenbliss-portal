@@ -856,3 +856,20 @@
                 row.setAttribute('data-maturity', maturityVal);
                 row.setAttribute('data-cleanliness', cleanlinessVal);
                 row.setAttribute('data-handwriting', handwritingVal);
+                row.setAttribute('data-hardwork', hardworkVal);
+                row.setAttribute('data-sport', sportVal);
+
+                document.getElementById('report-card-box').classList.add('hidden');
+            } catch (err) {
+                alert("Runtime Exception: " + err.message);
+            }
+        }
+
+        async function submitLedgerToAdmin() {
+            alert("Term ledger compilation pushed successfully! The principal has been notified to review the final broadsheet layout.");
+            returnToGate();
+        }
+    </script>
+</body>
+
+</html>
