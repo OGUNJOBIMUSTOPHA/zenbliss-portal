@@ -297,7 +297,8 @@
                     style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
                     2026/2027</span>
                 <button onclick="handleLogout()" class="btn-submit accent-red"
-                    style="padding:8px 15px; font-size:0.85rem;">🚪 Log Out</button>
+                    style="padding:8px 15px; font-size:0.85rem; cursor: pointer; display: block !important;">🚪 Log
+                    Out</button>
             </div>
         </div>
 
@@ -515,26 +516,36 @@
         let currentTeacherProfile = null;
         let selectedTargetStudentId = null;
 
-        window.onload = function () {
-            verifyAndLoadTeacherSession();
-        };
-
+        // FIXED: Pure top-level scope declaration ensuring logout works even during database initialization crashes
         function handleLogout() {
-            if (confirm("Are you sure you want to log out?")) {
-                localStorage.clear();
+            try {
+                if (confirm("Are you sure you want to log out?")) {
+                    localStorage.clear();
+                    window.location.replace("index.html");
+                }
+            } catch (err) {
                 window.location.href = "index.html";
             }
         }
 
+        window.onload = function () {
+            verifyAndLoadTeacherSession();
+        };
+
         async function verifyAndLoadTeacherSession() {
+            const displaySpan = document.getElementById('teacher-assigned-classes');
+            const classSelector = document.getElementById('teacher-class-selector');
+            const nameHeader = document.getElementById('teacher-profile-name');
+
             try {
                 const teacherId = localStorage.getItem('current_teacher_id');
                 if (!teacherId) {
                     alert("Session expired. Please log in again.");
-                    window.location.href = "index.html";
+                    window.location.replace("index.html");
                     return;
                 }
 
+                // Force database direct check bypasses local outdated tokens
                 const { data: user, error } = await supabaseClient
                     .from('users')
                     .select('*')
@@ -542,51 +553,53 @@
                     .single();
 
                 if (error || !user) {
-                    alert("Error authenticating faculty terminal profile.");
-                    window.location.href = "index.html";
+                    console.error("Supabase Error:", error);
+                    if (nameHeader) nameHeader.innerText = "Error Loading Account";
+                    alert("Profile load error: Check if the user ID matches in your Supabase Auth/Table.");
                     return;
                 }
 
                 currentTeacherProfile = user;
-                document.getElementById('teacher-profile-name').innerText = "Welcome, " + (user.admission_number || "Teacher");
+                if (nameHeader) nameHeader.innerText = "Welcome, " + (user.admission_number || "Teacher");
 
-                // ADVANCED SAFETY FIX: Parse PostgreSQL text array variations securely
+                // PARSING BLOCK: Handles completely empty arrays, strings, objects safely
                 let assignedClasses = [];
                 if (user.assigned_classes) {
                     if (Array.isArray(user.assigned_classes)) {
                         assignedClasses = user.assigned_classes;
                     } else if (typeof user.assigned_classes === 'string') {
-                        let cleanStr = user.assigned_classes.trim();
-                        if (cleanStr.startsWith('{') && cleanStr.endsWith('}')) {
-                            assignedClasses = cleanStr.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
-                        } else if (cleanStr.startsWith('[') && cleanStr.endsWith(']')) {
-                            try { assignedClasses = JSON.parse(cleanStr); } catch (e) { assignedClasses = [cleanStr]; }
-                        } else {
-                            assignedClasses = [cleanStr];
+                        let str = user.assigned_classes.trim();
+                        if (str.startsWith('{') && str.endsWith('}')) {
+                            assignedClasses = str.slice(1, -1).split(',').map(s => s.replace(/"/g, '').trim());
+                        } else if (str.startsWith('[') && str.endsWith(']')) {
+                            try { assignedClasses = JSON.parse(str); } catch (e) { assignedClasses = [str]; }
+                        } else if (str !== "") {
+                            assignedClasses = [str];
                         }
                     }
                 }
 
-                const displaySpan = document.getElementById('teacher-assigned-classes');
-                const classSelector = document.getElementById('teacher-class-selector');
+                // Remove accidental blank text fields inside the collection array
+                assignedClasses = assignedClasses.filter(c => c && c.trim() !== "");
 
-                if (assignedClasses.length === 0 || assignedClasses[0] === "") {
-                    displaySpan.innerText = "No classes assigned yet by admin.";
-                    classSelector.innerHTML = '<option value="">No classes available</option>';
+                if (assignedClasses.length === 0) {
+                    if (displaySpan) displaySpan.innerText = "No classes assigned yet by admin.";
+                    if (classSelector) classSelector.innerHTML = '<option value="">No classes available</option>';
                     return;
                 }
 
-                displaySpan.innerText = assignedClasses.join(', ');
+                if (displaySpan) displaySpan.innerText = assignedClasses.join(', ');
 
-                classSelector.innerHTML = '';
-                assignedClasses.forEach(cls => {
-                    if (cls) {
+                if (classSelector) {
+                    classSelector.innerHTML = '';
+                    assignedClasses.forEach(cls => {
                         classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
-                    }
-                });
+                    });
+                }
             } catch (err) {
-                console.error("Crash during profile layout load:", err);
-                alert("Interface parsing error: " + err.message);
+                console.error("Dashboard engine crashed initialization:", err);
+                if (displaySpan) displaySpan.innerText = "Processing Error";
+                alert("Runtime script interruption handled safely. Check developer console (F12).");
             }
         }
 
@@ -786,4 +799,60 @@
             } else if (avgPercentage >= 50) {
                 principalCommentBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
             } else {
-                principalCommentBox.innerText = "Performance >
+                principalCommentBox.innerText = "Performance is below average. Intense academic revision is recommended.";
+            }
+
+            document.getElementById('report-card-box').classList.remove('hidden');
+            document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('commit-btn-sync').onclick = function () {
+                commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, bioInput.disabled);
+            };
+        }
+
+        async function commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, isBioLocked) {
+            try {
+                const row = document.querySelector(`tr[data-id="${studentId}"]`);
+                const commentVal = document.getElementById('card-teacher-comment').value.trim();
+                const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
+
+                const punctualVal = document.getElementById('card-punctual').value;
+                const leadershipVal = document.getElementById('card-leadership').value;
+                const maturityVal = document.getElementById('card-maturity').value;
+                const cleanlinessVal = document.getElementById('card-cleanliness').value;
+                const handwritingVal = document.getElementById('card-handwriting').value;
+                const hardworkVal = document.getElementById('card-hardwork').value;
+                const sportVal = document.getElementById('card-sport').value;
+
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({
+                        math_score: mathTotal,
+                        english_score: engTotal,
+                        biology_score: isBioLocked ? 0 : bioTotal,
+                        teacher_comment: commentVal,
+                        days_present: attendanceVal,
+                        punctuality_rating: punctualVal,
+                        leadership_rating: leadershipVal,
+                        maturity_rating: maturityVal,
+                        cleanliness_rating: cleanlinessVal,
+                        handwriting_rating: handwritingVal,
+                        hardwork_rating: hardworkVal,
+                        sport_rating: sportVal
+                    })
+                    .eq('id', studentId);
+
+                if (error) {
+                    alert("Sync Error: " + error.message);
+                    return;
+                }
+
+                alert("Student card configuration saved successfully!");
+
+                row.setAttribute('data-comment', encodeURIComponent(commentVal));
+                row.setAttribute('data-present', attendanceVal);
+                row.setAttribute('data-punctual', punctualVal);
+                row.setAttribute('data-leadership', leadershipVal);
+                row.setAttribute('data-maturity', maturityVal);
+                row.setAttribute('data-cleanliness', cleanlinessVal);
+                row.setAttribute('data-handwriting', handwritingVal);
