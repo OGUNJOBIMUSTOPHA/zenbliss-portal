@@ -564,7 +564,6 @@
                 console.error("Session verification failure:", err);
             }
         }
-
         async function fetchStudentTermScores() {
             const chosenTerm = document.getElementById('selected-term').value;
             const currentStudentId = localStorage.getItem('current_student_id');
@@ -574,7 +573,6 @@
                 return;
             }
 
-            // FIXED LINE: Pulls directly from table to ensure active result_released value is verified
             const { data: student, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -586,12 +584,15 @@
                 return;
             }
 
-            // GUARD RAIL: Checks if admin has flagged boolean value to true
+            // DIAGNOSTIC ALERT: This will tell us exactly what value is live right now
+            alert("DEBUG: The live value of result_released for this user is: " + student.result_released);
+
             if (student.result_released === false || !student.result_released) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
 
+            // ... rest of your code remains the same
             activeStudentProfile = student;
 
             let assignedClassStr = "Not Configured";
