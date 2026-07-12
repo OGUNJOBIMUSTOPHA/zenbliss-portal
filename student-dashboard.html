@@ -248,7 +248,6 @@
             margin-bottom: 0;
         }
 
-        /* FIXES BLANK PRINT ISSUE AND EMBEDS PROPER VISIBILITY ENGINE RULES */
         @media print {
             body {
                 background: white !important;
@@ -544,7 +543,8 @@
                 return;
             }
 
-            if (student.results === false || !student.results) {
+            // FIXED SCHEMA TARGET SPECIFIER HERE:
+            if (student.results_released === false || student.results_released === "false" || !student.results_released) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
