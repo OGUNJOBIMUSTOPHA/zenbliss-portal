@@ -227,12 +227,38 @@
             background: #FAFAFA;
         }
 
+        /* PRINT HEADER LABEL CONTAINER */
+        .print-only-header {
+            display: none;
+        }
+
         /* DYNAMIC PRINT CSS ENGINE RULES */
         @media print {
             body {
                 background: #FFF !important;
                 color: #000 !important;
                 padding: 0 !important;
+            }
+
+            .print-only-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 25px;
+                border-bottom: 3px double #000;
+                padding-bottom: 10px;
+            }
+
+            .print-only-header h1 {
+                font-size: 1.75rem;
+                color: #1A365D !important;
+                letter-spacing: 1px;
+            }
+
+            .print-only-header p {
+                font-size: 0.9rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-top: 5px;
             }
 
             .portal-header,
@@ -278,6 +304,11 @@
 </head>
 
 <body>
+
+    <div class="print-only-header">
+        <h1>ZENBLISS SCHOOLS & COLLEGE</h1>
+        <p id="print-sheet-subtitle">Official Compilation Class Ledger Sheet</p>
+    </div>
 
     <header class="portal-header">
         <div class="header-container">
@@ -401,7 +432,7 @@
                     </table>
                 </div>
 
-                <div class="global-upload-bar">
+                <div id="upload-bar-container" class="global-upload-bar">
                     <div>
                         <h4 style="color: var(--primary-blue); margin: 0 0 5px 0;">Finalize & Upload Results Globally
                         </h4>
@@ -685,11 +716,12 @@
             }
         }
 
-        /* FIXED ENGINE CODE: Fetch only entries explicitly marked ledger_submitted === true */
         async function loadClassScoresToScreen(selectedClass) {
             const wrapper = document.getElementById('matrix-display-wrapper');
             const tbody = document.getElementById('matrix-rows');
             const printBtn = document.getElementById('print-ledger-btn');
+            const printSubtitle = document.getElementById('print-sheet-subtitle');
+            const uploadBar = document.getElementById('upload-bar-container');
 
             if (!selectedClass) {
                 wrapper.classList.add('hidden');
@@ -698,15 +730,17 @@
                 return;
             }
 
+            printSubtitle.innerText = `${selectedClass} Terminal Master Compilation Ledger Sheet`;
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
             wrapper.classList.remove('hidden');
+            uploadBar.classList.remove('hidden'); // Ensure container is visible on switch
 
             const { data: students, error } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
                 .eq('is_approved', true)
-                .eq('ledger_submitted', true); // CRITICAL RECONCILIATION FLAG CHECK
+                .eq('ledger_submitted', true);
 
             if (error) {
                 alert("Error loading class scores: " + error.message);
@@ -725,7 +759,14 @@
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
+                uploadBar.classList.add('hidden');
                 return;
+            }
+
+            // Check if results are already uploaded for this dataset to handle hiding action controls cleanly
+            const allUploaded = currentlyLoadedClassStudents.every(st => st.result_released === true);
+            if (allUploaded) {
+                uploadBar.classList.add('hidden');
             }
 
             printBtn.disabled = false;
@@ -771,8 +812,18 @@
                 if (error) errors = true;
             }
 
-            if (errors) alert("Some records failed to update.");
-            else alert("🎉 Success! All class results are now live for students.");
+            if (errors) {
+                alert("Some records failed to update.");
+            } else {
+                alert("🎉 Success! All class results are now live for students.");
+
+                // Hide the upload bar immediately upon successful upload
+                document.getElementById('upload-bar-container').classList.add('hidden');
+
+                // Optional: Refresh local state tracking array safely
+                const targetCls = document.getElementById('broadsheet-selector').value;
+                if (targetCls) loadClassScoresToScreen(targetCls);
+            }
         }
 
         async function rejectWholeClass() {
@@ -788,8 +839,9 @@
                 if (error) errors = true;
             }
 
-            if (errors) alert("An error occurred returning workspace.");
-            else {
+            if (errors) {
+                alert("An error occurred returning workspace.");
+            } else {
                 alert("Ledger rejected and sent back to teacher desk.");
                 loadClassScoresToScreen(document.getElementById('broadsheet-selector').value);
             }
