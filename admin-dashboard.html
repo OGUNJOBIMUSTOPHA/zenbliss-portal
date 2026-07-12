@@ -807,7 +807,7 @@
             for (let student of currentlyLoadedClassStudents) {
                 const { error } = await supabaseClient
                     .from('users')
-                    .update({ result_released: true })
+                    .update({ results_released: true })
                     .eq('id', student.id);
                 if (error) errors = true;
             }
@@ -815,7 +815,7 @@
             if (errors) {
                 alert("Some records failed to update.");
             } else {
-                alert("🎉 Success! All class results are now live for students.");
+                alert(" Success! All class results are now live for students.");
 
                 // Hide the upload bar immediately upon successful upload
                 document.getElementById('upload-bar-container').classList.add('hidden');
@@ -834,7 +834,7 @@
             for (let student of currentlyLoadedClassStudents) {
                 const { error } = await supabaseClient
                     .from('users')
-                    .update({ ledger_submitted: false, result_released: false })
+                    .update({ ledger_submitted: false, results_released: false })
                     .eq('id', student.id);
                 if (error) errors = true;
             }
