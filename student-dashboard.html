@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal — Zenbliss Schools</title>
+    <title>Student Terminal Dashboard — Zenbliss Schools</title>
     <style>
         :root {
             --primary-blue: #1A365D;
@@ -13,6 +13,7 @@
             --light-gray: #EDF2F7;
             --border-color: #E2E8F0;
             --text-dark: #2D3748;
+            --success-green: #2F855A;
         }
 
         * {
@@ -37,7 +38,7 @@
         }
 
         .header-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -53,4 +54,665 @@
 
         .school-logo-img {
             max-height: 50px;
-            border-radius
+            border-radius: 4px;
+            background: white;
+            padding: 2px;
+        }
+
+        .school-logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .portal-badge {
+            background-color: var(--accent-red);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .main-dashboard-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-summary-card {
+            background: var(--background-white);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            margin-bottom: 25px;
+        }
+
+        .student-details h2 {
+            color: var(--primary-blue);
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+
+        .student-details p {
+            color: #718096;
+            font-size: 0.95rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .primary-blue {
+            background-color: var(--primary-blue);
+        }
+
+        .accent-red {
+            background-color: var(--accent-red);
+        }
+
+        .success-green {
+            background-color: var(--success-green);
+        }
+
+        .gate-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            margin-bottom: 25px;
+        }
+
+        .term-selector-wrapper {
+            margin: 20px 0;
+        }
+
+        .term-select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E0;
+            font-size: 1rem;
+            width: 280px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+        }
+
+        .metric-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .metric-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+        }
+
+        .workspace-card {
+            background: var(--background-white);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            margin-bottom: 30px;
+        }
+
+        .academic-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .academic-table th,
+        .academic-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .academic-table th {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .academic-table tr:nth-child(even) {
+            background-color: #F7FAFC;
+        }
+
+        .subject-cell {
+            text-align: left !important;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Report Card Print Layout Enhancements */
+        .report-card-container {
+            background: white;
+            padding: 40px;
+            border: 3px double var(--primary-blue);
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 3px solid var(--accent-red);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .meta-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 40px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .meta-info-grid div {
+            border-bottom: 1px dashed #CBD5E0;
+            padding-bottom: 4px;
+        }
+
+        .skills-table-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .remarks-section {
+            margin-top: 25px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            background: #FAFAFA;
+        }
+
+        .remark-row {
+            margin-bottom: 12px;
+        }
+
+        .remark-row:last-child {
+            margin-bottom: 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .portal-header,
+            .profile-summary-card,
+            #term-gate-box,
+            .analytics-grid,
+            .workspace-card,
+            .btn-action,
+            .dashboard-actions {
+                display: none !important;
+            }
+
+            .report-card-container {
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="header-container">
+            <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+            </div>
+            <span class="portal-badge">Student Desk Terminal</span>
+        </div>
+    </header>
+
+    <div class="main-dashboard-container">
+
+        <div class="profile-summary-card">
+            <div class="student-details">
+                <h2 id="display-student-name">Querying profile record...</h2>
+                <p>Admission Ref: <span id="display-adm-no"
+                        style="font-weight: bold; color: var(--accent-red);">---</span> | Class Program: <span
+                        id="display-class" style="font-weight: bold;">---</span></p>
+            </div>
+            <div class="dashboard-actions">
+                <span
+                    style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
+                    2026/2027</span>
+                <button onclick="handleLogout()" class="btn-action accent-red"
+                    style="padding:8px 15px; font-size:0.85rem;">🚪 Log Out</button>
+            </div>
+        </div>
+
+        <div id="term-gate-box" class="gate-card">
+            <h3 style="color: var(--primary-blue); margin-bottom: 10px;">Select Target Terminal Report</h3>
+            <p style="color: #718096; font-size: 0.95rem;">Select the academic term compilation file you want to review.
+            </p>
+
+            <div class="term-selector-wrapper">
+                <select id="selected-term" class="term-select">
+                    <option value="3rd Term">Third Term Report Card (Current)</option>
+                    <option value="2nd Term">Second Term Report Card</option>
+                    <option value="1st Term">First Term Report Card</option>
+                </select>
+            </div>
+
+            <button class="btn-action primary-blue" style="padding: 12px 30px;" onclick="fetchStudentTermScores()">📊
+                Access Report Metrics</button>
+        </div>
+
+        <div id="dashboard-workspace" class="hidden">
+
+            <div class="analytics-grid">
+                <div class="metric-card">
+                    <h3>Cumulative Total Marks</h3>
+                    <div class="value" id="stat-total-score">0</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Terminal Average %</h3>
+                    <div class="value" id="stat-average-pct">0.0%</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Days Present</h3>
+                    <div class="value" id="stat-attendance">0 / 90</div>
+                </div>
+            </div>
+
+            <div class="workspace-card">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--light-gray); padding-bottom:10px;">
+                    <h3 style="color:var(--primary-blue); font-size:1.2rem;">Official Report Card Document</h3>
+                    <button class="btn-action success-green" onclick="window.print()">🖨️ Print Report Card</button>
+                </div>
+
+                <div class="report-card-container">
+                    <div class="report-header">
+                        <h2 style="color:var(--primary-blue); font-size:1.8rem; letter-spacing:1px; margin-bottom:2px;">
+                            ZENBLISS SCHOOLS & COLLEGE</h2>
+                        <p
+                            style="font-size:0.85rem; text-transform:uppercase; color:#718096; font-weight:bold; letter-spacing:2px;">
+                            Plot 12/14 academic avenue, terminal complex portal</p>
+                        <h3 style="margin-top:15px; background:var(--primary-blue); color:white; display:inline-block; padding:4px 20px; border-radius:4px; font-size:1rem;"
+                            id="card-term-title">THIRD TERM REPORT SHEET</h3>
+                    </div>
+
+                    <div class="meta-info-grid">
+                        <div><strong>Student Full Name:</strong> <span id="card-student-name">---</span></div>
+                        <div><strong>Admission Number:</strong> <span id="card-adm-no">---</span></div>
+                        <div><strong>Class Arm Level:</strong> <span id="card-class-arm">---</span></div>
+                        <div><strong>Academic Term:</strong> <span id="card-term">---</span></div>
+                        <div><strong>Department Path:</strong> <span id="card-dept">---</span></div>
+                        <div><strong>Term Attendance Log:</strong> <span id="card-attendance-log">---</span></div>
+                    </div>
+
+                    <table class="academic-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Subject Course Title</th>
+                                <th>1st CA (20)</th>
+                                <th>2nd CA (20)</th>
+                                <th>Exam (60)</th>
+                                <th>Subject Total (100)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-subjects-body">
+                        </tbody>
+                    </table>
+
+                    <div class="skills-table-section">
+                        <div>
+                            <h4
+                                style="color:var(--primary-blue); border-bottom:2px solid var(--primary-blue); padding-bottom:4px; margin-bottom:10px; font-size:0.95rem;">
+                                BEHAVIORAL RATINGS</h4>
+                            <table class="academic-table" style="margin-top:0; font-size:0.85rem;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:6px 10px;">Trait Parameter</th>
+                                        <th style="padding:6px 10px;">Rating (1-5)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Punctuality</td>
+                                        <td id="rate-punctual" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Leadership</td>
+                                        <td id="rate-leadership" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Maturity</td>
+                                        <td id="rate-maturity" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Cleanliness</td>
+                                        <td id="rate-cleanliness" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h4
+                                style="color:var(--primary-blue); border-bottom:2px solid var(--primary-blue); padding-bottom:4px; margin-bottom:10px; font-size:0.95rem;">
+                                PSYCHOMOTOR SKILLS</h4>
+                            <table class="academic-table" style="margin-top:0; font-size:0.85rem;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:6px 10px;">Skill Metric</th>
+                                        <th style="padding:6px 10px;">Rating (1-5)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Handwriting</td>
+                                        <td id="rate-handwriting" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Hardwork & Diligence</td>
+                                        <td id="rate-hardwork" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:left; padding:6px 10px;">Sports & Games</td>
+                                        <td id="rate-sport" style="font-weight:bold; padding:6px 10px;">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="remarks-section">
+                        <div class="remark-row">
+                            <strong>Class Teacher's Verdict Remarks:</strong>
+                            <p id="card-teacher-comment" style="font-style:italic; color:#4A5568; margin-top:3px;">No
+                                commentary added yet.</p>
+                        </div>
+                        <div class="remark-row"
+                            style="margin-top:15px; border-top:1px dashed #CBD5E0; padding-top:10px;">
+                            <strong>Principal's Official Desk Remarks:</strong>
+                            <p id="card-principal-comment" style="font-style:italic; color:#4A5568; margin-top:3px;">
+                                Awaiting compilation summary.</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:40px; display:flex; justify-content:space-between; font-size:0.9rem;">
+                        <div>
+                            <div style="border-bottom:1px solid #718096; width:180px; height:30px;"></div>
+                            <p style="margin-top:5px; text-align:center; font-weight:600;">Class Teacher Signature</p>
+                        </div>
+                        <div>
+                            <div style="border-bottom:1px solid #718096; width:180px; height:30px;"></div>
+                            <p style="margin-top:5px; text-align:center; font-weight:600;">Principal's Stamp / Date</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div style="text-align:left; margin-top:20px;">
+                <button class="btn-action" style="background:#718096;" onclick="returnToGate()">⬅️ Return to Selection
+                    Gate</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let activeStudentProfile = null;
+
+        function handleLogout() {
+            if (confirm("Confirm logging out of active student session?")) {
+                localStorage.clear();
+                window.location.replace("index.html");
+            }
+        }
+
+        window.onload = function () {
+            verifyStudentIdentitySession();
+        };
+
+        async function verifyStudentIdentitySession() {
+            try {
+                const studentId = localStorage.getItem('current_student_id');
+                if (!studentId) {
+                    alert("Session missing or expired. Returning to login panel.");
+                    window.location.replace("index.html");
+                    return;
+                }
+
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', studentId)
+                    .single();
+
+                if (error || !user) {
+                    alert("Error tracking student profile data framework.");
+                    return;
+                }
+
+                activeStudentProfile = user;
+
+                document.getElementById('display-student-name').innerText = user.admission_number || "Student Profile";
+                document.getElementById('display-adm-no').innerText = user.admission_number || "N/A";
+
+                let assignedClassStr = "Not Configured";
+                if (user.assigned_classes) {
+                    if (Array.isArray(user.assigned_classes)) {
+                        assignedClassStr = user.assigned_classes.join(', ');
+                    } else {
+                        assignedClassStr = user.assigned_classes.toString().replace(/[{}"\\[\]]/g, '');
+                    }
+                }
+                document.getElementById('display-class').innerText = assignedClassStr;
+
+            } catch (err) {
+                console.error("Session verification failure:", err);
+            }
+        }
+
+        async function fetchStudentTermScores() {
+            const chosenTerm = document.getElementById('selected-term').value;
+            const currentStudentId = localStorage.getItem('current_student_id');
+
+            if (!activeStudentProfile) {
+                alert("Profile context not completely active yet.");
+                return;
+            }
+
+            const { data: student, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', currentStudentId)
+                .single();
+
+            if (error || !student) {
+                alert("Failed to synchronize academic scores structure.");
+                return;
+            }
+
+            // GUARD RAIL: Check if the admin has marked results as released
+            if (!student.result_released) {
+                alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
+                return;
+            }
+
+            activeStudentProfile = student;
+
+            let assignedClassStr = "Not Configured";
+            if (student.assigned_classes) {
+                if (Array.isArray(student.assigned_classes)) {
+                    assignedClassStr = student.assigned_classes[0] || "";
+                } else {
+                    assignedClassStr = student.assigned_classes.toString().replace(/[{}"\\[\]]/g, '').split(',')[0];
+                }
+            }
+
+            const dept = student.department ? student.department.trim() : "None";
+            let lockBiology = false;
+            if (assignedClassStr.startsWith("SS") && (dept === "Commercial" || dept === "Humanity")) {
+                lockBiology = true;
+            }
+
+            const mathCA1 = Number(student.mat_ca1) || 0;
+            const mathCA2 = Number(student.mat_ca2) || 0;
+            const mathEx = Number(student.mat_ex) || 0;
+            const mathTotal = mathCA1 + mathCA2 + mathEx;
+
+            const engCA1 = Number(student.eng_ca1) || 0;
+            const engCA2 = Number(student.eng_ca2) || 0;
+            const engEx = Number(student.eng_ex) || 0;
+            const engTotal = engCA1 + engCA2 + engEx;
+
+            const bioCA1 = Number(student.bio_ca1) || 0;
+            const bioCA2 = Number(student.bio_ca2) || 0;
+            const bioEx = Number(student.bio_ex) || 0;
+            const bioTotal = bioCA1 + bioCA2 + bioEx;
+
+            const globalTotal = mathTotal + engTotal + (lockBiology ? 0 : bioTotal);
+            const totalSubjects = lockBiology ? 2 : 3;
+            const globalAvg = ((globalTotal / (totalSubjects * 100)) * 100).toFixed(1);
+
+            document.getElementById('stat-total-score').innerText = `${globalTotal} / ${totalSubjects * 100}`;
+            document.getElementById('stat-average-pct').innerText = `${globalAvg}%`;
+            document.getElementById('stat-attendance').innerText = `${student.days_present || 0} / 90 Days`;
+
+            document.getElementById('card-student-name').innerText = student.admission_number || "Unnamed Student";
+            document.getElementById('card-adm-no').innerText = student.admission_number || "N/A";
+            document.getElementById('card-class-arm').innerText = assignedClassStr;
+            document.getElementById('card-term').innerText = chosenTerm.toUpperCase();
+            document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL COMPILATION SHEET`;
+            document.getElementById('card-dept').innerText = dept;
+            document.getElementById('card-attendance-log').innerText = `${student.days_present || 0} Days Attended out of 90`;
+
+            const tbody = document.getElementById('report-subjects-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td class="subject-cell">Mathematics</td>
+                    <td>${mathCA1}</td>
+                    <td>${mathCA2}</td>
+                    <td>${mathEx}</td>
+                    <td style="font-weight:bold; color:var(--primary-blue);">${mathTotal}</td>
+                </tr>
+                <tr>
+                    <td class="subject-cell">English Language</td>
+                    <td>${engCA1}</td>
+                    <td>${engCA2}</td>
+                    <td>${engEx}</td>
+                    <td style="font-weight:bold; color:var(--primary-blue);">${engTotal}</td>
+                </tr>
+            `;
+
+            if (!lockBiology) {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="subject-cell">Biology</td>
+                        <td>${bioCA1}</td>
+                        <td>${bioCA2}</td>
+                        <td>${bioEx}</td>
+                        <td style="font-weight:bold; color:var(--primary-blue);">${bioTotal}</td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML += `
+                    <tr style="background:#EDF2F7; opacity:0.65;">
+                        <td class="subject-cell">Biology</td>
+                        <td colspan="4" style="font-style:italic; color:#718096;">Subject Excluded (Department Configuration)</td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML += `
+                <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
+                    <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE</td>
+                    <td colspan="2" style="color:white;">TOTAL SUM: ${globalTotal}</td>
+                    <td colspan="2" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}%</td>
+                </tr>
+            `;
+
+            document.getElementById('rate-punctual').innerText = student.punctuality_rating || "5";
+            document.getElementById('rate-leadership').innerText = student.leadership_rating || "5";
+            document.getElementById('rate-maturity').innerText = student.maturity_rating || "5";
+            document.getElementById('rate-cleanliness').innerText = student.cleanliness_rating || "5";
+            document.getElementById('rate-handwriting').innerText = student.handwriting_rating || "5";
+            document.getElementById('rate-hardwork').innerText = student.hardwork_rating || "5";
+            document.getElementById('rate-sport').innerText = student.sport_rating || "5";
+
+            document.getElementById('card-teacher-comment').innerText = student.teacher_comment ? decodeURIComponent(student.teacher_comment) : "No qualitative remarks registered yet for this session.";
+
+            const principalBox = document.getElementById('card-principal-comment');
+            const calculatedAvg = parseFloat(globalAvg) || 0;
+            if (calculatedAvg >= 75) {
+                principalBox.innerText = "An outstanding performance. Keep maintaining this standard of excellence.";
+            } else if (calculatedAvg >= 50) {
+                principalBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
+            } else {
+                principalBox.innerText = "Performance is below average. Intense academic revision is recommended.";
+            }
+
+            document.getElementById('term-gate-box').classList.add('hidden');
+            document.getElementById('dashboard-workspace').classList.remove('hidden');
+        }
+
+        function returnToGate() {
+            document.getElementById('dashboard-workspace').classList.add('hidden');
+            document.getElementById('term-gate-box').classList.remove('hidden');
+        }
+    </script>
+</body>
+
+</html>
