@@ -641,6 +641,29 @@
                 fetchPendingApplications();
             }
         }
+        async function loadSubmittedClassForAdmin(selectedClass) {
+            // Fetch only approved students in that class whose teacher has submitted their ledger
+            const { data: submittedStudents, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('role', 'student')
+                .eq('is_approved', true)
+                .eq('ledger_submitted', true); // Only show what the teacher pushed!
+
+            if (error) {
+                console.error("Error loading submitted ledger:", error.message);
+                return;
+            }
+
+            // Filter by class arm matches if your assigned_classes is an array/string
+            const filteredRows = submittedStudents.filter(st => {
+                if (!st.assigned_classes) return false;
+                return st.assigned_classes.toString().includes(selectedClass);
+            });
+
+            // Render these rows to your admin review table...
+            renderAdminReviewTable(filteredRows);
+        }
     </script>
 </body>
 
