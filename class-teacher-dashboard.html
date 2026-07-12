@@ -191,6 +191,18 @@
             color: var(--primary-blue);
         }
 
+        .disabled-subject-cell {
+            background-color: #EDF2F7 !important;
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .disabled-subject-cell input {
+            background-color: #E2E8F0 !important;
+            color: #A0AEC0 !important;
+            cursor: not-allowed;
+        }
+
         .report-card-section {
             background: #FAFAFA;
             border: 2px dashed var(--border-color);
@@ -320,8 +332,7 @@
                 <div>
                     <label style="font-weight:bold; font-size:0.85rem; margin-bottom:5px; display:block;">Select
                         Assigned Workspace Class:</label>
-                    <select id="teacher-class-selector" class="term-select">
-                    </select>
+                    <select id="teacher-class-selector" class="term-select"></select>
                 </div>
                 <div>
                     <label style="font-weight:bold; font-size:0.85rem; margin-bottom:5px; display:block;">Select Target
@@ -344,7 +355,8 @@
                 <div>
                     <h2 style="margin:0; font-size:1.4rem;" id="active-banner-title">Assigned Level Ledger</h2>
                     <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
-                        (60) across all fields. Leave blank if student is not taking the subject.</p>
+                        (60) across active fields. Non-relevant subject frames disappear or blur depending on levels.
+                    </p>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn-submit warning-orange" id="global-save-btn"
@@ -365,98 +377,10 @@
                 <div style="overflow-x: auto;">
                     <table class="ledger-table">
                         <thead>
-                            <tr>
-                                <th rowspan="2" class="student-name-cell">Student Full Name</th>
-                                <th colspan="4" class="subject-header-group">Mathematics</th>
-                                <th colspan="4" class="subject-header-group">English Language</th>
-                                <th colspan="4" class="subject-header-group">Economics</th>
-                                <th colspan="4" class="subject-header-group">Civic Education</th>
-                                <th colspan="4" class="subject-header-group">Commerce</th>
-                                <th colspan="4" class="subject-header-group">Government</th>
-                                <th colspan="4" class="subject-header-group">Financial Account</th>
-                                <th colspan="4" class="subject-header-group">Literature</th>
-                                <th colspan="4" class="subject-header-group">Physics</th>
-                                <th colspan="4" class="subject-header-group">Chemistry</th>
-                                <th colspan="4" class="subject-header-group">Biology</th>
-                                <th colspan="4" class="subject-header-group">Further Math</th>
-                                <th colspan="4" class="subject-header-group">C.R.K</th>
-                                <th colspan="4" class="subject-header-group">Yoruba</th>
-                                <th colspan="4" class="subject-header-group">Computer Studies</th>
-                                <th colspan="4" class="subject-header-group">Tech Drawing</th>
-                                <th rowspan="2" style="background:#2D3748;">Grand Total</th>
-                                <th rowspan="2" style="background:#2D3748;">Average (%)</th>
-                                <th rowspan="2">Action Operations</th>
-                            </tr>
-                            <tr>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                                <th>TOT</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th>EX</th>
-                                <th>TOT</th>
-                            </tr>
+                            <tr id="dynamic-th-row-1"></tr>
+                            <tr id="dynamic-th-row-2"></tr>
                         </thead>
-                        <tbody id="dynamic-student-rows">
-                        </tbody>
+                        <tbody id="dynamic-student-rows"></tbody>
                     </table>
                 </div>
             </div>
@@ -595,8 +519,38 @@
 
         const subjectPrefixes = [
             'mat', 'eng', 'econ', 'civic', 'comm', 'gov', 'acc',
-            'lit', 'phy', 'chem', 'bio', 'fmath', 'crk', 'yor', 'comp', 'td'
+            'lit', 'phy', 'chem', 'bio', 'fmath', 'crk', 'comp', 'td',
+            'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
+
+        function getSubjectFullTitle(prefix, isSenior, dept = "None") {
+            if (!isSenior) {
+                const jssMaps = {
+                    mat: "Mathematics",
+                    eng: "English Language",
+                    bst: "Basic Science & Technology (BST)",
+                    pvs: "Pre-Vocational Studies (PVS)",
+                    cca: "Cultural & Creative Arts (CCA)",
+                    his: "History",
+                    yor: "Yoruba",
+                    fre: "French",
+                    nve: "National Value Education (NVE)",
+                    crs: "Christian Religious Studies (CRS)"
+                };
+                return jssMaps[prefix] || prefix.toUpperCase();
+            }
+            if (dept === "Commercial" && prefix === 'crk') {
+                return "Marketing";
+            }
+            const seniorMaps = {
+                mat: "Mathematics", eng: "English Language", bio: "Biology", econ: "Economics",
+                civic: "Civic Education", comm: "Commerce", gov: "Government", acc: "Financial Accounting",
+                lit: "Literature-in-English", phy: "Physics", chem: "Chemistry", fmath: "Further Mathematics",
+                crk: "Christian Religious Knowledge (CRK)", comp: "Computer Studies", td: "Technical Drawing",
+                yor: "Yoruba"
+            };
+            return seniorMaps[prefix] || prefix.toUpperCase();
+        }
 
         function handleLogout() {
             if (confirm("Are you sure you want to log out?")) {
@@ -673,6 +627,25 @@
             }
         }
 
+        function isSubjectLockedForTrack(prefix, isSenior, dept) {
+            if (isSenior) {
+                if (['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(prefix)) {
+                    return true;
+                }
+                if (dept === "Science" || dept === "Science & Tech") {
+                    // Science students do not offer Yoruba ('yor' added here)
+                    return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
+                } else if (dept === "Humanity") {
+                    // Humanity students take Yoruba; leave it active
+                    return ['phy', 'chem', 'bio', 'fmath', 'td', 'acc'].includes(prefix);
+                } else if (dept === "Commercial") {
+                    // Commercial students do not offer Yoruba ('yor' added here)
+                    return ['bio', 'lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
+                }
+            }
+            return false;
+        }
+
         async function loadClassLedgerWorkspace() {
             const chosenClass = document.getElementById('teacher-class-selector').value;
             const chosenTerm = document.getElementById('target-compilation-term').value;
@@ -682,12 +655,40 @@
                 return;
             }
 
+            const isSenior = chosenClass.startsWith("SS");
             document.getElementById('active-banner-title').innerText = `Assigned Level Ledger: ${chosenClass} (${chosenTerm})`;
+
+            const activePrefixes = subjectPrefixes.filter(pref => {
+                if (!isSenior) {
+                    return ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref);
+                } else {
+                    return !['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref);
+                }
+            });
+
+            const thRow1 = document.getElementById('dynamic-th-row-1');
+            const thRow2 = document.getElementById('dynamic-th-row-2');
+
+            let th1Html = `<th rowspan="2" class="student-name-cell">Student Full Name</th>`;
+            let th2Html = ``;
+
+            activePrefixes.forEach(pref => {
+                let title = getSubjectFullTitle(pref, isSenior, isSenior ? "Science" : "None");
+                if (isSenior && pref === 'crk') {
+                    title = "C.R.K / Marketing";
+                }
+                th1Html += `<th colspan="4" class="subject-header-group">${title}</th>`;
+                th2Html += `<th>CA1</th><th>CA2</th><th>EX</th><th>TOT</th>`;
+            });
+
+            th1Html += `<th rowspan="2" style="background:#2D3748;">Grand Total</th><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action Operations</th>`;
+
+            thRow1.innerHTML = th1Html;
+            thRow2.innerHTML = th2Html;
 
             const tbody = document.getElementById('dynamic-student-rows');
             tbody.innerHTML = `<tr><td colspan="65" style="text-align:center;">Querying database records...</td></tr>`;
 
-            // Step 1: Fetch students from users table matching class
             const { data: students, error: studentError } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -714,7 +715,6 @@
                 return;
             }
 
-            // Step 2: Fetch terminal specific scores from student_results table
             const studentIds = classStudents.map(s => s.id);
             const { data: termResults, error: resultsError } = await supabaseClient
                 .from('student_results')
@@ -732,7 +732,6 @@
                 termResults.forEach(r => { resultsMap[r.student_id] = r; });
             }
 
-            // Lock logic check: is ledger already marked submitted?
             const isLedgerSubmitted = termResults && termResults.length > 0 && termResults[0].ledger_submitted === true;
 
             const globalSaveBtn = document.getElementById('global-save-btn');
@@ -755,25 +754,31 @@
                 let grandTotal = 0;
                 let activeSubjectsCount = 0;
 
-                subjectPrefixes.forEach(pref => {
+                activePrefixes.forEach(pref => {
+                    const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
+
                     const ca1 = record[`${pref}_ca1`] !== undefined && record[`${pref}_ca1`] !== null ? record[`${pref}_ca1`] : "";
                     const ca2 = record[`${pref}_ca2`] !== undefined && record[`${pref}_ca2`] !== null ? record[`${pref}_ca2`] : "";
                     const ex = record[`${pref}_ex`] !== undefined && record[`${pref}_ex`] !== null ? record[`${pref}_ex`] : "";
 
                     let total = 0;
                     let hasScore = false;
-                    if (ca1 !== "" || ca2 !== "" || ex !== "") {
+
+                    if (!isLocked && (ca1 !== "" || ca2 !== "" || ex !== "")) {
                         total = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
                         grandTotal += total;
                         activeSubjectsCount++;
                         hasScore = true;
                     }
 
+                    const tdClassStyle = isLocked ? `class="disabled-subject-cell"` : ``;
+                    const elementDisabledState = (isLocked || isLedgerSubmitted) ? `disabled placeholder="-"` : ``;
+
                     subjectsHtml += `
-                        <td><input type="number" class="score-input ${pref}-ca1" min="0" max="20" value="${ca1}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input ${pref}-ca2" min="0" max="20" value="${ca2}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input ${pref}-ex" min="0" max="60" value="${ex}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
-                        <td><span class="sub-total-span ${pref}-tot">${hasScore ? total : '-'}</span></td>
+                        <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ca1" min="0" max="20" value="${isLocked ? '' : ca1}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ca2" min="0" max="20" value="${isLocked ? '' : ca2}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ex" min="0" max="60" value="${isLocked ? '' : ex}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td ${tdClassStyle}><span class="sub-total-span ${pref}-tot">${(hasScore && !isLocked) ? total : '-'}</span></td>
                     `;
                 });
 
@@ -832,6 +837,10 @@
 
         function calculateMatrixRow(element) {
             const row = element.closest('tr');
+            const dept = row.getAttribute('data-dept') || "None";
+            const chosenClass = document.getElementById('teacher-class-selector').value;
+            const isSenior = chosenClass.startsWith("SS");
+
             const maxVal = parseFloat(element.getAttribute('max'));
             const currentVal = parseFloat(element.value) || 0;
 
@@ -844,12 +853,18 @@
             let grandTotal = 0;
             let activeSubjectsCount = 0;
 
-            subjectPrefixes.forEach(pref => {
+            const activePrefixes = subjectPrefixes.filter(pref => {
+                if (!isSenior) return ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref);
+                return !['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref);
+            });
+
+            activePrefixes.forEach(pref => {
+                const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
                 const ca1Raw = row.querySelector(`.${pref}-ca1`).value;
                 const ca2Raw = row.querySelector(`.${pref}-ca2`).value;
                 const exRaw = row.querySelector(`.${pref}-ex`).value;
 
-                if (ca1Raw !== "" || ca2Raw !== "" || exRaw !== "") {
+                if (!isLocked && (ca1Raw !== "" || ca2Raw !== "" || exRaw !== "")) {
                     const ca1 = parseFloat(ca1Raw) || 0;
                     const ca2 = parseFloat(ca2Raw) || 0;
                     const ex = parseFloat(exRaw) || 0;
@@ -870,6 +885,9 @@
         async function saveEntireLedgerProgress() {
             const saveBtn = document.getElementById('global-save-btn');
             const chosenTerm = document.getElementById('target-compilation-term').value;
+            const chosenClass = document.getElementById('teacher-class-selector').value;
+            const isSenior = chosenClass.startsWith("SS");
+
             saveBtn.innerText = "⏳ Saving...";
             saveBtn.disabled = true;
 
@@ -885,19 +903,30 @@
 
             for (let row of rows) {
                 const studentId = row.getAttribute('data-id');
+                const dept = row.getAttribute('data-dept') || "None";
                 const updatePayload = {
                     student_id: studentId,
                     term: chosenTerm
                 };
 
                 subjectPrefixes.forEach(pref => {
-                    const ca1 = row.querySelector(`.${pref}-ca1`).value;
-                    const ca2 = row.querySelector(`.${pref}-ca2`).value;
-                    const ex = row.querySelector(`.${pref}-ex`).value;
+                    const isLocked = isSubjectLockedForTrack(pref, isSenior, dept) ||
+                        (!isSenior && !['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref)) ||
+                        (isSenior && ['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref));
 
-                    updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
-                    updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
-                    updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                    if (isLocked) {
+                        updatePayload[`${pref}_ca1`] = null;
+                        updatePayload[`${pref}_ca2`] = null;
+                        updatePayload[`${pref}_ex`] = null;
+                    } else {
+                        const ca1 = row.querySelector(`.${pref}-ca1`).value;
+                        const ca2 = row.querySelector(`.${pref}-ca2`).value;
+                        const ex = row.querySelector(`.${pref}-ex`).value;
+
+                        updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
+                        updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
+                        updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                    }
                 });
 
                 const { error } = await supabaseClient
@@ -914,9 +943,9 @@
             saveBtn.disabled = false;
 
             if (errorsOccurred) {
-                alert("Some student grades failed to update. Please review your schema adjustments or network status.");
+                alert("Some student grades failed to update. Please review your table columns or configuration setup.");
             } else {
-                alert("All ledger components archived inside terminal columns seamlessly!");
+                alert("All ledger modifications safely written to database columns!");
             }
         }
 
@@ -975,6 +1004,9 @@
             try {
                 const row = document.querySelector(`tr[data-id="${studentId}"]`);
                 const chosenTerm = document.getElementById('target-compilation-term').value;
+                const chosenClass = document.getElementById('teacher-class-selector').value;
+                const isSenior = chosenClass.startsWith("SS");
+                const dept = row.getAttribute('data-dept') || "None";
 
                 const commentVal = document.getElementById('card-teacher-comment').value.trim();
                 const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
@@ -1001,15 +1033,24 @@
                     sport_rating: sportVal
                 };
 
-                // Inject scores synchronously while saving metrics to avoid erasing current data
                 subjectPrefixes.forEach(pref => {
-                    const ca1 = row.querySelector(`.${pref}-ca1`).value;
-                    const ca2 = row.querySelector(`.${pref}-ca2`).value;
-                    const ex = row.querySelector(`.${pref}-ex`).value;
+                    const isLocked = isSubjectLockedForTrack(pref, isSenior, dept) ||
+                        (!isSenior && !['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref)) ||
+                        (isSenior && ['bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref));
 
-                    updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
-                    updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
-                    updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                    if (isLocked) {
+                        updatePayload[`${pref}_ca1`] = null;
+                        updatePayload[`${pref}_ca2`] = null;
+                        updatePayload[`${pref}_ex`] = null;
+                    } else {
+                        const ca1 = row.querySelector(`.${pref}-ca1`).value;
+                        const ca2 = row.querySelector(`.${pref}-ca2`).value;
+                        const ex = row.querySelector(`.${pref}-ex`).value;
+
+                        updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
+                        updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
+                        updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                    }
                 });
 
                 const { error } = await supabaseClient

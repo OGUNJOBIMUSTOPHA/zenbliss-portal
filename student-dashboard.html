@@ -205,7 +205,6 @@
             margin-top: 20px;
         }
 
-        /* BRIDGED LOGO WRAPPER FOR WEB VIEW */
         .report-logo-area {
             display: flex;
             align-items: center;
@@ -300,7 +299,6 @@
                 page-break-inside: avoid !important;
             }
 
-            /* FORCE LOGO DISPLAY ON PRINT ELEMENTS */
             .report-logo-area {
                 display: flex !important;
                 align-items: center !important;
@@ -588,6 +586,49 @@
 
         let activeStudentProfile = null;
 
+        const subjectPrefixes = [
+            'mat', 'eng', 'econ', 'civic', 'comm', 'gov', 'acc',
+            'lit', 'phy', 'chem', 'bio', 'fmath', 'crk', 'comp', 'td',
+            'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
+        ];
+
+        function getSubjectFullTitle(prefix, isSenior, dept = "None") {
+            if (!isSenior) {
+                const jssMaps = {
+                    mat: "Mathematics", eng: "English Language", bst: "Basic Science & Technology (BST)",
+                    pvs: "Pre-Vocational Studies (PVS)", cca: "Cultural & Creative Arts (CCA)", his: "History",
+                    yor: "Yoruba", fre: "French", nve: "National Value Education (NVE)", crs: "Christian Religious Studies (CRS)"
+                };
+                return jssMaps[prefix] || prefix.toUpperCase();
+            }
+            if (dept === "Commercial" && prefix === 'crk') {
+                return "Marketing";
+            }
+            const seniorMaps = {
+                mat: "Mathematics", eng: "English Language", bio: "Biology", econ: "Economics",
+                civic: "Civic Education", comm: "Commerce", gov: "Government", acc: "Financial Accounting",
+                lit: "Literature-in-English", phy: "Physics", chem: "Chemistry", fmath: "Further Mathematics",
+                crk: "Christian Religious Knowledge (CRK)", comp: "Computer Studies", td: "Technical Drawing", yor: "Yoruba"
+            };
+            return seniorMaps[prefix] || prefix.toUpperCase();
+        }
+
+        function isSubjectLockedForTrack(prefix, isSenior, dept) {
+            if (isSenior) {
+                if (['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(prefix)) {
+                    return true;
+                }
+                if (dept === "Science" || dept === "Science & Tech") {
+                    return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
+                } else if (dept === "Humanity") {
+                    return ['phy', 'chem', 'bio', 'fmath', 'td', 'acc'].includes(prefix);
+                } else if (dept === "Commercial") {
+                    return ['bio', 'lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
+                }
+            }
+            return false;
+        }
+
         function handleLogout() {
             if (confirm("Confirm logging out of active student session?")) {
                 localStorage.clear();
@@ -648,19 +689,36 @@
                 return;
             }
 
-            const { data: student, error } = await supabaseClient
+            const { data: student, error: studentErr } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('id', currentStudentId)
                 .single();
 
-            if (error || !student) {
-                alert("Failed to synchronize academic scores structure.");
+            if (studentErr || !student) {
+                alert("Failed to synchronize academic profiles structure.");
                 return;
             }
 
             if (student.results_released === false || student.results_released === "false" || !student.results_released) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
+                return;
+            }
+
+            const { data: termRecord, error: recordErr } = await supabaseClient
+                .from('student_results')
+                .select('*')
+                .eq('student_id', currentStudentId)
+                .eq('term', chosenTerm)
+                .maybeSingle();
+
+            if (recordErr) {
+                alert("Error pulling term data columns: " + recordErr.message);
+                return;
+            }
+
+            if (!termRecord) {
+                alert("No compiled database record found for your account under the chosen term framework.");
                 return;
             }
 
@@ -675,30 +733,8 @@
                 }
             }
 
+            const isSenior = assignedClassStr.startsWith("SS");
             const dept = student.department ? student.department.trim() : "None";
-            let lockBiology = false;
-            if (assignedClassStr.startsWith("SS") && (dept === "Commercial" || dept === "Humanity")) {
-                lockBiology = true;
-            }
-
-            const mathCA1 = Number(student.mat_ca1) || 0;
-            const mathCA2 = Number(student.mat_ca2) || 0;
-            const mathEx = Number(student.mat_ex) || 0;
-            const mathTotal = mathCA1 + mathCA2 + mathEx;
-
-            const engCA1 = Number(student.eng_ca1) || 0;
-            const engCA2 = Number(student.eng_ca2) || 0;
-            const engEx = Number(student.eng_ex) || 0;
-            const engTotal = engCA1 + engCA2 + engEx;
-
-            const bioCA1 = Number(student.bio_ca1) || 0;
-            const bioCA2 = Number(student.bio_ca2) || 0;
-            const bioEx = Number(student.bio_ex) || 0;
-            const bioTotal = bioCA1 + bioCA2 + bioEx;
-
-            const globalTotal = mathTotal + engTotal + (lockBiology ? 0 : bioTotal);
-            const totalSubjects = lockBiology ? 2 : 3;
-            const globalAvg = ((globalTotal / (totalSubjects * 100)) * 100).toFixed(1);
 
             document.getElementById('card-student-name').innerText = student.admission_number || "Unnamed Student";
             document.getElementById('card-adm-no').innerText = student.admission_number || "N/A";
@@ -707,62 +743,70 @@
             document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL COMPILATION SHEET`;
             document.getElementById('card-dept').innerText = dept;
 
-            document.getElementById('card-attendance-log').innerText = `${student.days_present || 0}/90`;
+            document.getElementById('card-attendance-log').innerText = `${termRecord.days_present || 0}/90`;
+
+            const activePrefixes = subjectPrefixes.filter(pref => {
+                if (!isSenior) {
+                    return ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref);
+                } else {
+                    return !['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref);
+                }
+            });
 
             const tbody = document.getElementById('report-subjects-body');
-            tbody.innerHTML = `
-                <tr>
-                    <td class="subject-cell">Mathematics</td>
-                    <td>${mathCA1}</td>
-                    <td>${mathCA2}</td>
-                    <td>${mathEx}</td>
-                    <td style="font-weight:bold; color:var(--primary-blue);">${mathTotal}</td>
-                </tr>
-                <tr>
-                    <td class="subject-cell">English Language</td>
-                    <td>${engCA1}</td>
-                    <td>${engCA2}</td>
-                    <td>${engEx}</td>
-                    <td style="font-weight:bold; color:var(--primary-blue);">${engTotal}</td>
-                </tr>
-            `;
+            tbody.innerHTML = "";
 
-            if (!lockBiology) {
+            let grandTotal = 0;
+            let activeSubjectsCount = 0;
+
+            activePrefixes.forEach(pref => {
+                const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
+                if (isLocked) return;
+
+                const ca1 = termRecord[`${pref}_ca1`] !== undefined && termRecord[`${pref}_ca1`] !== null ? termRecord[`${pref}_ca1`] : "";
+                const ca2 = termRecord[`${pref}_ca2`] !== undefined && termRecord[`${pref}_ca2`] !== null ? termRecord[`${pref}_ca2`] : "";
+                const ex = termRecord[`${pref}_ex`] !== undefined && termRecord[`${pref}_ex`] !== null ? termRecord[`${pref}_ex`] : "";
+
+                let subjectTotal = "-";
+                if (ca1 !== "" || ca2 !== "" || ex !== "") {
+                    const totalScore = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
+                    subjectTotal = totalScore;
+                    grandTotal += totalScore;
+                    activeSubjectsCount++;
+                }
+
+                const title = getSubjectFullTitle(pref, isSenior, dept);
+
                 tbody.innerHTML += `
                     <tr>
-                        <td class="subject-cell">Biology</td>
-                        <td>${bioCA1}</td>
-                        <td>${bioCA2}</td>
-                        <td>${bioEx}</td>
-                        <td style="font-weight:bold; color:var(--primary-blue);">${bioTotal}</td>
+                        <td class="subject-cell">${title}</td>
+                        <td>${ca1 !== "" ? ca1 : "-"}</td>
+                        <td>${ca2 !== "" ? ca2 : "-"}</td>
+                        <td>${ex !== "" ? ex : "-"}</td>
+                        <td style="font-weight:bold; color:var(--primary-blue);">${subjectTotal}</td>
                     </tr>
                 `;
-            } else {
-                tbody.innerHTML += `
-                    <tr style="background:#EDF2F7; opacity:0.65;">
-                        <td class="subject-cell">Biology</td>
-                        <td colspan="4" style="font-style:italic; color:#718096;">Subject Excluded (Department Configuration)</td>
-                    </tr>
-                `;
-            }
+            });
+
+            const globalAvg = activeSubjectsCount > 0 ? ((grandTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) : "0.0";
 
             tbody.innerHTML += `
                 <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
                     <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE</td>
-                    <td colspan="2" style="color:white;">TOTAL SUM: ${globalTotal}</td>
+                    <td colspan="2" style="color:white;">TOTAL SUM: ${grandTotal}</td>
                     <td colspan="2" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}%</td>
                 </tr>
             `;
 
-            document.getElementById('rate-punctual').innerText = student.punctuality_rating || "5";
-            document.getElementById('rate-leadership').innerText = student.leadership_rating || "5";
-            document.getElementById('rate-maturity').innerText = student.maturity_rating || "5";
-            document.getElementById('rate-cleanliness').innerText = student.cleanliness_rating || "5";
-            document.getElementById('rate-handwriting').innerText = student.handwriting_rating || "5";
-            document.getElementById('rate-hardwork').innerText = student.hardwork_rating || "5";
-            document.getElementById('rate-sport').innerText = student.sport_rating || "5";
+            document.getElementById('rate-punctual').innerText = termRecord.punctuality_rating || "-";
+            document.getElementById('rate-leadership').innerText = termRecord.leadership_rating || "-";
+            document.getElementById('rate-maturity').innerText = termRecord.maturity_rating || "-";
+            document.getElementById('rate-cleanliness').innerText = termRecord.cleanliness_rating || "-";
+            document.getElementById('rate-handwriting').innerText = termRecord.handwriting_rating || "-";
+            document.getElementById('rate-hardwork').innerText = termRecord.hardwork_rating || "-";
+            document.getElementById('rate-sport').innerText = termRecord.sport_rating || "-";
 
-            document.getElementById('card-teacher-comment').innerText = student.teacher_comment ? decodeURIComponent(student.teacher_comment) : "No qualitative remarks registered yet for this session.";
+            document.getElementById('card-teacher-comment').innerText = termRecord.teacher_comment ? decodeURIComponent(termRecord.teacher_comment) : "No qualitative remarks registered yet for this session.";
 
             const principalBox = document.getElementById('card-principal-comment');
             const calculatedAvg = parseFloat(globalAvg) || 0;
