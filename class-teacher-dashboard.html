@@ -14,6 +14,7 @@
             --border-color: #E2E8F0;
             --text-dark: #2D3748;
             --success-green: #2F855A;
+            --warning-orange: #DD6B20;
         }
 
         * {
@@ -264,6 +265,10 @@
             background-color: var(--success-green);
         }
 
+        .warning-orange {
+            background-color: var(--warning-orange);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -336,7 +341,9 @@
                     <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
                         (60) across all fields.</p>
                 </div>
-                <div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-submit warning-orange" id="global-save-btn"
+                        onclick="saveEntireLedgerProgress()">💾 Save Ledger Progress</button>
                     <button class="btn-submit success-green" id="admin-submission-btn"
                         onclick="submitLedgerToAdmin()">📤 Submit Term Ledger to Admin</button>
                 </div>
@@ -491,8 +498,8 @@
                         </div>
                     </div>
                     <div style="text-align:right; margin-top:15px;">
-                        <button class="btn-submit primary-blue" id="commit-btn-sync">Save & Sync Student
-                            Metrics</button>
+                        <button class="btn-submit primary-blue" id="commit-btn-sync">Save Individual Card
+                            Details</button>
                     </div>
                 </div>
             </div>
@@ -672,10 +679,9 @@
                 const displayBioEx = lockBiology ? "" : bioEx;
                 const bioDisplayTot = lockBiology ? "N/A" : bioTotal;
 
-                const globalTotal = mathTotal + (lockBiology ? 0 : bioTotal);
+                const globalTotal = mathTotal + engTotal + (lockBiology ? 0 : bioTotal);
                 const maxPossibleSubjects = lockBiology ? 2 : 3;
 
-                // FIXED: Direct calculation formatting matches calculateMatrixRow
                 const globalAvg = ((globalTotal / (maxPossibleSubjects * 100)) * 100).toFixed(1) + "%";
 
                 tbody.innerHTML += `
@@ -760,6 +766,70 @@
             const tot = m + e + b;
             row.querySelector('.row-total').innerText = tot;
             row.querySelector('.row-avg').innerText = ((tot / (totalSubjects * 100)) * 100).toFixed(1) + "%";
+        }
+
+        // GLOBAL SAVE FUNCTION FOR ENTIRE TABLE
+        async function saveEntireLedgerProgress() {
+            const saveBtn = document.getElementById('global-save-btn');
+            saveBtn.innerText = "⏳ Saving...";
+            saveBtn.disabled = true;
+
+            const rows = document.querySelectorAll('#dynamic-student-rows .ledger-row');
+            if (rows.length === 0) {
+                alert("No student data available to save.");
+                saveBtn.innerText = "💾 Save Ledger Progress";
+                saveBtn.disabled = false;
+                return;
+            }
+
+            let errorsOccurred = false;
+
+            for (let row of rows) {
+                const studentId = row.getAttribute('data-id');
+                const bioInput = row.querySelector('.b-ex');
+                const isBioLocked = bioInput.disabled;
+
+                const mCa1 = Number(row.querySelector('.m-ca1').value) || 0;
+                const mCa2 = Number(row.querySelector('.m-ca2').value) || 0;
+                const mEx = Number(row.querySelector('.m-ex').value) || 0;
+
+                const eCa1 = Number(row.querySelector('.e-ca1').value) || 0;
+                const eCa2 = Number(row.querySelector('.e-ca2').value) || 0;
+                const eEx = Number(row.querySelector('.e-ex').value) || 0;
+
+                const bCa1 = isBioLocked ? 0 : (Number(row.querySelector('.b-ca1').value) || 0);
+                const bCa2 = isBioLocked ? 0 : (Number(row.querySelector('.b-ca2').value) || 0);
+                const bEx = isBioLocked ? 0 : (Number(row.querySelector('.b-ex').value) || 0);
+
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({
+                        mat_ca1: mCa1,
+                        mat_ca2: mCa2,
+                        mat_ex: mEx,
+                        eng_ca1: eCa1,
+                        eng_ca2: eCa2,
+                        eng_ex: eEx,
+                        bio_ca1: bCa1,
+                        bio_ca2: bCa2,
+                        bio_ex: bEx
+                    })
+                    .eq('id', studentId);
+
+                if (error) {
+                    console.error(`Error saving scores for student ${studentId}:`, error.message);
+                    errorsOccurred = true;
+                }
+            }
+
+            saveBtn.innerText = "💾 Save Ledger Progress";
+            saveBtn.disabled = false;
+
+            if (errorsOccurred) {
+                alert("Some student grades failed to update. Please review your internet connection and try again.");
+            } else {
+                alert("All ledger continuous assessment score structures saved successfully!");
+            }
         }
 
         function loadToReportCardView(studentId, name) {
@@ -879,7 +949,6 @@
                 row.setAttribute('data-hardwork', hardworkVal);
                 row.setAttribute('data-sport', sportVal);
 
-                // FIXED: Keep the view open or recalculate the values explicitly on completion
                 const mockElement = row.querySelector('.m-ca1');
                 calculateMatrixRow(mockElement);
 
