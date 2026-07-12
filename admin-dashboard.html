@@ -764,7 +764,7 @@
             }
 
             // Check if results are already uploaded for this dataset to handle hiding action controls cleanly
-            const allUploaded = currentlyLoadedClassStudents.every(st => st.result_released === true);
+            const allUploaded = currentlyLoadedClassStudents.every(st => st.results_released === true);
             if (allUploaded) {
                 uploadBar.classList.add('hidden');
             }
