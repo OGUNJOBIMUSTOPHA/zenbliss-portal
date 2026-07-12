@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Control Dashboard — Zenbliss Schools</title>
+    <title>Admin Management Console — Zenbliss Schools</title>
     <style>
         :root {
             --primary-blue: #1A365D;
@@ -13,6 +13,7 @@
             --light-gray: #EDF2F7;
             --border-color: #E2E8F0;
             --text-dark: #2D3748;
+            --success-green: #2F855A;
         }
 
         * {
@@ -29,7 +30,6 @@
             padding-bottom: 50px;
         }
 
-        /* FIXED PORTAL HEADER & FLEX COMPONENT SPACING */
         .portal-header {
             background-color: var(--primary-blue);
             color: var(--background-white);
@@ -38,13 +38,12 @@
         }
 
         .header-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
         }
 
         .logo-branding {
@@ -53,19 +52,13 @@
             gap: 15px;
         }
 
-        .school-logo-img {
-            max-height: 50px;
-            border-radius: 4px;
-            background: white;
-            padding: 2px;
-        }
-
         .school-logo-text {
             font-size: 1.25rem;
             font-weight: 800;
         }
 
         .portal-badge {
+            background-color: var(--accent-red);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.75rem;
@@ -73,158 +66,139 @@
             font-weight: bold;
         }
 
-        /* FIXED LOGOUT BUTTON LAYOUT DESIGN */
-        .btn-logout {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            white-space: nowrap;
-            order: 3;
-        }
-
-        .btn-logout:hover {
-            background-color: #dc2626;
-        }
-
         .admin-container {
-            max-width: 1300px;
+            max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
         }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+        .workspace-card {
+            background: var(--background-white);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
             margin-bottom: 30px;
         }
 
-        @media (max-width: 900px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+        .control-panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
         }
 
-        .control-box {
-            background: var(--background-white);
-            border-radius: 8px;
+        .selection-panel {
+            background: #FAFAFA;
+            padding: 20px;
+            border-radius: 6px;
             border: 1px solid var(--border-color);
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         }
 
-        .control-box h2 {
-            color: var(--primary-blue);
-            font-size: 1.25rem;
+        .form-group {
             margin-bottom: 15px;
-            border-bottom: 2px solid var(--light-gray);
-            padding-bottom: 8px;
         }
 
-        .data-table {
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #CBD5E0;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .admin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
-        }
-
-        .data-table th {
-            background-color: var(--light-gray);
-            color: var(--primary-blue);
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 4px;
-        }
-
-        .btn-delete {
-            background-color: #FED7D7;
-            color: #C53030;
-        }
-
-        .btn-approve {
-            background-color: #C6F6D5;
-            color: #22543D;
-        }
-
-        .btn-reject {
-            background-color: #FEEBC8;
-            color: #744210;
-        }
-
-        .broadsheet-card {
-            background: var(--background-white);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        .broadsheet-scroll {
-            overflow-x: auto;
             margin-top: 15px;
         }
 
-        .matrix-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .matrix-table th,
-        .matrix-table td {
-            padding: 8px;
+        .admin-table th,
+        .admin-table td {
+            padding: 12px 10px;
             text-align: center;
             border: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        .matrix-table th {
+        .admin-table th {
             background-color: var(--primary-blue);
             color: white;
         }
 
-        .global-upload-bar {
-            background: #EBF8FF;
-            border: 1px solid #BEE3F8;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-action {
+            padding: 8px 16px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .primary-blue {
+            background-color: var(--primary-blue);
+        }
+
+        .success-green {
+            background-color: var(--success-green);
+        }
+
+        .accent-red {
+            background-color: var(--accent-red);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
         }
 
         .hidden {
             display: none !important;
         }
 
-        .checkbox-tile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border: 1px solid #E2E8F0;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            background: #FAFAFA;
+        /* PRINT CONFIGURATION BREAKPOINTS */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .portal-header,
+            .selection-panel,
+            .btn-action,
+            #global-release-btn {
+                display: none !important;
+            }
+
+            .control-panel-grid {
+                display: block !important;
+            }
+
+            .workspace-card {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .admin-table th {
+                background-color: #1A365D !important;
+                color: black !important;
+                border: 1px solid #000 !important;
+            }
+
+            .admin-table td {
+                border: 1px solid #000 !important;
+            }
         }
     </style>
 </head>
@@ -234,435 +208,189 @@
     <header class="portal-header">
         <div class="header-container">
             <div class="logo-branding">
-                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
-                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS — CENTRAL ADMIN</h1>
             </div>
-            <span class="portal-badge" style="background-color: var(--accent-red); color: white;">Proprietress
-                Terminal</span>
-            <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+            <span class="portal-badge">Admin Desk Dashboard</span>
         </div>
     </header>
 
     <div class="admin-container">
 
-        <div class="dashboard-grid">
+        <div class="workspace-card">
+            <h2>Teacher Ledger Submission Review Gate</h2>
+            <p style="color:#718096; margin-bottom: 20px;">Review term files submitted by class teachers and release
+                results to the student dashboard portals.</p>
 
-            <div class="control-box">
-                <h2>Staff Registry (Add / Delete Teachers)</h2>
-                <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
-                    <div class="form-row" style="display: flex; gap: 10px;">
-                        <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
-                            style="flex:2; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                        <input type="password" id="new-staff-pass" placeholder="Create password" required
-                            style="flex:2; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                        <button type="submit"
-                            style="margin:0; padding:10px 20px; background-color: #1A365D; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Add
-                            Staff</button>
+            <div class="control-panel-grid">
+
+                <div class="selection-panel">
+                    <div class="form-group">
+                        <label>Select Target Class to Review</label>
+                        <select id="admin-class-select" class="form-select">
+                            <option value="">-- Choose Class --</option>
+                            <option value="JSS 1">JSS 1</option>
+                            <option value="JSS 2">JSS 2</option>
+                            <option value="JSS 3">JSS 3</option>
+                            <option value="SS 1">SS 1</option>
+                            <option value="SS 2">SS 2</option>
+                            <option value="SS 3">SS 3</option>
+                        </select>
                     </div>
-                </form>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Teacher Name</th>
-                            <th>Password</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="staff-registry-rows">
-                    </tbody>
-                </table>
-            </div>
+                    <div class="form-group">
+                        <label>Target Academic Term</label>
+                        <select id="admin-term-select" class="form-select">
+                            <option value="3rd Term">Third Term</option>
+                            <option value="2nd Term">Second Term</option>
+                            <option value="1st Term">First Term</option>
+                        </select>
+                    </div>
 
-            <div class="control-box">
-                <h2>Assign Class Responsibilities</h2>
-                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Ticking classes automatically saves
-                    allocations live to the selected teacher profile database.</p>
-
-                <div class="form-group" style="margin-bottom: 15px; display: flex; flex-direction: column;">
-                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Step 1: Select Target
-                        Teacher</label>
-                    <select id="assign-staff-select" onchange="syncClassCheckboxesByTeacherOwnership(this.value)"
-                        required style="padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                    </select>
+                    <button class="btn-action primary-blue" style="width: 100%; padding: 12px; margin-bottom: 10px;"
+                        onclick="fetchSubmittedLedger()">🔍 Fetch Submitted Ledger</button>
+                    <button id="admin-print-btn" class="btn-action"
+                        style="background:#4A5568; width: 100%; padding: 12px;" onclick="window.print()" disabled>🖨️
+                        Print Active Ledger</button>
                 </div>
 
-                <div class="form-group">
-                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; display: block;">Step 2:
-                        Allocate Classroom Desks (Max 2 Levels)</label>
-                    <div id="admin-dynamic-class-matrix-zone">
-                        <p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff
-                            profile to load classroom maps...</p>
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3 id="table-view-title" style="color:var(--primary-blue);">No Class Selected</h3>
+                        <button id="global-release-btn" class="btn-action success-green hidden"
+                            onclick="releaseAllClassResults()">🔓 Release All Results For This Class</button>
                     </div>
-                </div>
-            </div>
 
-        </div>
-
-        <div class="control-box" style="margin-bottom: 30px;">
-            <h2>Pending Student Applications</h2>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Applied Class & Dept</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pending-students-rows">
-                </tbody>
-            </table>
-        </div>
-
-        <div class="broadsheet-card">
-            <h2>Review Uploaded Class Results</h2>
-            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Select a class to review the complete
-                grade metrics updated by the respective Class Teacher.</p>
-
-            <div style="margin-bottom: 20px;">
-                <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)"
-                    style="padding: 8px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                    <option value="">-- Choose Class Ledger --</option>
-                    <option value="JSS 1">JSS 1 Master Sheet</option>
-                    <option value="JSS 2">JSS 2 Master Sheet</option>
-                    <option value="JSS 3">JSS 3 Master Sheet</option>
-                    <option value="SS 1">SS 1 Master Sheet</option>
-                    <option value="SS 2">SS 2 Master Sheet</option>
-                    <option value="SS 3">SS 3 Master Sheet</option>
-                </select>
-                <button onclick="printBroadsheet()"
-                    style="margin-left: 10px; padding: 8px 15px; cursor: pointer; font-weight: bold; border: 1px solid #CBD5E0; border-radius: 4px; background: white;">Print
-                    Class Broadsheet</button>
-            </div>
-
-            <div id="matrix-display-wrapper" class="hidden">
-                <div class="broadsheet-scroll">
-                    <table class="matrix-table">
+                    <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Student Name</th>
-                                <th>Math</th>
-                                <th>English</th>
-                                <th>Biology</th>
-                                <th>Civic Ed</th>
-                                <th>Total Mark</th>
-                                <th>Average %</th>
+                                <th style="text-align:left;">Student Admission Ref</th>
+                                <th>Math Total</th>
+                                <th>Eng Total</th>
+                                <th>Bio Total</th>
+                                <th>Ledger Status</th>
+                                <th>Portal Release</th>
                             </tr>
                         </thead>
-                        <tbody id="matrix-rows">
+                        <tbody id="admin-ledger-rows">
+                            <tr>
+                                <td colspan="6" style="color:#a0aec0; font-style:italic;">Select a class configuration
+                                    parameter to review submissions.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="global-upload-bar">
-                    <div>
-                        <h4 style="color: var(--primary-blue); margin: 0 0 5px 0;">Finalize & Upload Results Globally
-                        </h4>
-                        <p style="font-size: 0.8rem; color: #4A5568; margin: 0;">Approving locks the database and
-                            uploads the report cards onto the student login panels.</p>
-                    </div>
-                    <div style="display:flex; gap:12px;">
-                        <button class="action-btn btn-reject" style="padding:10px 15px;" onclick="rejectWholeClass()">🔴
-                            Reject & Return Sheet to Teacher</button>
-                        <button class="action-btn btn-approve" style="padding:10px 15px;"
-                            onclick="finalizeUploadGlobally()">🔵 Approve & Upload Term Results</button>
-                    </div>
-                </div>
             </div>
         </div>
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
         const SUPABASE_URL = "https://msqvndhvxtfdzzuswvdz.supabase.co";
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let cachedTeachersList = [];
-        const MASTER_SCHOOL_CLASSES = ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
+        let activeFetchedStudents = [];
 
-        window.onload = function () {
-            fetchTeachers();
-            fetchPendingApplications();
-        };
+        async function fetchSubmittedLedger() {
+            const targetClass = document.getElementById('admin-class-select').value;
+            const targetTerm = document.getElementById('admin-term-select').value;
+            const tbody = document.getElementById('admin-ledger-rows');
+            const releaseBtn = document.getElementById('global-release-btn');
+            const printBtn = document.getElementById('admin-print-btn');
 
-        function handleLogout() {
-            if (confirm("Are you sure you want to log out?")) {
-                localStorage.clear();
-                window.location.href = "admin-login.html";
-            }
-        }
-
-        async function fetchTeachers() {
-            const tbody = document.getElementById('staff-registry-rows');
-            const selectDropdown = document.getElementById('assign-staff-select');
-            if (!tbody) return;
-
-            const { data: teachers, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('role', 'teacher');
-
-            if (error) {
-                alert("Database Error Fetching Staff: " + error.message + "\nHint: " + error.hint);
-                console.error("Error loading teachers:", error);
+            if (!targetClass) {
+                alert("Please select a target class level.");
                 return;
             }
 
-            cachedTeachersList = teachers;
-            const previouslySelectedId = selectDropdown ? selectDropdown.value : "";
+            document.getElementById('table-view-title').innerText = `${targetClass} — ${targetTerm} Audit`;
+            tbody.innerHTML = `<tr><td colspan="6">Syncing ledger records from database backend...</td></tr>`;
+            releaseBtn.classList.add('hidden');
+            printBtn.disabled = true;
 
-            tbody.innerHTML = "";
-            if (selectDropdown) selectDropdown.innerHTML = `<option value="">-- Choose Staff Profile --</option>`;
-
-            if (teachers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">No teachers registered yet.</td></tr>`;
-                return;
-            }
-
-            teachers.forEach(teacher => {
-                const activeAssignedStr = (teacher.assigned_classes && teacher.assigned_classes.length > 0)
-                    ? ` (${teacher.assigned_classes.join(', ')})`
-                    : " (No Level Assigned)";
-
-                tbody.innerHTML += `<tr>
-                    <td style="font-weight: 600;">${teacher.admission_number || '—'}<span style="color:#718096; font-size:0.75rem; font-weight:normal;">${activeAssignedStr}</span></td>
-                    <td>••••••••</td>
-                    <td>
-                        <button class="action-btn btn-delete" onclick="deleteStaff('${teacher.id}')">Delete Account</button>
-                    </td>
-                </tr>`;
-
-                if (selectDropdown) {
-                    selectDropdown.innerHTML += `<option value="${teacher.id}">${teacher.admission_number}</option>`;
-                }
-            });
-
-            if (selectDropdown && previouslySelectedId) {
-                selectDropdown.value = previouslySelectedId;
-            }
-        }
-
-        async function addStaffMember(event) {
-            try {
-                event.preventDefault();
-
-                const staffName = document.getElementById('new-staff-name').value.trim();
-                const staffPassword = document.getElementById('new-staff-pass').value;
-
-                const { data, error } = await supabaseClient
-                    .from('users')
-                    .insert([
-                        {
-                            admission_number: staffName,
-                            password: staffPassword,
-                            role: 'teacher',
-                            is_approved: true,
-                            assigned_classes: []
-                        }
-                    ]).select();
-
-                if (error) {
-                    alert("Database rejected registration: " + error.message + "\nDetails: " + error.details);
-                    console.error("Supabase error:", error);
-                    return;
-                }
-
-                alert(`Staff account for ${staffName} registered successfully!`);
-                document.getElementById('Staff-form').reset();
-                await fetchTeachers();
-
-            } catch (crashError) {
-                event.preventDefault();
-                alert("JavaScript Engine Error: " + crashError.message);
-                console.error("Full crash dump:", crashError);
-            }
-        }
-
-        async function deleteStaff(id) {
-            if (confirm("Confirm account deletion? This will revoke all access for this teacher.")) {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    alert("Error deleting staff: " + error.message);
-                } else {
-                    alert("Staff account permanently deleted.");
-                    await fetchTeachers();
-                    document.getElementById('admin-dynamic-class-matrix-zone').innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
-                }
-            }
-        }
-
-        function syncClassCheckboxesByTeacherOwnership(selectedTeacherId) {
-            const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
-            if (!selectedTeacherId) {
-                matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
-                return;
-            }
-
-            const targetTeacher = cachedTeachersList.find(t => t.id === selectedTeacherId);
-            const teacherOwnedClasses = targetTeacher ? (targetTeacher.assigned_classes || []) : [];
-
-            const classGlobalOwnershipMap = {};
-            cachedTeachersList.forEach(t => {
-                if (t.id !== selectedTeacherId) {
-                    const classes = t.assigned_classes || [];
-                    classes.forEach(c => {
-                        classGlobalOwnershipMap[c] = t.admission_number || "Another Faculty Desk";
-                    });
-                }
-            });
-
-            matrixZone.innerHTML = "";
-
-            MASTER_SCHOOL_CLASSES.forEach(cls => {
-                const isOwnedByCurrentTeacher = teacherOwnedClasses.includes(cls);
-                const assignedToOtherTeacherName = classGlobalOwnershipMap[cls];
-
-                let checkedAttr = isOwnedByCurrentTeacher ? "checked" : "";
-                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;">✅ Available for Allocation</span>`;
-                let disabledAttr = "";
-                let tileBackgroundStyle = "background:#fafafa;";
-
-                if (isOwnedByCurrentTeacher) {
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;">🎯 Currently Assigned to This Teacher</span>`;
-                    tileBackgroundStyle = "background: #ebf8ff; border: 1px solid #90cdf4;";
-                } else if (assignedToOtherTeacherName) {
-                    checkedAttr = "";
-                    disabledAttr = "disabled";
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;">🔒 Occupied by ${assignedToOtherTeacherName}</span>`;
-                    tileBackgroundStyle = "background: #edf2f7; opacity: 0.65; cursor: not-allowed;";
-                }
-
-                matrixZone.innerHTML += `
-                    <div class="checkbox-tile" style="${tileBackgroundStyle}">
-                        <input type="checkbox" value="${cls}" ${checkedAttr} ${disabledAttr} 
-                            style="transform: scale(1.2); cursor:pointer;" 
-                            onchange="executeLiveClassAssignmentUpdate('${selectedTeacherId}', this)">
-                        <label style="font-size:0.85rem; cursor:pointer; width: 100%; display:block;">${tileStatusText}</label>
-                    </div>
-                `;
-            });
-        }
-
-        async function executeLiveClassAssignmentUpdate(teacherId, checkboxElement) {
-            const targetedClassValue = checkboxElement.value;
-            const isCheckedAction = checkboxElement.checked;
-
-            const targetTeacher = cachedTeachersList.find(t => t.id === teacherId);
-            let updatedClassesArray = targetTeacher ? [...(targetTeacher.assigned_classes || [])] : [];
-
-            if (isCheckedAction) {
-                if (updatedClassesArray.length >= 2) {
-                    checkboxElement.checked = false;
-                    alert(`Process Denied: ${targetTeacher.admission_number} is already managing a limit of 2 full classes.`);
-                    return;
-                }
-                if (!updatedClassesArray.includes(targetedClassValue)) {
-                    updatedClassesArray.push(targetedClassValue);
-                }
-            } else {
-                updatedClassesArray = updatedClassesArray.filter(c => c !== targetedClassValue);
-            }
-
-            const { error } = await supabaseClient
-                .from('users')
-                .update({ assigned_classes: updatedClassesArray })
-                .eq('id', teacherId);
-
-            if (error) {
-                alert("Failed to sync allocation: " + error.message);
-                checkboxElement.checked = !isCheckedAction;
-                return;
-            }
-
-            const { data: refreshedTeachers, error: fetchErr } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('role', 'teacher');
-
-            if (!fetchErr) {
-                cachedTeachersList = refreshedTeachers;
-                await fetchTeachers();
-                syncClassCheckboxesByTeacherOwnership(teacherId);
-            }
-        }
-
-        async function fetchPendingApplications() {
-            const tbody = document.getElementById('pending-students-rows');
-            if (!tbody) return;
-
-            const { data: pendingStudents, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('role', 'student')
-                .eq('is_approved', false);
-
-            if (error) {
-                console.error("Error fetching students:", error.message);
-                return;
-            }
-
-            tbody.innerHTML = "";
-            if (pendingStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#718096;">No pending student applications.</td></tr>`;
-                return;
-            }
-
-            pendingStudents.forEach(student => {
-                const appliedClass = (student.assigned_classes && student.assigned_classes[0]) || "Not Specified";
-                const dept = student.department || "General";
-                tbody.innerHTML += `<tr>
-                    <td>${student.admission_number || 'Unnamed student'}</td>
-                    <td>${appliedClass} (${dept})</td>
-                    <td>
-                        <button class="action-btn btn-approve" onclick="approveStudent('${student.id}')">Approve</button>
-                        <button class="action-btn btn-reject" onclick="deleteStaff('${student.id}')">Reject</button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        async function approveStudent(id) {
-            const { error } = await supabaseClient
-                .from('users')
-                .update({ is_approved: true })
-                .eq('id', id);
-
-            if (error) {
-                alert("Failed to approve student: " + error.message);
-            } else {
-                alert("Student application approved successfully!");
-                fetchPendingApplications();
-            }
-        }
-        async function loadSubmittedClassForAdmin(selectedClass) {
-            // Fetch only approved students in that class whose teacher has submitted their ledger
-            const { data: submittedStudents, error } = await supabaseClient
+            const { data: students, error } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
                 .eq('is_approved', true)
-                .eq('ledger_submitted', true); // Only show what the teacher pushed!
+                .eq('ledger_submitted', true);
 
             if (error) {
-                console.error("Error loading submitted ledger:", error.message);
+                alert("Error connecting to Supabase: " + error.message);
                 return;
             }
 
-            // Filter by class arm matches if your assigned_classes is an array/string
-            const filteredRows = submittedStudents.filter(st => {
+            activeFetchedStudents = students.filter(st => {
                 if (!st.assigned_classes) return false;
-                return st.assigned_classes.toString().includes(selectedClass);
+                if (Array.isArray(st.assigned_classes)) {
+                    return st.assigned_classes.includes(targetClass);
+                }
+                return st.assigned_classes.toString().includes(targetClass);
             });
 
-            // Render these rows to your admin review table...
-            renderAdminReviewTable(filteredRows);
+            tbody.innerHTML = "";
+
+            if (activeFetchedStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color:#e53e3e; font-weight:bold;">No submitted records found. The teacher has not submitted the ledger for ${targetClass} yet.</td></tr>`;
+                return;
+            }
+
+            releaseBtn.classList.remove('hidden');
+            printBtn.disabled = false; // Enable printing once a valid ledger loads
+
+            activeFetchedStudents.forEach(student => {
+                const mathTotal = (Number(student.mat_ca1) || 0) + (Number(student.mat_ca2) || 0) + (Number(student.mat_ex) || 0);
+                const engTotal = (Number(student.eng_ca1) || 0) + (Number(student.eng_ca2) || 0) + (Number(student.eng_ex) || 0);
+
+                const dept = student.department ? student.department.trim() : "None";
+                const isBioLocked = targetClass.startsWith("SS") && (dept === "Commercial" || dept === "Humanity");
+                const bioTotal = isBioLocked ? "N/A" : ((Number(student.bio_ca1) || 0) + (Number(student.bio_ca2) || 0) + (Number(student.bio_ex) || 0));
+
+                const releaseStatusText = student.result_released ? "Released" : "Pending Approval";
+                const badgeColor = student.result_released ? "background:#C6F6D5; color:#22543D;" : "background:#FEEBC8; color:#744210;";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="text-align:left; font-weight:bold;">${student.admission_number || 'Unnamed Student'}</td>
+                        <td>${mathTotal}</td>
+                        <td>${engTotal}</td>
+                        <td>${bioTotal}</td>
+                        <td><span class="status-badge" style="background:#EBF8FF; color:#2B6CB0;">📤 Submitted</span></td>
+                        <td><span class="status-badge" id="release-badge-${student.id}" style="${badgeColor}">${releaseStatusText}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function releaseAllClassResults() {
+            if (activeFetchedStudents.length === 0) return;
+
+            if (!confirm(`Are you sure you want to officially approve and release the terminal report cards for all students in this class layer?`)) {
+                return;
+            }
+
+            let errorsOccurred = false;
+
+            for (let student of activeFetchedStudents) {
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({ result_released: true })
+                    .eq('id', student.id);
+
+                if (error) {
+                    console.error("Failed releasing student ID: " + student.id, error.message);
+                    errorsOccurred = true;
+                }
+            }
+
+            if (errorsOccurred) {
+                alert("Some students failed to update properly.");
+            } else {
+                alert("🎉 Success! All compiled records for this class have been verified and released to the student portals.");
+                fetchSubmittedLedger();
+            }
         }
     </script>
 </body>
