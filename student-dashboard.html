@@ -205,6 +205,15 @@
             margin-top: 20px;
         }
 
+        /* BRIDGED LOGO WRAPPER FOR WEB VIEW */
+        .report-logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 5px;
+        }
+
         .report-header {
             text-align: center;
             border-bottom: 3px solid var(--accent-red);
@@ -249,10 +258,20 @@
         }
 
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0.3cm 0.4cm;
+            }
+
+            html,
             body {
+                height: 99%;
                 background: white !important;
                 color: black !important;
                 padding: 0 !important;
+                margin: 0 !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
             }
 
             .portal-header,
@@ -265,12 +284,103 @@
             }
 
             #dashboard-workspace,
-            .workspace-card,
-            .report-card-container {
+            .workspace-card {
                 display: block !important;
                 border: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
+            }
+
+            .report-card-container {
+                display: block !important;
+                border: 2px solid var(--primary-blue) !important;
+                padding: 10px 15px !important;
+                margin: 0 !important;
+                height: auto !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* FORCE LOGO DISPLAY ON PRINT ELEMENTS */
+            .report-logo-area {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 12px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .report-logo-area img {
+                display: block !important;
+                max-height: 40px !important;
+            }
+
+            .report-header {
+                margin-bottom: 5px !important;
+                padding-bottom: 3px !important;
+            }
+
+            .report-header h2 {
+                font-size: 1.35rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            .report-header p {
+                font-size: 0.75rem !important;
+            }
+
+            .report-header h3 {
+                margin-top: 6px !important;
+                padding: 2px 15px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .meta-info-grid {
+                margin-bottom: 8px !important;
+                gap: 4px 20px !important;
+                font-size: 10px !important;
+            }
+
+            .academic-table {
+                margin-top: 5px !important;
+            }
+
+            .academic-table th,
+            .academic-table td {
+                padding: 4px 8px !important;
+                font-size: 10px !important;
+            }
+
+            .skills-table-section {
+                gap: 15px !important;
+                margin-top: 8px !important;
+            }
+
+            .skills-table-section h4 {
+                font-size: 10px !important;
+                margin-bottom: 2px !important;
+                padding-bottom: 2px !important;
+            }
+
+            .skills-table-section .academic-table th,
+            .skills-table-section .academic-table td {
+                padding: 3px 6px !important;
+            }
+
+            .remarks-section {
+                margin-top: 8px !important;
+                padding: 6px !important;
+            }
+
+            .remark-row {
+                margin-bottom: 3px !important;
+            }
+
+            .remark-row p {
+                margin-top: 1px !important;
+            }
+
+            div[style*="margin-top:40px"] {
+                margin-top: 20px !important;
             }
         }
     </style>
@@ -281,7 +391,7 @@
     <header class="portal-header">
         <div class="header-container">
             <div class="logo-branding">
-                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.opacity='0';">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
             <span class="portal-badge">Student Desk Terminal</span>
@@ -334,8 +444,13 @@
 
                 <div class="report-card-container">
                     <div class="report-header">
-                        <h2 style="color:var(--primary-blue); font-size:1.8rem; letter-spacing:1px; margin-bottom:2px;">
-                            ZENBLISS SCHOOLS & COLLEGE</h2>
+                        <div class="report-logo-area">
+                            <img src="logo.jpg" alt="Logo" style="max-height: 50px; object-fit: contain;"
+                                onerror="this.style.display='none';">
+                            <h2
+                                style="color:var(--primary-blue); font-size:1.8rem; letter-spacing:1px; margin-bottom:2px; display: inline-block;">
+                                ZENBLISS SCHOOLS & COLLEGE</h2>
+                        </div>
                         <p
                             style="font-size:0.85rem; text-transform:uppercase; color:#718096; font-weight:bold; letter-spacing:2px;">
                             Plot 12/14 academic avenue, terminal complex portal</p>
@@ -543,7 +658,6 @@
                 return;
             }
 
-            // FIXED SCHEMA TARGET SPECIFIER HERE:
             if (student.results_released === false || student.results_released === "false" || !student.results_released) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
@@ -591,7 +705,8 @@
             document.getElementById('card-term').innerText = chosenTerm.toUpperCase();
             document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL COMPILATION SHEET`;
             document.getElementById('card-dept').innerText = dept;
-            document.getElementById('card-attendance-log').innerText = `${student.days_present || 0} Days Attended out of 90`;
+
+            document.getElementById('card-attendance-log').innerText = `${student.days_present || 0}/90`;
 
             const tbody = document.getElementById('report-subjects-body');
             tbody.innerHTML = `
