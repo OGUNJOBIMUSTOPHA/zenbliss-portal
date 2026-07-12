@@ -569,11 +569,12 @@
             const chosenTerm = document.getElementById('selected-term').value;
             const currentStudentId = localStorage.getItem('current_student_id');
 
-            if (!activeStudentProfile) {
-                alert("Profile context not completely active yet.");
+            if (!currentStudentId) {
+                alert("Profile session context missing.");
                 return;
             }
 
+            // FIXED LINE: Pulls directly from table to ensure active result_released value is verified
             const { data: student, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -585,8 +586,8 @@
                 return;
             }
 
-            // GUARD RAIL: Check if the admin has marked results as released
-            if (!student.result_released) {
+            // GUARD RAIL: Checks if admin has flagged boolean value to true
+            if (student.result_released === false || !student.result_released) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
