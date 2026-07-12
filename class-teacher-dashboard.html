@@ -745,6 +745,9 @@
 
                 activePrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
+                    if (!isLocked) {
+                        activeSubjectsCount++; // Base average divisor on all available subjects for track
+                    }
 
                     const ca1 = record[`${pref}_ca1`] !== undefined && record[`${pref}_ca1`] !== null ? record[`${pref}_ca1`] : "";
                     const ca2 = record[`${pref}_ca2`] !== undefined && record[`${pref}_ca2`] !== null ? record[`${pref}_ca2`] : "";
@@ -756,7 +759,6 @@
                     if (!isLocked && (ca1 !== "" || ca2 !== "" || ex !== "")) {
                         total = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
                         grandTotal += total;
-                        activeSubjectsCount++;
                         hasScore = true;
                     }
 
@@ -859,6 +861,10 @@
 
             activePrefixes.forEach(pref => {
                 const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
+                if (!isLocked) {
+                    activeSubjectsCount++; // Count every valid track subject in runtime updates too
+                }
+
                 const ca1Raw = row.querySelector(`.${pref}-ca1`).value;
                 const ca2Raw = row.querySelector(`.${pref}-ca2`).value;
                 const exRaw = row.querySelector(`.${pref}-ex`).value;
@@ -871,7 +877,6 @@
 
                     row.querySelector(`.${pref}-tot`).innerText = total;
                     grandTotal += total;
-                    activeSubjectsCount++;
                 } else {
                     row.querySelector(`.${pref}-tot`).innerText = "-";
                 }
