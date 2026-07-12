@@ -632,7 +632,6 @@
             }
 
             classStudents.forEach(student => {
-                // FIXED: Pull custom 3-letter abbreviation score columns for CA and Exam data fields
                 const mathCA1 = Number(student.mat_ca1) || 0;
                 const mathCA2 = Number(student.mat_ca2) || 0;
                 const mathEx = Number(student.mat_ex) || 0;
@@ -675,6 +674,8 @@
 
                 const globalTotal = mathTotal + (lockBiology ? 0 : bioTotal);
                 const maxPossibleSubjects = lockBiology ? 2 : 3;
+
+                // FIXED: Direct calculation formatting matches calculateMatrixRow
                 const globalAvg = ((globalTotal / (maxPossibleSubjects * 100)) * 100).toFixed(1) + "%";
 
                 tbody.innerHTML += `
@@ -756,7 +757,6 @@
                 row.querySelector('.b-tot').innerText = b;
             }
 
-            // FIXED: Calculating correct global total and average based on actual individual subject totals
             const tot = m + e + b;
             row.querySelector('.row-total').innerText = tot;
             row.querySelector('.row-avg').innerText = ((tot / (totalSubjects * 100)) * 100).toFixed(1) + "%";
@@ -838,7 +838,6 @@
                 const hardworkVal = document.getElementById('card-hardwork').value;
                 const sportVal = document.getElementById('card-sport').value;
 
-                // FIXED: Map exam parameters natively to target custom 3-letter table keys
                 const { error } = await supabaseClient
                     .from('users')
                     .update({
@@ -879,6 +878,10 @@
                 row.setAttribute('data-handwriting', handwritingVal);
                 row.setAttribute('data-hardwork', hardworkVal);
                 row.setAttribute('data-sport', sportVal);
+
+                // FIXED: Keep the view open or recalculate the values explicitly on completion
+                const mockElement = row.querySelector('.m-ca1');
+                calculateMatrixRow(mockElement);
 
                 document.getElementById('report-card-box').classList.add('hidden');
             } catch (err) {
