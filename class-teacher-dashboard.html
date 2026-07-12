@@ -297,8 +297,7 @@
                     style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
                     2026/2027</span>
                 <button onclick="handleLogout()" class="btn-submit accent-red"
-                    style="padding:8px 15px; font-size:0.85rem; cursor: pointer; display: block !important;">🚪 Log
-                    Out</button>
+                    style="padding:8px 15px; font-size:0.85rem; cursor: pointer;">🚪 Log Out</button>
             </div>
         </div>
 
@@ -516,15 +515,10 @@
         let currentTeacherProfile = null;
         let selectedTargetStudentId = null;
 
-        // FIXED: Pure top-level scope declaration ensuring logout works even during database initialization crashes
         function handleLogout() {
-            try {
-                if (confirm("Are you sure you want to log out?")) {
-                    localStorage.clear();
-                    window.location.replace("index.html");
-                }
-            } catch (err) {
-                window.location.href = "index.html";
+            if (confirm("Are you sure you want to log out?")) {
+                localStorage.clear();
+                window.location.replace("index.html");
             }
         }
 
@@ -545,7 +539,6 @@
                     return;
                 }
 
-                // Force database direct check bypasses local outdated tokens
                 const { data: user, error } = await supabaseClient
                     .from('users')
                     .select('*')
@@ -553,16 +546,13 @@
                     .single();
 
                 if (error || !user) {
-                    console.error("Supabase Error:", error);
-                    if (nameHeader) nameHeader.innerText = "Error Loading Account";
-                    alert("Profile load error: Check if the user ID matches in your Supabase Auth/Table.");
+                    alert("Profile load error.");
                     return;
                 }
 
                 currentTeacherProfile = user;
                 if (nameHeader) nameHeader.innerText = "Welcome, " + (user.admission_number || "Teacher");
 
-                // PARSING BLOCK: Handles completely empty arrays, strings, objects safely
                 let assignedClasses = [];
                 if (user.assigned_classes) {
                     if (Array.isArray(user.assigned_classes)) {
@@ -579,7 +569,6 @@
                     }
                 }
 
-                // Remove accidental blank text fields inside the collection array
                 assignedClasses = assignedClasses.filter(c => c && c.trim() !== "");
 
                 if (assignedClasses.length === 0) {
@@ -597,9 +586,7 @@
                     });
                 }
             } catch (err) {
-                console.error("Dashboard engine crashed initialization:", err);
-                if (displaySpan) displaySpan.innerText = "Processing Error";
-                alert("Runtime script interruption handled safely. Check developer console (F12).");
+                console.error(err);
             }
         }
 
@@ -645,9 +632,21 @@
             }
 
             classStudents.forEach(student => {
-                const mathScore = Number(student.math_score) || 0;
-                const engScore = Number(student.english_score) || 0;
-                const bioScore = Number(student.biology_score) || 0;
+                // FIXED: Pull columns matching 3-letter configuration prefixes (mat_, eng_, bio_)
+                const mathCA1 = Number(student.mat_ca1) || 0;
+                const mathCA2 = Number(student.mat_ca2) || 0;
+                const mathEx = Number(student.math_score) || 0;
+                const mathTotal = mathCA1 + mathCA2 + mathEx;
+
+                const engCA1 = Number(student.eng_ca1) || 0;
+                const engCA2 = Number(student.eng_ca2) || 0;
+                const engEx = Number(student.english_score) || 0;
+                const engTotal = engCA1 + engCA2 + engEx;
+
+                const bioCA1 = Number(student.bio_ca1) || 0;
+                const bioCA2 = Number(student.bio_ca2) || 0;
+                const bioEx = Number(student.biology_score) || 0;
+                const bioTotal = bioCA1 + bioCA2 + bioEx;
 
                 const existingComment = student.teacher_comment || "";
                 const existingDaysPresent = student.days_present || 0;
@@ -668,12 +667,13 @@
                 }
 
                 const bioDisabledAttr = lockBiology ? "disabled style='background:#edf2f7; cursor:not-allowed;'" : "";
-                const bioValueCA1 = lockBiology ? "" : "0";
-                const bioValueCA2 = lockBiology ? "" : "0";
-                const bioValueEx = lockBiology ? "" : bioScore;
-                const bioDisplayTot = lockBiology ? "N/A" : bioScore;
 
-                const globalTotal = mathScore + engScore + (lockBiology ? 0 : bioScore);
+                const displayBioCA1 = lockBiology ? "" : bioCA1;
+                const displayBioCA2 = lockBiology ? "" : bioCA2;
+                const displayBioEx = lockBiology ? "" : bioEx;
+                const bioDisplayTot = lockBiology ? "N/A" : bioTotal;
+
+                const globalTotal = mathTotal + (lockBiology ? 0 : bioTotal);
                 const maxPossibleSubjects = lockBiology ? 2 : 3;
                 const globalAvg = ((globalTotal / (maxPossibleSubjects * 100)) * 100).toFixed(1) + "%";
 
@@ -695,17 +695,17 @@
                             ${student.admission_number || 'Unnamed Student'}
                             <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
                         </td>
-                        <td><input type="number" class="score-input m-ca1" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input m-ca2" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input m-ex" min="0" max="60" value="${mathScore}" oninput="calculateMatrixRow(this)"></td>
-                        <td><span class="sub-total-span m-tot">${mathScore}</span></td>
-                        <td><input type="number" class="score-input e-ca1" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input e-ca2" min="0" max="20" value="0" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input e-ex" min="0" max="60" value="${engScore}" oninput="calculateMatrixRow(this)"></td>
-                        <td><span class="sub-total-span e-tot">${engScore}</span></td>
-                        <td><input type="number" class="score-input b-ca1" min="0" max="20" value="${bioValueCA1}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input b-ca2" min="0" max="20" value="${bioValueCA2}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input b-ex" min="0" max="60" value="${bioValueEx}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ca1" min="0" max="20" value="${mathCA1}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ca2" min="0" max="20" value="${mathCA2}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ex" min="0" max="60" value="${mathEx}" oninput="calculateMatrixRow(this)"></td>
+                        <td><span class="sub-total-span m-tot">${mathTotal}</span></td>
+                        <td><input type="number" class="score-input e-ca1" min="0" max="20" value="${engCA1}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ca2" min="0" max="20" value="${engCA2}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ex" min="0" max="60" value="${engEx}" oninput="calculateMatrixRow(this)"></td>
+                        <td><span class="sub-total-span e-tot">${engTotal}</span></td>
+                        <td><input type="number" class="score-input b-ca1" min="0" max="20" value="${displayBioCA1}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input b-ca2" min="0" max="20" value="${displayBioCA2}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input b-ex" min="0" max="60" value="${displayBioEx}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td><span class="sub-total-span b-tot">${bioDisplayTot}</span></td>
                         <td><span class="row-total" style="font-weight:bold;">${globalTotal}</span></td>
                         <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">${globalAvg}</span></td>
@@ -806,13 +806,26 @@
             document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
 
             document.getElementById('commit-btn-sync').onclick = function () {
-                commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, bioInput.disabled);
+                commitStudentReportMetrics(studentId, bioInput.disabled);
             };
         }
 
-        async function commitStudentReportMetrics(studentId, mathTotal, engTotal, bioTotal, isBioLocked) {
+        async function commitStudentReportMetrics(studentId, isBioLocked) {
             try {
                 const row = document.querySelector(`tr[data-id="${studentId}"]`);
+
+                const mCa1 = Number(row.querySelector('.m-ca1').value) || 0;
+                const mCa2 = Number(row.querySelector('.m-ca2').value) || 0;
+                const mEx = Number(row.querySelector('.m-ex').value) || 0;
+
+                const eCa1 = Number(row.querySelector('.e-ca1').value) || 0;
+                const eCa2 = Number(row.querySelector('.e-ca2').value) || 0;
+                const eEx = Number(row.querySelector('.e-ex').value) || 0;
+
+                const bCa1 = isBioLocked ? 0 : (Number(row.querySelector('.b-ca1').value) || 0);
+                const bCa2 = isBioLocked ? 0 : (Number(row.querySelector('.b-ca2').value) || 0);
+                const bEx = isBioLocked ? 0 : (Number(row.querySelector('.b-ex').value) || 0);
+
                 const commentVal = document.getElementById('card-teacher-comment').value.trim();
                 const attendanceVal = parseInt(document.getElementById('card-attendance').value) || 0;
 
@@ -824,12 +837,19 @@
                 const hardworkVal = document.getElementById('card-hardwork').value;
                 const sportVal = document.getElementById('card-sport').value;
 
+                // FIXED: Column mapping parameters using requested three letter abbreviations
                 const { error } = await supabaseClient
                     .from('users')
                     .update({
-                        math_score: mathTotal,
-                        english_score: engTotal,
-                        biology_score: isBioLocked ? 0 : bioTotal,
+                        mat_ca1: mCa1,
+                        mat_ca2: mCa2,
+                        math_score: mEx,
+                        eng_ca1: eCa1,
+                        eng_ca2: eCa2,
+                        english_score: eEx,
+                        bio_ca1: bCa1,
+                        bio_ca2: bCa2,
+                        biology_score: bEx,
                         teacher_comment: commentVal,
                         days_present: attendanceVal,
                         punctuality_rating: punctualVal,
@@ -847,7 +867,7 @@
                     return;
                 }
 
-                alert("Student card configuration saved successfully!");
+                alert("Student metrics and continuous assessments synced successfully!");
 
                 row.setAttribute('data-comment', encodeURIComponent(commentVal));
                 row.setAttribute('data-present', attendanceVal);
@@ -866,7 +886,7 @@
         }
 
         async function submitLedgerToAdmin() {
-            alert("Term ledger compilation pushed successfully! The principal has been notified to review the final broadsheet layout.");
+            alert("Term ledger compilation pushed successfully!");
             returnToGate();
         }
     </script>
