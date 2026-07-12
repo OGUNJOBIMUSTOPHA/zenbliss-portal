@@ -155,35 +155,6 @@
             width: 280px;
         }
 
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .metric-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
-        }
-
-        .metric-card h3 {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: #718096;
-            margin-bottom: 10px;
-        }
-
-        .metric-card .value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary-blue);
-        }
-
         .workspace-card {
             background: var(--background-white);
             padding: 25px;
@@ -226,7 +197,6 @@
             display: none !important;
         }
 
-        /* Report Card Print Layout Enhancements */
         .report-card-container {
             background: white;
             padding: 40px;
@@ -278,26 +248,30 @@
             margin-bottom: 0;
         }
 
+        /* FIXES BLANK PRINT ISSUE AND EMBEDS PROPER VISIBILITY ENGINE RULES */
         @media print {
             body {
-                background: white;
-                padding: 0;
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
             }
 
             .portal-header,
             .profile-summary-card,
             #term-gate-box,
-            .analytics-grid,
-            .workspace-card,
+            .workspace-card>div:first-of-type,
             .btn-action,
             .dashboard-actions {
                 display: none !important;
             }
 
+            #dashboard-workspace,
+            .workspace-card,
             .report-card-container {
-                border: none;
-                padding: 0;
-                margin: 0;
+                display: block !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
         }
     </style>
@@ -351,21 +325,6 @@
         </div>
 
         <div id="dashboard-workspace" class="hidden">
-
-            <div class="analytics-grid">
-                <div class="metric-card">
-                    <h3>Cumulative Total Marks</h3>
-                    <div class="value" id="stat-total-score">0</div>
-                </div>
-                <div class="metric-card">
-                    <h3>Terminal Average %</h3>
-                    <div class="value" id="stat-average-pct">0.0%</div>
-                </div>
-                <div class="metric-card">
-                    <h3>Days Present</h3>
-                    <div class="value" id="stat-attendance">0 / 90</div>
-                </div>
-            </div>
 
             <div class="workspace-card">
                 <div
@@ -564,6 +523,7 @@
                 console.error("Session verification failure:", err);
             }
         }
+
         async function fetchStudentTermScores() {
             const chosenTerm = document.getElementById('selected-term').value;
             const currentStudentId = localStorage.getItem('current_student_id');
@@ -584,13 +544,11 @@
                 return;
             }
 
-
-            if (student.result_released === false || !student.results_released) {
+            if (student.results === false || !student.results) {
                 alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
 
-            // ... rest of your code remains the same
             activeStudentProfile = student;
 
             let assignedClassStr = "Not Configured";
@@ -626,10 +584,6 @@
             const globalTotal = mathTotal + engTotal + (lockBiology ? 0 : bioTotal);
             const totalSubjects = lockBiology ? 2 : 3;
             const globalAvg = ((globalTotal / (totalSubjects * 100)) * 100).toFixed(1);
-
-            document.getElementById('stat-total-score').innerText = `${globalTotal} / ${totalSubjects * 100}`;
-            document.getElementById('stat-average-pct').innerText = `${globalAvg}%`;
-            document.getElementById('stat-attendance').innerText = `${student.days_present || 0} / 90 Days`;
 
             document.getElementById('card-student-name').innerText = student.admission_number || "Unnamed Student";
             document.getElementById('card-adm-no').innerText = student.admission_number || "N/A";
