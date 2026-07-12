@@ -638,6 +638,20 @@
                 return;
             }
 
+            // Lock logic check: is ledger already submitted?
+            const isLedgerSubmitted = classStudents.length > 0 && classStudents[0].ledger_submitted === true;
+
+            const globalSaveBtn = document.getElementById('global-save-btn');
+            const adminSubmitBtn = document.getElementById('admin-submission-btn');
+
+            if (isLedgerSubmitted) {
+                globalSaveBtn.classList.add('hidden');
+                adminSubmitBtn.classList.add('hidden');
+            } else {
+                globalSaveBtn.classList.remove('hidden');
+                adminSubmitBtn.classList.remove('hidden');
+            }
+
             classStudents.forEach(student => {
                 const mathCA1 = Number(student.mat_ca1) || 0;
                 const mathCA2 = Number(student.mat_ca2) || 0;
@@ -672,7 +686,8 @@
                     lockBiology = true;
                 }
 
-                const bioDisabledAttr = lockBiology ? "disabled style='background:#edf2f7; cursor:not-allowed;'" : "";
+                const globalDisabledAttr = isLedgerSubmitted ? "disabled style='background:#edf2f7; cursor:not-allowed;'" : "";
+                const bioDisabledAttr = (lockBiology || isLedgerSubmitted) ? "disabled style='background:#edf2f7; cursor:not-allowed;'" : "";
 
                 const displayBioCA1 = lockBiology ? "" : bioCA1;
                 const displayBioCA2 = lockBiology ? "" : bioCA2;
@@ -702,13 +717,13 @@
                             ${student.admission_number || 'Unnamed Student'}
                             <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
                         </td>
-                        <td><input type="number" class="score-input m-ca1" min="0" max="20" value="${mathCA1}" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input m-ca2" min="0" max="20" value="${mathCA2}" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input m-ex" min="0" max="60" value="${mathEx}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ca1" min="0" max="20" value="${mathCA1}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ca2" min="0" max="20" value="${mathCA2}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input m-ex" min="0" max="60" value="${mathEx}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td><span class="sub-total-span m-tot">${mathTotal}</span></td>
-                        <td><input type="number" class="score-input e-ca1" min="0" max="20" value="${engCA1}" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input e-ca2" min="0" max="20" value="${engCA2}" oninput="calculateMatrixRow(this)"></td>
-                        <td><input type="number" class="score-input e-ex" min="0" max="60" value="${engEx}" oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ca1" min="0" max="20" value="${engCA1}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ca2" min="0" max="20" value="${engCA2}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                        <td><input type="number" class="score-input e-ex" min="0" max="60" value="${engEx}" ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td><span class="sub-total-span e-tot">${engTotal}</span></td>
                         <td><input type="number" class="score-input b-ca1" min="0" max="20" value="${displayBioCA1}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td><input type="number" class="score-input b-ca2" min="0" max="20" value="${displayBioCA2}" ${bioDisabledAttr} oninput="calculateMatrixRow(this)"></td>
@@ -718,7 +733,9 @@
                         <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">${globalAvg}</span></td>
                         <td>
                             <button type="button" style="padding:6px 10px; cursor:pointer; font-weight:bold; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;" 
-                                onclick="loadToReportCardView('${student.id}', '${student.admission_number}')">Configure Card</button>
+                                onclick="loadToReportCardView('${student.id}', '${student.admission_number}', ${isLedgerSubmitted})">
+                                ${isLedgerSubmitted ? 'View Card' : 'Configure Card'}
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -755,7 +772,7 @@
             let b = 0;
             let totalSubjects = 3;
 
-            if (bioInputCheck.disabled) {
+            if (bioInputCheck.disabled && !bioInputCheck.hasAttribute('style')) {
                 row.querySelector('.b-tot').innerText = "N/A";
                 totalSubjects = 2;
             } else {
@@ -768,7 +785,6 @@
             row.querySelector('.row-avg').innerText = ((tot / (totalSubjects * 100)) * 100).toFixed(1) + "%";
         }
 
-        // GLOBAL SAVE FUNCTION FOR ENTIRE TABLE
         async function saveEntireLedgerProgress() {
             const saveBtn = document.getElementById('global-save-btn');
             saveBtn.innerText = "⏳ Saving...";
@@ -787,7 +803,7 @@
             for (let row of rows) {
                 const studentId = row.getAttribute('data-id');
                 const bioInput = row.querySelector('.b-ex');
-                const isBioLocked = bioInput.disabled;
+                const isBioLocked = bioInput.disabled && !bioInput.hasAttribute('style');
 
                 const mCa1 = Number(row.querySelector('.m-ca1').value) || 0;
                 const mCa2 = Number(row.querySelector('.m-ca2').value) || 0;
@@ -832,7 +848,7 @@
             }
         }
 
-        function loadToReportCardView(studentId, name) {
+        function loadToReportCardView(studentId, name, isSubmitted = false) {
             selectedTargetStudentId = studentId;
             const row = document.querySelector(`tr[data-id="${studentId}"]`);
 
@@ -843,7 +859,7 @@
             let bioTotal = 0;
             let denominator = 200;
 
-            if (!bioInput.disabled) {
+            if (!(bioInput.disabled && !bioInput.hasAttribute('style'))) {
                 bioTotal = parseInt(row.querySelector('.b-tot').innerText) || 0;
                 denominator = 300;
             }
@@ -872,6 +888,21 @@
             } else {
                 principalCommentBox.innerText = "Performance is below average. Intense academic revision is recommended.";
             }
+
+            // Lock individual configuration input elements if submitted
+            const commitBtn = document.getElementById('commit-btn-sync');
+            const shouldDisable = isSubmitted;
+
+            commitBtn.style.display = shouldDisable ? 'none' : 'inline-block';
+            document.getElementById('card-teacher-comment').disabled = shouldDisable;
+            document.getElementById('card-attendance').disabled = shouldDisable;
+            document.getElementById('card-punctual').disabled = shouldDisable;
+            document.getElementById('card-leadership').disabled = shouldDisable;
+            document.getElementById('card-maturity').disabled = shouldDisable;
+            document.getElementById('card-cleanliness').disabled = shouldDisable;
+            document.getElementById('card-handwriting').disabled = shouldDisable;
+            document.getElementById('card-hardwork').disabled = shouldDisable;
+            document.getElementById('card-sport').disabled = shouldDisable;
 
             document.getElementById('report-card-box').classList.remove('hidden');
             document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
@@ -959,8 +990,61 @@
         }
 
         async function submitLedgerToAdmin() {
-            alert("Term ledger compilation pushed successfully!");
-            returnToGate();
+            const submitBtn = document.getElementById('admin-submission-btn');
+            const chosenClass = document.getElementById('teacher-class-selector').value;
+            const chosenTerm = document.getElementById('target-compilation-term').value;
+
+            if (!chosenClass) {
+                alert("No active class selected.");
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to officially submit the ${chosenTerm} ledger for ${chosenClass} to the admin? This will mark the workspace as ready for review.`)) {
+                return;
+            }
+
+            if (!confirm(`⚠️ DOUBLE CHECK: Are you completely sure you want to submit? You will not be able to edit these marks once sent to the admin dashboard unless reopened.`)) {
+                return;
+            }
+
+            submitBtn.innerText = "⏳ Submitting...";
+            submitBtn.disabled = true;
+
+            const rows = document.querySelectorAll('#dynamic-student-rows .ledger-row');
+            if (rows.length === 0) {
+                alert("No student records found to submit.");
+                submitBtn.innerText = "📤 Submit Term Ledger to Admin";
+                submitBtn.disabled = false;
+                return;
+            }
+
+            let errorsOccurred = false;
+
+            for (let row of rows) {
+                const studentId = row.getAttribute('data-id');
+
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({
+                        ledger_submitted: true
+                    })
+                    .eq('id', studentId);
+
+                if (error) {
+                    console.error(`Error submitting status for student ${studentId}:`, error.message);
+                    errorsOccurred = true;
+                }
+            }
+
+            submitBtn.innerText = "📤 Submit Term Ledger to Admin";
+            submitBtn.disabled = false;
+
+            if (errorsOccurred) {
+                alert("Ledger submitted, but some student records failed to sync. Please re-submit.");
+            } else {
+                alert(`🎉 The ${chosenClass} (${chosenTerm}) ledger has been officially submitted to the Admin dashboard!`);
+                returnToGate();
+            }
         }
     </script>
 </body>
