@@ -191,13 +191,11 @@
             color: var(--primary-blue);
         }
 
-        /* Gray out & lock interactions completely */
         .disabled-subject-cell {
             background-color: #EDF2F7 !important;
             opacity: 0.35;
             cursor: not-allowed;
             pointer-events: none;
-            /* Hard blocks mouse selections & clicking focus */
         }
 
         .disabled-subject-cell input {
@@ -358,8 +356,7 @@
                 <div>
                     <h2 style="margin:0; font-size:1.4rem;" id="active-banner-title">Assigned Level Ledger</h2>
                     <p style="margin:5px 0 0 0; font-size:0.85rem; opacity:0.9;">Input CA1 (20), CA2 (20), and Exams
-                        (60) across active fields. Non-relevant subject frames disappear or blur depending on levels.
-                    </p>
+                        (60) across active fields.</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn-submit warning-orange" id="global-save-btn"
@@ -488,7 +485,7 @@
                         <div class="form-group">
                             <label>Class Teacher's Remarks</label>
                             <textarea id="card-teacher-comment" class="comment-box" rows="4"
-                                placeholder="Enter academic feedback metrics..."></textarea>
+                                placeholder="Enter academic feedback..."></textarea>
                         </div>
                         <div class="form-group">
                             <label>Auto-Generated Principal Comment</label>
@@ -529,16 +526,9 @@
         function getSubjectFullTitle(prefix, isSenior, dept = "None") {
             if (!isSenior) {
                 const jssMaps = {
-                    mat: "Mathematics",
-                    eng: "English Language",
-                    bst: "Basic Science & Technology (BST)",
-                    pvs: "Pre-Vocational Studies (PVS)",
-                    cca: "Cultural & Creative Arts (CCA)",
-                    his: "History",
-                    yor: "Yoruba",
-                    fre: "French",
-                    nve: "National Value Education (NVE)",
-                    crs: "Christian Religious Studies (CRS)"
+                    mat: "Mathematics", eng: "English Language", bst: "Basic Science & Technology (BST)",
+                    pvs: "Pre-Vocational Studies (PVS)", cca: "Cultural & Creative Arts (CCA)", his: "History",
+                    yor: "Yoruba", fre: "French", nve: "National Value Education (NVE)", crs: "Christian Religious Studies (CRS)"
                 };
                 return jssMaps[prefix] || prefix.toUpperCase();
             }
@@ -549,8 +539,7 @@
                 mat: "Mathematics", eng: "English Language", bio: "Biology", econ: "Economics",
                 civic: "Civic Education", comm: "Commerce", gov: "Government", acc: "Financial Accounting",
                 lit: "Literature-in-English", phy: "Physics", chem: "Chemistry", fmath: "Further Mathematics",
-                crk: "Christian Religious Knowledge (CRK)", comp: "Computer Studies", td: "Technical Drawing",
-                yor: "Yoruba"
+                crk: "Christian Religious Knowledge (CRK)", comp: "Computer Studies", td: "Technical Drawing", yor: "Yoruba"
             };
             return seniorMaps[prefix] || prefix.toUpperCase();
         }
@@ -651,7 +640,7 @@
             const chosenTerm = document.getElementById('target-compilation-term').value;
 
             if (!chosenClass) {
-                alert("Please select a valid assigned class configuration level first.");
+                alert("Please select a valid assigned class level first.");
                 return;
             }
 
@@ -723,7 +712,7 @@
                 .in('student_id', studentIds);
 
             if (resultsError) {
-                alert("Failed to query terminal academic archives: " + resultsError.message);
+                alert("Failed to query terminal archives: " + resultsError.message);
                 return;
             }
 
@@ -797,6 +786,7 @@
                 tbody.innerHTML += `
                     <tr class="ledger-row" 
                         data-id="${student.id}" 
+                        data-record-id="${record.id || ''}"
                         data-dept="${dept}"
                         data-comment="${encodeURIComponent(existingComment)}"
                         data-present="${existingDaysPresent}"
@@ -841,12 +831,10 @@
             const chosenClass = document.getElementById('teacher-class-selector').value;
             const isSenior = chosenClass.startsWith("SS");
 
-            // Extract exact subject prefix out of class properties (e.g. "score-input yor-ca1" -> "yor")
             const classListArray = Array.from(element.classList);
             const targetClassIndicator = classListArray.find(c => c.includes('-') && c !== 'score-input');
             const prefix = targetClassIndicator ? targetClassIndicator.split('-')[0] : '';
 
-            // FAILSAFE LOGIC GUARD: If subject is forbidden for this tracking department, clear input instantly
             if (prefix && isSubjectLockedForTrack(prefix, isSenior, dept)) {
                 element.value = "";
                 return;
@@ -857,7 +845,7 @@
 
             if (maxVal && currentVal > maxVal) {
                 element.value = "";
-                alert(`The entered score exceeds the maximum allowed limit of ${maxVal} marks for this section.`);
+                alert(`The entered score exceeds the maximum allowed limit of ${maxVal} marks.`);
                 return;
             }
 
@@ -914,11 +902,17 @@
 
             for (let row of rows) {
                 const studentId = row.getAttribute('data-id');
+                const recordId = row.getAttribute('data-record-id');
                 const dept = row.getAttribute('data-dept') || "None";
+
                 const updatePayload = {
                     student_id: studentId,
                     term: chosenTerm
                 };
+
+                if (recordId && recordId !== "") {
+                    updatePayload.id = recordId;
+                }
 
                 subjectPrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept) ||
@@ -942,7 +936,7 @@
 
                 const { error } = await supabaseClient
                     .from('student_results')
-                    .upsert(updatePayload, { onConflict: 'student_id,term' });
+                    .upsert(updatePayload);
 
                 if (error) {
                     console.error(`Error archiving records for student ${studentId}:`, error.message);
@@ -954,9 +948,10 @@
             saveBtn.disabled = false;
 
             if (errorsOccurred) {
-                alert("Some student grades failed to update. Please review your table columns or configuration setup.");
+                alert("Some student grades failed to update. Please review table metrics.");
             } else {
                 alert("All ledger modifications safely written to database columns!");
+                loadClassLedgerWorkspace();
             }
         }
 
@@ -1014,6 +1009,7 @@
         async function commitStudentReportMetrics(studentId) {
             try {
                 const row = document.querySelector(`tr[data-id="${studentId}"]`);
+                const recordId = row.getAttribute('data-record-id');
                 const chosenTerm = document.getElementById('target-compilation-term').value;
                 const chosenClass = document.getElementById('teacher-class-selector').value;
                 const isSenior = chosenClass.startsWith("SS");
@@ -1044,6 +1040,10 @@
                     sport_rating: sportVal
                 };
 
+                if (recordId && recordId !== "") {
+                    updatePayload.id = recordId;
+                }
+
                 subjectPrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept) ||
                         (!isSenior && !['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref)) ||
@@ -1066,7 +1066,7 @@
 
                 const { error } = await supabaseClient
                     .from('student_results')
-                    .upsert(updatePayload, { onConflict: 'student_id,term' });
+                    .upsert(updatePayload);
 
                 if (error) {
                     alert("Sync Error: " + error.message);
@@ -1086,6 +1086,7 @@
                 row.setAttribute('data-sport', sportVal);
 
                 document.getElementById('report-card-box').classList.add('hidden');
+                loadClassLedgerWorkspace();
             } catch (err) {
                 alert("Runtime Exception: " + err.message);
             }
@@ -1130,7 +1131,7 @@
             submitBtn.disabled = false;
 
             if (errorsOccurred) {
-                alert("Ledger status change complete with localized errors. Verify table configurations.");
+                alert("Ledger status change complete with localized errors.");
             } else {
                 alert(`🎉 The ${chosenClass} (${chosenTerm}) ledger has been officially submitted to the Admin!`);
                 returnToGate();
