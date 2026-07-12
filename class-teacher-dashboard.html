@@ -191,10 +191,13 @@
             color: var(--primary-blue);
         }
 
+        /* Gray out & lock interactions completely */
         .disabled-subject-cell {
             background-color: #EDF2F7 !important;
             opacity: 0.35;
             cursor: not-allowed;
+            pointer-events: none;
+            /* Hard blocks mouse selections & clicking focus */
         }
 
         .disabled-subject-cell input {
@@ -633,13 +636,10 @@
                     return true;
                 }
                 if (dept === "Science" || dept === "Science & Tech") {
-                    // Science students do not offer Yoruba ('yor' added here)
                     return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
                 } else if (dept === "Humanity") {
-                    // Humanity students take Yoruba; leave it active
                     return ['phy', 'chem', 'bio', 'fmath', 'td', 'acc'].includes(prefix);
                 } else if (dept === "Commercial") {
-                    // Commercial students do not offer Yoruba ('yor' added here)
                     return ['bio', 'lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
                 }
             }
@@ -840,6 +840,17 @@
             const dept = row.getAttribute('data-dept') || "None";
             const chosenClass = document.getElementById('teacher-class-selector').value;
             const isSenior = chosenClass.startsWith("SS");
+
+            // Extract exact subject prefix out of class properties (e.g. "score-input yor-ca1" -> "yor")
+            const classListArray = Array.from(element.classList);
+            const targetClassIndicator = classListArray.find(c => c.includes('-') && c !== 'score-input');
+            const prefix = targetClassIndicator ? targetClassIndicator.split('-')[0] : '';
+
+            // FAILSAFE LOGIC GUARD: If subject is forbidden for this tracking department, clear input instantly
+            if (prefix && isSubjectLockedForTrack(prefix, isSenior, dept)) {
+                element.value = "";
+                return;
+            }
 
             const maxVal = parseFloat(element.getAttribute('max'));
             const currentVal = parseFloat(element.value) || 0;
