@@ -29,7 +29,6 @@
             padding-bottom: 50px;
         }
 
-        /* FIXED PORTAL HEADER & FLEX COMPONENT SPACING */
         .portal-header {
             background-color: var(--primary-blue);
             color: var(--background-white);
@@ -73,7 +72,6 @@
             font-weight: bold;
         }
 
-        /* FIXED LOGOUT BUTTON LAYOUT DESIGN */
         .btn-logout {
             background-color: #ef4444;
             color: white;
@@ -92,7 +90,7 @@
         }
 
         .admin-container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 30px auto;
             padding: 0 20px;
         }
@@ -193,12 +191,14 @@
             padding: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
 
         .matrix-table th {
             background-color: var(--primary-blue);
             color: white;
+            font-weight: 600;
         }
 
         .global-upload-bar {
@@ -227,12 +227,10 @@
             background: #FAFAFA;
         }
 
-        /* PRINT HEADER LABEL CONTAINER */
         .print-only-header {
             display: none;
         }
 
-        /* DYNAMIC PRINT CSS ENGINE RULES */
         @media print {
             body {
                 background: #FFF !important;
@@ -348,8 +346,7 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="staff-registry-rows">
-                    </tbody>
+                    <tbody id="staff-registry-rows"></tbody>
                 </table>
             </div>
 
@@ -388,8 +385,7 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="pending-students-rows">
-                </tbody>
+                <tbody id="pending-students-rows"></tbody>
             </table>
         </div>
 
@@ -419,16 +415,28 @@
                     <table class="matrix-table">
                         <thead>
                             <tr>
-                                <th>Student Name</th>
+                                <th style="text-align: left;">Student Name</th>
                                 <th>Math</th>
                                 <th>English</th>
                                 <th>Biology</th>
+                                <th>Economics</th>
+                                <th>Civic</th>
+                                <th>Commerce</th>
+                                <th>Govt</th>
+                                <th>Account</th>
+                                <th>Literature</th>
+                                <th>Physics</th>
+                                <th>Chemistry</th>
+                                <th>F.Math</th>
+                                <th>CRK</th>
+                                <th>Yoruba</th>
+                                <th>Computer</th>
+                                <th>Tech. Draw</th>
                                 <th>Total Mark</th>
                                 <th>Average %</th>
                             </tr>
                         </thead>
-                        <tbody id="matrix-rows">
-                        </tbody>
+                        <tbody id="matrix-rows"></tbody>
                     </table>
                 </div>
 
@@ -461,6 +469,11 @@
         let cachedTeachersList = [];
         let currentlyLoadedClassStudents = [];
         const MASTER_SCHOOL_CLASSES = ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
+
+        const subjectPrefixes = [
+            'mat', 'eng', 'bio', 'econ', 'civic', 'comm', 'gov', 'acc',
+            'lit', 'phy', 'chem', 'fmath', 'crk', 'yor', 'comp', 'td'
+        ];
 
         window.onload = function () {
             fetchTeachers();
@@ -556,18 +569,20 @@
         }
 
         async function deleteStaff(id) {
-            if (confirm("Confirm account deletion? This will revoke all access for this teacher.")) {
+            if (confirm("Confirm account deletion? This will revoke all access.")) {
                 const { error } = await supabaseClient
                     .from('users')
                     .delete()
                     .eq('id', id);
 
                 if (error) {
-                    alert("Error deleting staff: " + error.message);
+                    alert("Error deleting account: " + error.message);
                 } else {
-                    alert("Staff account permanently deleted.");
+                    alert("Account permanently deleted.");
                     await fetchTeachers();
-                    document.getElementById('admin-dynamic-class-matrix-zone').innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
+                    fetchPendingApplications();
+                    const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
+                    if (matrixZone) matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
                 }
             }
         }
@@ -731,19 +746,18 @@
             }
 
             printSubtitle.innerText = `${selectedClass} Terminal Master Compilation Ledger Sheet`;
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
             wrapper.classList.remove('hidden');
-            uploadBar.classList.remove('hidden'); // Ensure container is visible on switch
+            uploadBar.classList.remove('hidden');
 
-            const { data: students, error } = await supabaseClient
+            const { data: students, error: userError } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
-                .eq('is_approved', true)
-                .eq('ledger_submitted', true);
+                .eq('is_approved', true);
 
-            if (error) {
-                alert("Error loading class scores: " + error.message);
+            if (userError) {
+                alert("Error loading students: " + userError.message);
                 return;
             }
 
@@ -753,74 +767,122 @@
                 return st.assigned_classes.toString().includes(selectedClass);
             });
 
-            tbody.innerHTML = "";
-
             if (currentlyLoadedClassStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No registered students found in this class.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
                 uploadBar.classList.add('hidden');
                 return;
             }
 
-            // FIXED SCHEMA EVALUATION KEY HERE:
-            const allUploaded = currentlyLoadedClassStudents.every(st => st.results_released === true || st.results_released === "true");
-            if (allUploaded) {
+            const studentIds = currentlyLoadedClassStudents.map(s => s.id);
+            const { data: results, error: resultsError } = await supabaseClient
+                .from('student_results')
+                .select('*')
+                .in('student_id', studentIds);
+
+            if (resultsError) {
+                alert("Error loading class scores: " + resultsError.message);
+                return;
+            }
+
+            tbody.innerHTML = "";
+            let recordsDisplayedCount = 0;
+            let allReleased = true;
+
+            currentlyLoadedClassStudents.forEach(student => {
+                const studentResult = results.find(r => r.student_id === student.id);
+
+                if (!studentResult || !studentResult.ledger_submitted) {
+                    return;
+                }
+
+                recordsDisplayedCount++;
+                if (!studentResult.results_released) {
+                    allReleased = false;
+                }
+
+                let globalTotal = 0;
+                let activeSubjectsCount = 0;
+                let rowCellsHtml = `<td style="text-align:left; font-weight:600;">${student.admission_number || 'Unnamed Student'}</td>`;
+
+                const dept = student.department ? student.department.trim() : "None";
+                const isSenior = selectedClass.startsWith("SS");
+
+                subjectPrefixes.forEach(prefix => {
+                    let isLocked = false;
+                    if (isSenior) {
+                        if (prefix === 'bio' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'econ' && dept === "Humanity") isLocked = true;
+                        if (prefix === 'comm' && (dept === "Science" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'gov' && dept === "Science") isLocked = true;
+                        if (prefix === 'acc' && (dept === "Science" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'lit' && (dept === "Science" || dept === "Commercial")) isLocked = true;
+                        if (prefix === 'phy' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'chem' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'fmath' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'td' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                    } else {
+                        if (['econ', 'comm', 'gov', 'acc', 'lit', 'phy', 'chem', 'fmath', 'td'].includes(prefix)) {
+                            isLocked = true;
+                        }
+                    }
+
+                    if (isLocked) {
+                        rowCellsHtml += `<td style="color: #cbd5e0; background: #f7fafc;">N/A</td>`;
+                    } else {
+                        const ca1 = Number(studentResult[`${prefix}_ca1`]) || 0;
+                        const ca2 = Number(studentResult[`${prefix}_ca2`]) || 0;
+                        const ex = Number(studentResult[`${prefix}_ex`]) || 0;
+                        const subjectTotal = ca1 + ca2 + ex;
+
+                        globalTotal += subjectTotal;
+                        activeSubjectsCount++;
+                        rowCellsHtml += `<td>${subjectTotal}</td>`;
+                    }
+                });
+
+                const averagePercentage = activeSubjectsCount > 0
+                    ? ((globalTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) + "%"
+                    : "0.0%";
+
+                rowCellsHtml += `<td style="font-weight:bold; color:var(--primary-blue);">${globalTotal}</td>`;
+                rowCellsHtml += `<td style="font-weight:bold; color:#B7791F;">${averagePercentage}</td>`;
+
+                tbody.innerHTML += `<tr>${rowCellsHtml}</tr>`;
+            });
+
+            if (recordsDisplayedCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet.</td></tr>`;
+                printBtn.disabled = true;
+                printBtn.style.opacity = "0.6";
+                uploadBar.classList.add('hidden');
+                return;
+            }
+
+            if (allReleased) {
                 uploadBar.classList.add('hidden');
             }
 
             printBtn.disabled = false;
             printBtn.style.opacity = "1";
-
-            currentlyLoadedClassStudents.forEach(student => {
-                const mathTotal = (Number(student.mat_ca1) || 0) + (Number(student.mat_ca2) || 0) + (Number(student.mat_ex) || 0);
-                const engTotal = (Number(student.eng_ca1) || 0) + (Number(student.eng_ca2) || 0) + (Number(student.eng_ex) || 0);
-
-                const dept = student.department ? student.department.trim() : "None";
-                const isBioLocked = selectedClass.startsWith("SS") && (dept === "Commercial" || dept === "Humanity");
-
-                const bioTotal = isBioLocked ? 0 : ((Number(student.bio_ca1) || 0) + (Number(student.bio_ca2) || 0) + (Number(student.bio_ex) || 0));
-                const bioDisplay = isBioLocked ? "N/A" : bioTotal;
-
-                const globalTotal = mathTotal + engTotal + bioTotal;
-                const activeSubjectsCount = isBioLocked ? 2 : 3;
-                const averagePercentage = ((globalTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) + "%";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align:left; font-weight:600;">${student.admission_number || 'Unnamed Student'}</td>
-                        <td>${mathTotal}</td>
-                        <td>${engTotal}</td>
-                        <td>${bioDisplay}</td>
-                        <td style="font-weight:bold; color:var(--primary-blue);">${globalTotal}</td>
-                        <td style="font-weight:bold; color:#B7791F;">${averagePercentage}</td>
-                    </tr>
-                `;
-            });
         }
 
         async function finalizeUploadGlobally() {
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm("Are you sure you want to approve this ledger and release report cards onto all student portal panels?")) return;
 
-            let errors = false;
-            for (let student of currentlyLoadedClassStudents) {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .update({ results_released: true })
-                    .eq('id', student.id);
-                if (error) errors = true;
-            }
+            const studentIds = currentlyLoadedClassStudents.map(s => s.id);
+            const { error } = await supabaseClient
+                .from('student_results')
+                .update({ results_released: true })
+                .in('student_id', studentIds);
 
-            if (errors) {
-                alert("Some records failed to update.");
+            if (error) {
+                alert("Some records failed to update: " + error.message);
             } else {
                 alert("Success! All class results are now live for students.");
-
-                // Hide the upload bar immediately upon successful upload
                 document.getElementById('upload-bar-container').classList.add('hidden');
-
-                // Refresh local state tracking array safely
                 const targetCls = document.getElementById('broadsheet-selector').value;
                 if (targetCls) loadClassScoresToScreen(targetCls);
             }
@@ -830,17 +892,14 @@
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm("Reject ledger? This returns edit access back to the teacher and removes it from your view until re-submitted.")) return;
 
-            let errors = false;
-            for (let student of currentlyLoadedClassStudents) {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .update({ ledger_submitted: false, results_released: false })
-                    .eq('id', student.id);
-                if (error) errors = true;
-            }
+            const studentIds = currentlyLoadedClassStudents.map(s => s.id);
+            const { error } = await supabaseClient
+                .from('student_results')
+                .update({ ledger_submitted: false, results_released: false })
+                .in('student_id', studentIds);
 
-            if (errors) {
-                alert("An error occurred returning workspace.");
+            if (error) {
+                alert("An error occurred returning workspace: " + error.message);
             } else {
                 alert("Ledger rejected and sent back to teacher desk.");
                 loadClassScoresToScreen(document.getElementById('broadsheet-selector').value);
