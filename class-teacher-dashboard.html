@@ -632,20 +632,20 @@
             }
 
             classStudents.forEach(student => {
-                // FIXED: Pull columns matching 3-letter configuration prefixes (mat_, eng_, bio_)
+                // FIXED: Pull custom 3-letter abbreviation score columns for CA and Exam data fields
                 const mathCA1 = Number(student.mat_ca1) || 0;
                 const mathCA2 = Number(student.mat_ca2) || 0;
-                const mathEx = Number(student.math_score) || 0;
+                const mathEx = Number(student.mat_ex) || 0;
                 const mathTotal = mathCA1 + mathCA2 + mathEx;
 
                 const engCA1 = Number(student.eng_ca1) || 0;
                 const engCA2 = Number(student.eng_ca2) || 0;
-                const engEx = Number(student.english_score) || 0;
+                const engEx = Number(student.eng_ex) || 0;
                 const engTotal = engCA1 + engCA2 + engEx;
 
                 const bioCA1 = Number(student.bio_ca1) || 0;
                 const bioCA2 = Number(student.bio_ca2) || 0;
-                const bioEx = Number(student.biology_score) || 0;
+                const bioEx = Number(student.bio_ex) || 0;
                 const bioTotal = bioCA1 + bioCA2 + bioEx;
 
                 const existingComment = student.teacher_comment || "";
@@ -756,6 +756,7 @@
                 row.querySelector('.b-tot').innerText = b;
             }
 
+            // FIXED: Calculating correct global total and average based on actual individual subject totals
             const tot = m + e + b;
             row.querySelector('.row-total').innerText = tot;
             row.querySelector('.row-avg').innerText = ((tot / (totalSubjects * 100)) * 100).toFixed(1) + "%";
@@ -837,19 +838,19 @@
                 const hardworkVal = document.getElementById('card-hardwork').value;
                 const sportVal = document.getElementById('card-sport').value;
 
-                // FIXED: Column mapping parameters using requested three letter abbreviations
+                // FIXED: Map exam parameters natively to target custom 3-letter table keys
                 const { error } = await supabaseClient
                     .from('users')
                     .update({
                         mat_ca1: mCa1,
                         mat_ca2: mCa2,
-                        math_score: mEx,
+                        mat_ex: mEx,
                         eng_ca1: eCa1,
                         eng_ca2: eCa2,
-                        english_score: eEx,
+                        eng_ex: eEx,
                         bio_ca1: bCa1,
                         bio_ca2: bCa2,
-                        biology_score: bEx,
+                        bio_ex: bEx,
                         teacher_comment: commentVal,
                         days_present: attendanceVal,
                         punctuality_rating: punctualVal,
