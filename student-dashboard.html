@@ -505,6 +505,7 @@
                 const { count, error: countErr } = await supabaseClient
                     .from('users')
                     .select('*', { count: 'exact', head: true })
+                    .eq('role', 'student')
                     .contains('assigned_classes', [assignedClassStr]);
 
                 if (!countErr && count !== null) {
