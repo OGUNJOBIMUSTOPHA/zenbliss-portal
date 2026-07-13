@@ -203,6 +203,25 @@
             border: 3px double var(--primary-blue);
             border-radius: 4px;
             margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Verification School Watermark Setup */
+        .report-card-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('logo.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 450px auto;
+            opacity: 0.06;
+            z-index: -1;
+            pointer-events: none;
         }
 
         .report-logo-area {
@@ -297,6 +316,20 @@
                 margin: 0 !important;
                 height: auto !important;
                 page-break-inside: avoid !important;
+                position: relative !important;
+                z-index: 1 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .report-card-container::before {
+                content: "" !important;
+                position: absolute !important;
+                background-image: url('logo.jpg') !important;
+                opacity: 0.07 !important;
+                z-index: -1 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .report-logo-area {
@@ -375,10 +408,6 @@
 
             .remark-row p {
                 margin-top: 1px !important;
-            }
-
-            div[style*="margin-top:40px"] {
-                margin-top: 20px !important;
             }
         }
     </style>
@@ -552,17 +581,6 @@
                             <strong>Principal's Official Desk Remarks:</strong>
                             <p id="card-principal-comment" style="font-style:italic; color:#4A5568; margin-top:3px;">
                                 Awaiting compilation summary.</p>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:40px; display:flex; justify-content:space-between; font-size:0.9rem;">
-                        <div>
-                            <div style="border-bottom:1px solid #718096; width:180px; height:30px;"></div>
-                            <p style="margin-top:5px; text-align:center; font-weight:600;">Class Teacher Signature</p>
-                        </div>
-                        <div>
-                            <div style="border-bottom:1px solid #718096; width:180px; height:30px;"></div>
-                            <p style="margin-top:5px; text-align:center; font-weight:600;">Principal's Stamp / Date</p>
                         </div>
                     </div>
 
@@ -763,17 +781,16 @@
                 const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
                 if (isLocked) return;
 
+                // Match track denominator requirements exactly like Admin rules
+                activeSubjectsCount++;
+
+                // Fallback missing inputs cleanly to 0 so the compilation page never errors out
                 const ca1 = termRecord[`${pref}_ca1`] !== undefined && termRecord[`${pref}_ca1`] !== null ? termRecord[`${pref}_ca1`] : "";
                 const ca2 = termRecord[`${pref}_ca2`] !== undefined && termRecord[`${pref}_ca2`] !== null ? termRecord[`${pref}_ca2`] : "";
                 const ex = termRecord[`${pref}_ex`] !== undefined && termRecord[`${pref}_ex`] !== null ? termRecord[`${pref}_ex`] : "";
 
-                let subjectTotal = "-";
-                if (ca1 !== "" || ca2 !== "" || ex !== "") {
-                    const totalScore = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
-                    subjectTotal = totalScore;
-                    grandTotal += totalScore;
-                    activeSubjectsCount++;
-                }
+                const totalScore = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
+                grandTotal += totalScore;
 
                 const title = getSubjectFullTitle(pref, isSenior, dept);
 
@@ -783,7 +800,7 @@
                         <td>${ca1 !== "" ? ca1 : "-"}</td>
                         <td>${ca2 !== "" ? ca2 : "-"}</td>
                         <td>${ex !== "" ? ex : "-"}</td>
-                        <td style="font-weight:bold; color:var(--primary-blue);">${subjectTotal}</td>
+                        <td style="font-weight:bold; color:var(--primary-blue);">${totalScore > 0 || ca1 !== "" || ca2 !== "" || ex !== "" ? totalScore : "-"}</td>
                     </tr>
                 `;
             });
