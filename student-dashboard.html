@@ -51,6 +51,13 @@
             gap: 15px;
         }
 
+        .school-logo-img {
+            max-height: 50px;
+            border-radius: 4px;
+            background: white;
+            padding: 2px;
+        }
+
         .school-logo-text {
             font-size: 1.25rem;
             font-weight: 800;
@@ -102,12 +109,34 @@
             text-decoration: none;
         }
 
+        /* Report wrapper with relative positioning for watermark containment */
         .report-card-wrapper {
+            position: relative;
             background: var(--background-white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 30px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+
+        /* Styled pseudo-element acting as a translucent centered logo watermark background */
+        .report-card-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('logo.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 400px;
+            /* Adjust sizing to fit your layout preference */
+            opacity: 0.05;
+            /* Keeps watermark faint enough to read table data text over it */
+            z-index: -1;
+            pointer-events: none;
         }
 
         .report-header-banner {
@@ -122,7 +151,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 25px;
-            background: #F7FAFC;
+            background: rgba(247, 250, 252, 0.8);
             padding: 15px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
@@ -133,6 +162,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 25px;
+            background: transparent;
         }
 
         .scores-table th,
@@ -163,12 +193,57 @@
             border: 1px solid var(--border-color);
             padding: 15px;
             border-radius: 6px;
-            background: #F7FAFC;
+            background: rgba(247, 250, 252, 0.8);
             margin-bottom: 15px;
         }
 
         .hidden {
             display: none !important;
+        }
+
+        .action-utilities-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        @media print {
+            body {
+                background: #FFF !important;
+                color: #000 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact;
+                /* Enforces rendering backgrounds and watermarks */
+                print-color-adjust: exact;
+            }
+
+            .portal-header,
+            .action-utilities-bar,
+            #term-gate-box {
+                display: none !important;
+            }
+
+            .report-card-wrapper {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .report-card-wrapper::before {
+                opacity: 0.06 !important;
+                /* Preserves subtle visibility on high contrast physical print */
+            }
+
+            .scores-table th {
+                background-color: #E2E8F0 !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+            }
+
+            .scores-table td {
+                border: 1px solid #000 !important;
+            }
         }
     </style>
 </head>
@@ -178,6 +253,7 @@
     <header class="portal-header">
         <div class="header-container">
             <div class="logo-branding">
+                <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
                 <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
             <span class="portal-badge">Student Result Terminal</span>
@@ -201,6 +277,14 @@
         </div>
 
         <div id="dashboard-workspace" class="report-card-wrapper hidden">
+
+            <div class="action-utilities-bar">
+                <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">⬅️ Return to
+                    Terminal Selector</button>
+                <button class="btn-submit" style="background-color: #2B6CB0;" onclick="window.print()">🖨️ Print Report
+                    Card</button>
+            </div>
+
             <div class="report-header-banner">
                 <h2 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 1px;">ZENBLISS SCHOOLS &
                     COLLEGE</h2>
@@ -257,9 +341,6 @@
                     </div>
                 </div>
             </div>
-
-            <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">⬅️ Return to
-                Terminal Selector</button>
         </div>
 
     </div>
