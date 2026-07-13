@@ -135,6 +135,11 @@
             pointer-events: none;
         }
 
+        /* Dedicated print-only logo wrapper that hides on screen layout */
+        .print-logo-header {
+            display: none;
+        }
+
         .report-header-banner {
             border-bottom: 2px double var(--primary-blue);
             padding-bottom: 8px;
@@ -220,14 +225,26 @@
                 color: #000 !important;
                 padding: 0 !important;
                 font-size: 11px !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                /* Forces background images to render */
+                print-color-adjust: exact !important;
             }
 
             .portal-header,
             .action-utilities-bar,
             #term-gate-box {
                 display: none !important;
+            }
+
+            /* Displays explicit header image on the paper layout */
+            .print-logo-header {
+                display: flex !important;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+
+            .print-logo-header img {
+                max-height: 60px;
             }
 
             .report-card-wrapper {
@@ -243,6 +260,8 @@
             .report-card-wrapper::before {
                 opacity: 0.14 !important;
                 background-size: 280px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .student-meta-grid {
@@ -281,9 +300,7 @@
         <div class="header-container">
             <div class="logo-branding">
                 <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
-                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE
-                    Faith in God and diligence
-                </h1>
+                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
             </div>
             <span class="portal-badge">Student Result Terminal</span>
         </div>
@@ -302,16 +319,20 @@
                 <option value="3rd Term" selected>Third Term Report (Current)</option>
             </select>
             <br>
-            <button class="btn-submit" onclick="fetchStudentTermScores()">View Result</button>
+            <button class="btn-submit" onclick="fetchStudentTermScores()">🔑 View Result</button>
         </div>
 
         <div id="dashboard-workspace" class="report-card-wrapper hidden">
 
             <div class="action-utilities-bar">
                 <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">⬅️ Return to
-                    Terminal Selector</button>
+                    Term Selector</button>
                 <button class="btn-submit" style="background-color: #2B6CB0;" onclick="window.print()">🖨️ Print Report
                     Card</button>
+            </div>
+
+            <div class="print-logo-header">
+                <img src="logo.jpg" alt="Zenbliss Logo" onerror="this.style.display='none';">
             </div>
 
             <div class="report-header-banner">
@@ -326,9 +347,9 @@
 
             <div class="student-meta-grid">
                 <div><strong>Student Full Name:</strong> <span id="card-student-name">-</span></div>
-                <div><strong>Number in Class:</strong> <span id="card-class-count">-</span></div>
+                <div><strong>No. in Class:</strong> <span id="card-class-count">-</span></div>
                 <div><strong>Class:</strong> <span id="card-class-arm">-</span></div>
-                <div><strong>Term:</strong> <span id="card-term">-</span></div>
+                <div><strong>Target Term Horizon:</strong> <span id="card-term">-</span></div>
                 <div><strong>Department:</strong> <span id="card-dept">-</span></div>
                 <div><strong>Attendance:</strong> <span id="card-attendance-log">-</span></div>
             </div>
@@ -336,7 +357,7 @@
             <table class="scores-table">
                 <thead>
                     <tr>
-                        <th style="width: 45%;">Course Subject Title</th>
+                        <th style="width: 45%;">Subjects</th>
                         <th style="width: 12%;">CA 1 (20)</th>
                         <th style="width: 12%;">CA 2 (20)</th>
                         <th style="width: 12%;">Exam (60)</th>
@@ -352,10 +373,10 @@
                         style="color: var(--primary-blue); margin-bottom: 6px; border-bottom: 1px solid #CBD5E0; padding-bottom: 2px; font-size: 0.85rem;">
                         Behavioral & Skill Diagnostics</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px;">
-                        <p>Punctuality : <strong id="rate-punctual">-</strong>/5</p>
-                        <p>Handwriting : <strong id="rate-handwriting">-</strong>/5</p>
+                        <p>Punctuality: <strong id="rate-punctual">-</strong>/5</p>
+                        <p>Handwriting: <strong id="rate-handwriting">-</strong>/5</p>
                         <p>Leadership: <strong id="rate-leadership">-</strong>/5</p>
-                        <p>Hardwork: <strong id="rate-hardwork">-</strong>/5</p>
+                        <p>Task: <strong id="rate-hardwork">-</strong>/5</p>
                         <p>Maturity: <strong id="rate-maturity">-</strong>/5</p>
                         <p>Sport: <strong id="rate-sport">-</strong>/5</p>
                         <p>Cleanliness: <strong id="rate-cleanliness">-</strong>/5</p>
@@ -363,8 +384,8 @@
                 </div>
                 <div>
                     <div class="commentary-box" style="margin-bottom: 6px;">
-                        <h4 style="color: var(--primary-blue); margin-bottom: 2px; font-size: 0.85rem;">Form Teacher
-                            Remarks</h4>
+                        <h4 style="color: var(--primary-blue); margin-bottom: 2px; font-size: 0.85rem;">Teacher
+                            Comment</h4>
                         <p id="card-teacher-comment" style="font-style: italic; color: #4A5568; line-height: 1.3;">-</p>
                     </div>
                     <div class="commentary-box" style="margin-bottom: 0;">
@@ -478,7 +499,6 @@
             const isSenior = assignedClassStr.startsWith("SS");
             const dept = student.department ? student.department.trim() : "None";
 
-            // Dynamic lookup to calculate total students sharing this class string
             let totalInClass = "-";
             if (assignedClassStr !== "Not Configured") {
                 const { count, error: countErr } = await supabaseClient
