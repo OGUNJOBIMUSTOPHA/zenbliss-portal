@@ -135,7 +135,6 @@
             pointer-events: none;
         }
 
-        /* Dedicated print-only logo wrapper that hides on screen layout */
         .print-logo-header {
             display: none;
         }
@@ -226,7 +225,6 @@
                 padding: 0 !important;
                 font-size: 11px !important;
                 -webkit-print-color-adjust: exact !important;
-                /* Forces background images to render */
                 print-color-adjust: exact !important;
             }
 
@@ -236,7 +234,6 @@
                 display: none !important;
             }
 
-            /* Displays explicit header image on the paper layout */
             .print-logo-header {
                 display: flex !important;
                 justify-content: center;
@@ -300,7 +297,7 @@
         <div class="header-container">
             <div class="logo-branding">
                 <img src="logo.jpg" alt="Zenbliss Logo" class="school-logo-img" onerror="this.style.display='none';">
-                <h1 class="school-logo-text">ZENBLISS SCHOOLS & COLLEGE</h1>
+                <h1 class="school-logo-text">ZENBLISS COLLEGE</h1>
             </div>
             <span class="portal-badge">Student Result Terminal</span>
         </div>
@@ -310,8 +307,7 @@
 
         <div id="term-gate-box" class="gate-card">
             <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Welcome to Your Academic Report Vault</h2>
-            <p style="color: #718096;">Select the term context below to render your verified assessment
-                parameters.</p>
+            <p style="color: #718096;">Select the term context below to render your verified assessment parameters.</p>
 
             <select id="selected-term" class="term-select">
                 <option value="1st Term">First Term Report</option>
@@ -337,7 +333,7 @@
 
             <div class="report-header-banner">
                 <h2 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 0.5px; font-size: 1.4rem;">
-                    ZENBLISS SCHOOLS & COLLEGE</h2>
+                    ZENBLISS COLLEGE</h2>
                 <h3 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 0.5px; font-size: 1.4rem;">
                     Tel:08038128006, 09063463396, 08055500931</h3>
                 <p
@@ -449,9 +445,12 @@
         async function fetchStudentTermScores() {
             const chosenTerm = document.getElementById('selected-term').value;
             const currentStudentId = localStorage.getItem('current_student_id');
+            const localSessionId = localStorage.getItem('active_session_id');
 
             if (!currentStudentId) {
                 alert("Profile session context missing. Please log in again.");
+                localStorage.clear();
+                window.location.replace("index.html");
                 return;
             }
 
@@ -463,6 +462,14 @@
 
             if (studentErr || !student) {
                 alert("Failed to synchronize academic profiles structure.");
+                return;
+            }
+
+            // Concurrent session hijacking safety check
+            if (student.current_session_id !== localSessionId) {
+                alert(" Access Denied: This Student account has been logged in from another device or browser window. Disconnecting session.");
+                localStorage.clear();
+                window.location.replace("index.html");
                 return;
             }
 
@@ -484,7 +491,7 @@
             }
 
             if (termRecord.ledger_submitted === false) {
-                alert("🔒 Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
+                alert(" Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
 

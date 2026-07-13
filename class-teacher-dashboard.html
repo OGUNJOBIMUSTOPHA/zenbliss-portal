@@ -305,7 +305,7 @@
         </div>
     </header>
 
-    <div class="class-container">
+    <div id="teacher-portal-content" class="class-container hidden">
 
         <div class="profile-card">
             <div>
@@ -555,6 +555,7 @@
             verifyAndLoadTeacherSession();
         };
 
+        // Enforce Concurrent Session Control and verify active session parameters
         async function verifyAndLoadTeacherSession() {
             const displaySpan = document.getElementById('teacher-assigned-classes');
             const classSelector = document.getElementById('teacher-class-selector');
@@ -562,8 +563,11 @@
 
             try {
                 const teacherId = localStorage.getItem('current_teacher_id');
-                if (!teacherId) {
-                    alert("Session expired. Please log in again.");
+                const localSessionId = localStorage.getItem('active_session_id');
+
+                if (!teacherId || !localSessionId) {
+                    alert("Session context missing or expired. Please log in again.");
+                    localStorage.clear();
                     window.location.replace("index.html");
                     return;
                 }
@@ -575,9 +579,22 @@
                     .single();
 
                 if (error || !user) {
-                    alert("Profile load error.");
+                    alert("Security check error. Profile matching failed.");
+                    localStorage.clear();
+                    window.location.replace("index.html");
                     return;
                 }
+
+                // Verify that the locally cached session token matches the database value
+                if (user.current_session_id !== localSessionId) {
+                    alert("🔒 Access Denied: This Faculty account has been logged in from another device or browser tab. You have been disconnected.");
+                    localStorage.clear();
+                    window.location.replace("index.html");
+                    return;
+                }
+
+                // Render content safe-zone if verification criteria are completely satisfied
+                document.getElementById('teacher-portal-content').classList.remove('hidden');
 
                 currentTeacherProfile = user;
                 if (nameHeader) nameHeader.innerText = "Welcome, " + (user.admission_number || "Teacher");
@@ -636,6 +653,15 @@
         }
 
         async function loadClassLedgerWorkspace() {
+            // Re-verify workspace tokens prior to querying records
+            const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
+            if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
+                alert("🔒 Session invalidated: Another login was detected.");
+                localStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
             const chosenClass = document.getElementById('teacher-class-selector').value;
             const chosenTerm = document.getElementById('target-compilation-term').value;
 
@@ -741,7 +767,7 @@
 
                 let subjectsHtml = "";
                 let grandTotal = 0;
-                let scoredSubjectsCount = 0; // Dynamic indicator for input matches
+                let scoredSubjectsCount = 0;
 
                 activePrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
@@ -757,7 +783,7 @@
                         total = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
                         grandTotal += total;
                         hasScore = true;
-                        scoredSubjectsCount++; // Increment count strictly when values are written
+                        scoredSubjectsCount++;
                     }
 
                     const tdClassStyle = isLocked ? `class="disabled-subject-cell"` : ``;
@@ -771,7 +797,6 @@
                     `;
                 });
 
-                // Calculate ledger display metrics dynamically targeting strictly active inputs
                 const globalAvg = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
 
                 const existingComment = record.teacher_comment || "";
@@ -851,7 +876,7 @@
             }
 
             let grandTotal = 0;
-            let scoredSubjectsCount = 0; // Local input tracker counter
+            let scoredSubjectsCount = 0;
 
             const activePrefixes = subjectPrefixes.filter(pref => {
                 if (!isSenior) return ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref);
@@ -873,7 +898,7 @@
 
                     row.querySelector(`.${pref}-tot`).innerText = total;
                     grandTotal += total;
-                    scoredSubjectsCount++; // Accumulate divisor dynamically
+                    scoredSubjectsCount++;
                 } else {
                     row.querySelector(`.${pref}-tot`).innerText = "-";
                 }
@@ -884,6 +909,15 @@
         }
 
         async function saveEntireLedgerProgress() {
+            // Confirm explicit database access alignment parameters
+            const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
+            if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
+                alert("🔒 Save Blocked: Session key expired or overridden by another login instance.");
+                localStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
             const saveBtn = document.getElementById('global-save-btn');
             const chosenTerm = document.getElementById('target-compilation-term').value;
             const chosenClass = document.getElementById('teacher-class-selector').value;
@@ -1010,6 +1044,14 @@
 
         async function commitStudentReportMetrics(studentId) {
             try {
+                const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
+                if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
+                    alert("🔒 Session invalidated: Another login was detected.");
+                    localStorage.clear();
+                    window.location.replace("index.html");
+                    return;
+                }
+
                 const row = document.querySelector(`tr[data-id="${studentId}"]`);
                 const recordId = row.getAttribute('data-record-id');
                 const chosenTerm = document.getElementById('target-compilation-term').value;
@@ -1095,6 +1137,14 @@
         }
 
         async function submitLedgerToAdmin() {
+            const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
+            if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
+                alert("🔒 Submission Blocked: Active session expired.");
+                localStorage.clear();
+                window.location.replace("index.html");
+                return;
+            }
+
             const submitBtn = document.getElementById('admin-submission-btn');
             const chosenClass = document.getElementById('teacher-class-selector').value;
             const chosenTerm = document.getElementById('target-compilation-term').value;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Control Dashboard — Zenbliss Schools</title>
+    <title>Zenbliss Schools — Admin Control Portal</title>
     <style>
         :root {
             --primary-blue: #1A365D;
@@ -320,7 +320,7 @@
         </div>
     </header>
 
-    <div class="admin-container">
+    <div id="dashboard-content-wrapper" class="admin-container hidden">
 
         <div class="dashboard-grid">
 
@@ -475,10 +475,52 @@
             'lit', 'phy', 'chem', 'fmath', 'crk', 'yor', 'comp', 'td'
         ];
 
-        window.onload = function () {
+        window.onload = async function () {
+            // Guardrail execution check to inspect simultaneous terminal parameters
+            const passedSecurityCheck = await verifyActiveAdminSession();
+            if (!passedSecurityCheck) return;
+
+            // Make the system interface visible only when the structural tokens pass
+            document.getElementById('dashboard-content-wrapper').classList.remove('hidden');
+
             fetchTeachers();
             fetchPendingApplications();
         };
+
+        // Enforce Concurrent Session Control single login routine tracking
+        async function verifyActiveAdminSession() {
+            const currentAdminId = localStorage.getItem('current_admin_id');
+            const localSessionId = localStorage.getItem('active_session_id');
+
+            if (!currentAdminId || !localSessionId) {
+                alert("Session context missing. Please log in again.");
+                localStorage.clear();
+                window.location.href = "admin-login.html";
+                return false;
+            }
+
+            const { data: adminUser, error } = await supabaseClient
+                .from('users')
+                .select('current_session_id')
+                .eq('id', currentAdminId)
+                .single();
+
+            if (error || !adminUser) {
+                alert("Security data synchronization failure. Logging out.");
+                localStorage.clear();
+                window.location.href = "admin-login.html";
+                return false;
+            }
+
+            if (adminUser.current_session_id !== localSessionId) {
+                alert("🔒 Access Denied: This Admin account has been logged in from another device or window. You have been logged out.");
+                localStorage.clear();
+                window.location.href = "admin-login.html";
+                return false;
+            }
+
+            return true;
+        }
 
         function handleLogout() {
             if (confirm("Are you sure you want to log out?")) {
@@ -732,6 +774,10 @@
         }
 
         async function loadClassScoresToScreen(selectedClass) {
+            // Re-run session check prior to executing heavy database fetches on selection
+            const passedSecurityCheck = await verifyActiveAdminSession();
+            if (!passedSecurityCheck) return;
+
             const wrapper = document.getElementById('matrix-display-wrapper');
             const tbody = document.getElementById('matrix-rows');
             const printBtn = document.getElementById('print-ledger-btn');
@@ -803,7 +849,7 @@
                 }
 
                 let globalTotal = 0;
-                let scoredSubjectsCount = 0; // Dynamic indicator counter for input records
+                let scoredSubjectsCount = 0;
                 let rowCellsHtml = `<td style="text-align:left; font-weight:600;">${student.admission_number || 'Unnamed Student'}</td>`;
 
                 const dept = student.department ? student.department.trim() : "None";
@@ -835,7 +881,6 @@
                         const ca2Raw = studentResult[`${prefix}_ca2`];
                         const exRaw = studentResult[`${prefix}_ex`];
 
-                        // Only accumulate calculations if at least one data input property exists
                         if (ca1Raw !== undefined && ca1Raw !== null || ca2Raw !== undefined && ca2Raw !== null || exRaw !== undefined && exRaw !== null) {
                             const ca1 = Number(ca1Raw) || 0;
                             const ca2 = Number(ca2Raw) || 0;
@@ -878,6 +923,9 @@
         }
 
         async function finalizeUploadGlobally() {
+            const passedSecurityCheck = await verifyActiveAdminSession();
+            if (!passedSecurityCheck) return;
+
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm("Are you sure you want to approve this ledger and release report cards onto all student portal panels?")) return;
 
@@ -898,6 +946,9 @@
         }
 
         async function rejectWholeClass() {
+            const passedSecurityCheck = await verifyActiveAdminSession();
+            if (!passedSecurityCheck) return;
+
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm("Reject ledger? This returns edit access back to the teacher and removes it from your view until re-submitted.")) return;
 
