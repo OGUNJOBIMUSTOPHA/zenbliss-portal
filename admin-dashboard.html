@@ -803,7 +803,7 @@
                 }
 
                 let globalTotal = 0;
-                let activeSubjectsCount = 0;
+                let scoredSubjectsCount = 0; // Dynamic indicator counter for input records
                 let rowCellsHtml = `<td style="text-align:left; font-weight:600;">${student.admission_number || 'Unnamed Student'}</td>`;
 
                 const dept = student.department ? student.department.trim() : "None";
@@ -831,19 +831,28 @@
                     if (isLocked) {
                         rowCellsHtml += `<td style="color: #cbd5e0; background: #f7fafc;">N/A</td>`;
                     } else {
-                        const ca1 = Number(studentResult[`${prefix}_ca1`]) || 0;
-                        const ca2 = Number(studentResult[`${prefix}_ca2`]) || 0;
-                        const ex = Number(studentResult[`${prefix}_ex`]) || 0;
-                        const subjectTotal = ca1 + ca2 + ex;
+                        const ca1Raw = studentResult[`${prefix}_ca1`];
+                        const ca2Raw = studentResult[`${prefix}_ca2`];
+                        const exRaw = studentResult[`${prefix}_ex`];
 
-                        globalTotal += subjectTotal;
-                        activeSubjectsCount++;
-                        rowCellsHtml += `<td>${subjectTotal}</td>`;
+                        // Only accumulate calculations if at least one data input property exists
+                        if (ca1Raw !== undefined && ca1Raw !== null || ca2Raw !== undefined && ca2Raw !== null || exRaw !== undefined && exRaw !== null) {
+                            const ca1 = Number(ca1Raw) || 0;
+                            const ca2 = Number(ca2Raw) || 0;
+                            const ex = Number(exRaw) || 0;
+                            const subjectTotal = ca1 + ca2 + ex;
+
+                            globalTotal += subjectTotal;
+                            scoredSubjectsCount++;
+                            rowCellsHtml += `<td>${subjectTotal}</td>`;
+                        } else {
+                            rowCellsHtml += `<td>-</td>`;
+                        }
                     }
                 });
 
-                const averagePercentage = activeSubjectsCount > 0
-                    ? ((globalTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) + "%"
+                const averagePercentage = scoredSubjectsCount > 0
+                    ? ((globalTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) + "%"
                     : "0.0%";
 
                 rowCellsHtml += `<td style="font-weight:bold; color:var(--primary-blue);">${globalTotal}</td>`;

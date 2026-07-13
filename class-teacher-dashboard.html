@@ -741,13 +741,10 @@
 
                 let subjectsHtml = "";
                 let grandTotal = 0;
-                let activeSubjectsCount = 0;
+                let scoredSubjectsCount = 0; // Dynamic indicator for input matches
 
                 activePrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
-                    if (!isLocked) {
-                        activeSubjectsCount++; // Base average divisor on all available subjects for track
-                    }
 
                     const ca1 = record[`${pref}_ca1`] !== undefined && record[`${pref}_ca1`] !== null ? record[`${pref}_ca1`] : "";
                     const ca2 = record[`${pref}_ca2`] !== undefined && record[`${pref}_ca2`] !== null ? record[`${pref}_ca2`] : "";
@@ -760,6 +757,7 @@
                         total = (Number(ca1) || 0) + (Number(ca2) || 0) + (Number(ex) || 0);
                         grandTotal += total;
                         hasScore = true;
+                        scoredSubjectsCount++; // Increment count strictly when values are written
                     }
 
                     const tdClassStyle = isLocked ? `class="disabled-subject-cell"` : ``;
@@ -773,7 +771,8 @@
                     `;
                 });
 
-                const globalAvg = activeSubjectsCount > 0 ? ((grandTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
+                // Calculate ledger display metrics dynamically targeting strictly active inputs
+                const globalAvg = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
 
                 const existingComment = record.teacher_comment || "";
                 const existingDaysPresent = record.days_present || 0;
@@ -852,7 +851,7 @@
             }
 
             let grandTotal = 0;
-            let activeSubjectsCount = 0;
+            let scoredSubjectsCount = 0; // Local input tracker counter
 
             const activePrefixes = subjectPrefixes.filter(pref => {
                 if (!isSenior) return ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref);
@@ -861,9 +860,6 @@
 
             activePrefixes.forEach(pref => {
                 const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
-                if (!isLocked) {
-                    activeSubjectsCount++; // Count every valid track subject in runtime updates too
-                }
 
                 const ca1Raw = row.querySelector(`.${pref}-ca1`).value;
                 const ca2Raw = row.querySelector(`.${pref}-ca2`).value;
@@ -877,13 +873,14 @@
 
                     row.querySelector(`.${pref}-tot`).innerText = total;
                     grandTotal += total;
+                    scoredSubjectsCount++; // Accumulate divisor dynamically
                 } else {
                     row.querySelector(`.${pref}-tot`).innerText = "-";
                 }
             });
 
             row.querySelector('.row-total').innerText = grandTotal;
-            row.querySelector('.row-avg').innerText = activeSubjectsCount > 0 ? ((grandTotal / (activeSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
+            row.querySelector('.row-avg').innerText = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
         }
 
         async function saveEntireLedgerProgress() {
@@ -1138,7 +1135,7 @@
             if (errorsOccurred) {
                 alert("Ledger status change complete with localized errors.");
             } else {
-                alert(`🎉 The ${chosenClass} (${chosenTerm}) ledger has been officially submitted to the Admin!`);
+                alert(` The ${chosenClass} (${chosenTerm}) ledger has been officially submitted to the Admin!`);
                 returnToGate();
             }
         }
