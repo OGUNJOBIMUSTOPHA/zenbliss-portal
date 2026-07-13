@@ -85,6 +85,11 @@
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Helper function to generate a randomized session string
+        function createUniqueSessionToken() {
+            return 'zb_sess_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        }
+
         async function handleAdminLogin(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -92,7 +97,6 @@
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Direct query without mid-way alerts
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -116,9 +120,24 @@
                 return;
             }
 
-            // Single fast success confirmation
-            alert("Secure tokens verified. Initializing control dashboard...");
+            // Generate security token mapping parameters
+            const dynamicSession = createUniqueSessionToken();
+
+            // Commit token update parameters to the active database profile
+            const { error: tokenUpdateError } = await supabaseClient
+                .from('users')
+                .update({ current_session_id: dynamicSession })
+                .eq('id', currentAdmin.id);
+
+            if (tokenUpdateError) {
+                alert("Database synchronization failure during session security setup.");
+                return;
+            }
+
+            // Sync structural localStorage keys
+            localStorage.setItem('active_session_id', dynamicSession);
             localStorage.setItem('current_admin_id', currentAdmin.id.toString());
+
             window.location.href = "admin-dashboard.html";
         }
     </script>

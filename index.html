@@ -226,6 +226,11 @@
         const SUPABASE_KEY = "sb_publishable_LMoSZHZaX_VH1yjk1vOuZA_Cb-AYsBH";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Helper function to generate a randomized dynamic tracking token
+        function createUniqueSessionToken() {
+            return 'zb_sess_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        }
+
         // 1. Student Login Logic Flow
         async function handleStudentLogin(event) {
             event.preventDefault();
@@ -237,7 +242,7 @@
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', typedName) // Reading name from admission_number field
+                .eq('admission_number', typedName)
                 .eq('role', 'student');
 
             if (error || !user || user.length === 0) {
@@ -257,6 +262,22 @@
                 return;
             }
 
+            // Generate security token mapping parameters
+            const dynamicSession = createUniqueSessionToken();
+
+            // Commit token update parameters to the active database profile
+            const { error: tokenUpdateError } = await supabaseClient
+                .from('users')
+                .update({ current_session_id: dynamicSession })
+                .eq('id', currentUser.id);
+
+            if (tokenUpdateError) {
+                alert("Database synchronization failure during session security setup.");
+                return;
+            }
+
+            // Sync structural localStorage keys
+            localStorage.setItem('active_session_id', dynamicSession);
             localStorage.setItem('current_student_id', currentUser.id.toString());
             window.location.href = "student-dashboard.html";
         }
@@ -271,11 +292,10 @@
 
             // Administrative Master Key bypass routing shortcut check
             if (typedStaffName.toLowerCase() === 'admin' && password === 'admin123') {
-                window.location.href = "admin-dashboard.html"; // Routing to the updated panel
+                window.location.href = "admin-dashboard.html";
                 return;
             }
 
-            // Normal teacher query directly checking names
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -294,6 +314,22 @@
                 return;
             }
 
+            // Generate security token mapping parameters
+            const dynamicSession = createUniqueSessionToken();
+
+            // Commit token update parameters to the active database profile
+            const { error: tokenUpdateError } = await supabaseClient
+                .from('users')
+                .update({ current_session_id: dynamicSession })
+                .eq('id', currentUser.id);
+
+            if (tokenUpdateError) {
+                alert("Database synchronization failure during session security setup.");
+                return;
+            }
+
+            // Sync structural localStorage keys
+            localStorage.setItem('active_session_id', dynamicSession);
             localStorage.setItem('current_teacher_id', currentUser.id.toString());
             window.location.href = "class-teacher-dashboard.html";
         }
