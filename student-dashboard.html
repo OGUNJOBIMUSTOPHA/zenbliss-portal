@@ -350,7 +350,7 @@
                 <div><strong>Student Full Name:</strong> <span id="card-student-name">-</span></div>
                 <div><strong>No. in Class:</strong> <span id="card-class-count">-</span></div>
                 <div><strong>Class:</strong> <span id="card-class-arm">-</span></div>
-                <div><strong>Target Term Horizon:</strong> <span id="card-term">-</span></div>
+                <div><strong>Term:</strong> <span id="card-term">-</span></div>
                 <div><strong>Department:</strong> <span id="card-dept">-</span></div>
                 <div><strong>Attendance:</strong> <span id="card-attendance-log">-</span></div>
             </div>
@@ -512,7 +512,7 @@
                 }
             }
 
-            document.getElementById('card-student-name').innerText = student.full_name || "Unnamed Student";
+            document.getElementById('card-student-name').innerText = student.student_id || "Unnamed Student";
             document.getElementById('card-class-count').innerText = totalInClass;
             document.getElementById('card-class-arm').innerText = assignedClassStr;
             document.getElementById('card-term').innerText = chosenTerm.toUpperCase();
