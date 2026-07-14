@@ -320,7 +320,7 @@
                     style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
                     2026/2027</span>
                 <button onclick="handleLogout()" class="btn-submit accent-red"
-                    style="padding:8px 15px; font-size:0.85rem; cursor: pointer;">🚪 Log Out</button>
+                    style="padding:8px 15px; font-size:0.85rem; cursor: pointer;"> Log Out</button>
             </div>
         </div>
 
@@ -339,14 +339,12 @@
                     <label style="font-weight:bold; font-size:0.85rem; margin-bottom:5px; display:block;">Select Target
                         Term Ledger:</label>
                     <select id="target-compilation-term" class="term-select">
-                        <option value="1st Term">First Term Ledger</option>
-                        <option value="2nd Term">Second Term Ledger</option>
-                        <option value="3rd Term" selected>Third Term Ledger (Current)</option>
+                        <option value="">-- Loading Terms... --</option>
                     </select>
                 </div>
             </div>
 
-            <button class="btn-submit primary-blue" style="padding: 12px 30px;" onclick="loadClassLedgerWorkspace()">📝
+            <button class="btn-submit primary-blue" style="padding: 12px 30px;" onclick="loadClassLedgerWorkspace()">
                 Open & Load Students</button>
         </div>
 
@@ -359,10 +357,10 @@
                         (60) across active fields.</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn-submit warning-orange" id="global-save-btn"
-                        onclick="saveEntireLedgerProgress()">💾 Save Ledger Progress</button>
-                    <button class="btn-submit success-green" id="admin-submission-btn"
-                        onclick="submitLedgerToAdmin()">📤 Submit Term Ledger to Admin</button>
+                    <button class="btn-submit warning-orange" id="global-save-btn" onclick="saveEntireLedgerProgress()">
+                        Save Ledger Progress</button>
+                    <button class="btn-submit success-green" id="admin-submission-btn" onclick="submitLedgerToAdmin()">
+                        Submit Term Ledger to Admin</button>
                 </div>
             </div>
 
@@ -500,7 +498,7 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅️ Close Ledger
+                <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅ Close Ledger
                     Workspace</button>
             </div>
         </div>
@@ -631,9 +629,46 @@
                         classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
                     });
                 }
+
+                // Dynamic dropdown terms initialized strictly by Admin inside the database
+                await populateTargetTermsDropdown();
+
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        async function populateTargetTermsDropdown() {
+            const termSelector = document.getElementById('target-compilation-term');
+            if (!termSelector) return;
+
+            const { data, error } = await supabaseClient
+                .from('student_results')
+                .select('term');
+
+            if (error) {
+                console.error("Could not fetch active system compilation targets: ", error.message);
+                termSelector.innerHTML = `
+                    <option value="1st Term">First Term Ledger</option>
+                    <option value="2nd Term">Second Term Ledger</option>
+                    <option value="3rd Term" selected>Third Term Ledger (Current)</option>
+                `;
+                return;
+            }
+
+            const uniqueTerms = [...new Set(data.map(item => item.term))].filter(Boolean).sort();
+
+            if (uniqueTerms.length === 0) {
+                termSelector.innerHTML = '<option value="">No opened terms from Admin</option>';
+                return;
+            }
+
+            termSelector.innerHTML = '';
+            uniqueTerms.forEach(term => {
+                const optionLabel = term.endsWith('Term') ? `${term} Ledger` : term;
+                const isSelected = term === "3rd Term" ? "selected" : "";
+                termSelector.innerHTML += `<option value="${term}" ${isSelected}>${optionLabel}</option>`;
+            });
         }
 
         function isSubjectLockedForTrack(prefix, isSenior, dept) {
@@ -656,7 +691,7 @@
             // Re-verify workspace tokens prior to querying records
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
-                alert("🔒 Session invalidated: Another login was detected.");
+                alert(" Session invalidated: Another login was detected.");
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
@@ -667,6 +702,11 @@
 
             if (!chosenClass) {
                 alert("Please select a valid assigned class level first.");
+                return;
+            }
+
+            if (!chosenTerm) {
+                alert("Please select an active term ledger initialized by the Admin.");
                 return;
             }
 
@@ -912,7 +952,7 @@
             // Confirm explicit database access alignment parameters
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
-                alert("🔒 Save Blocked: Session key expired or overridden by another login instance.");
+                alert(" Save Blocked: Session key expired or overridden by another login instance.");
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
@@ -980,7 +1020,7 @@
                 }
             }
 
-            saveBtn.innerText = "💾 Save Ledger Progress";
+            saveBtn.innerText = " Save Ledger Progress";
             saveBtn.disabled = false;
 
             if (errorsOccurred) {
@@ -1046,7 +1086,7 @@
             try {
                 const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
                 if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
-                    alert("🔒 Session invalidated: Another login was detected.");
+                    alert(" Session invalidated: Another login was detected.");
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -1139,7 +1179,7 @@
         async function submitLedgerToAdmin() {
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
-                alert("🔒 Submission Blocked: Active session expired.");
+                alert(" Submission Blocked: Active session expired.");
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
@@ -1158,7 +1198,7 @@
                 return;
             }
 
-            submitBtn.innerText = "⏳ Submitting...";
+            submitBtn.innerText = " Submitting...";
             submitBtn.disabled = true;
 
             const rows = document.querySelectorAll('#dynamic-student-rows .ledger-row');
@@ -1179,7 +1219,7 @@
                 }
             }
 
-            submitBtn.innerText = "📤 Submit Term Ledger to Admin";
+            submitBtn.innerText = " Submit Term Ledger to Admin";
             submitBtn.disabled = false;
 
             if (errorsOccurred) {

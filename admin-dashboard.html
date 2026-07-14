@@ -221,7 +221,7 @@
             align-items: center;
             gap: 10px;
             padding: 8px;
-            border: 1px solid #E2E8F0;
+            border: 1px solid #E2E2F0;
             border-radius: 6px;
             margin-bottom: 6px;
             background: #FAFAFA;
@@ -321,6 +321,36 @@
     </header>
 
     <div id="dashboard-content-wrapper" class="admin-container hidden">
+
+        <div class="control-box" style="margin-bottom: 30px;">
+            <h2>Configure active term period & Academic Session</h2>
+            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Setting a session to active determines
+                the academic framework students and teachers see automatically when they log into their portals.</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Current
+                        Active Session</label>
+                    <select id="active-session-selector"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Target
+                        Work Term</label>
+                    <select id="active-term-selector"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
+                        <option value="1st Term">First Term Report</option>
+                        <option value="2nd Term">Second Term Report</option>
+                        <option value="3rd Term" selected>Third Term Report</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="handleActiveSessionUpdate()"
+                        style="padding: 10px 20px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 42px;">Save
+                        Configurations</button>
+                </div>
+            </div>
+        </div>
 
         <div class="dashboard-grid">
 
@@ -483,6 +513,7 @@
             // Make the system interface visible only when the structural tokens pass
             document.getElementById('dashboard-content-wrapper').classList.remove('hidden');
 
+            await loadAcademicSessionsDropdown();
             fetchTeachers();
             fetchPendingApplications();
         };
@@ -526,6 +557,69 @@
             if (confirm("Are you sure you want to log out?")) {
                 localStorage.clear();
                 window.location.href = "admin-login.html";
+            }
+        }
+
+        // Pull active sessions dynamically to build selection parameters
+        async function loadAcademicSessionsDropdown() {
+            try {
+                const { data: sessions, error } = await supabaseClient
+                    .from('academic_sessions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const sessionDropdown = document.getElementById('active-session-selector');
+                sessionDropdown.innerHTML = '';
+
+                if (sessions && sessions.length > 0) {
+                    sessions.forEach(session => {
+                        const option = document.createElement('option');
+                        option.value = session.id;
+                        option.textContent = session.name;
+                        if (session.is_active) {
+                            option.selected = true;
+                        }
+                        sessionDropdown.appendChild(option);
+                    });
+                } else {
+                    sessionDropdown.innerHTML = `<option value="">No academic sessions configured</option>`;
+                }
+            } catch (err) {
+                console.error("Failed to compile session dropdown structures: ", err.message);
+            }
+        }
+
+        // Safely updates the active session to active=true and marks all other records as false
+        async function handleActiveSessionUpdate() {
+            const selectedSessionId = document.getElementById('active-session-selector').value;
+            if (!selectedSessionId) {
+                alert("Please select a valid academic session target.");
+                return;
+            }
+
+            try {
+                // Step 1: Force all sessions is_active states to FALSE
+                const { error: resetErr } = await supabaseClient
+                    .from('academic_sessions')
+                    .update({ is_active: false })
+                    .neq('id', '00000000-0000-0000-0000-000000000000'); // Generic safe execution filter
+
+                if (resetErr) throw resetErr;
+
+                // Step 2: Set chosen targeted session's is_active field to TRUE
+                const { error: setErr } = await supabaseClient
+                    .from('academic_sessions')
+                    .update({ is_active: true })
+                    .eq('id', selectedSessionId);
+
+                if (setErr) throw setErr;
+
+                alert("Academic session configurations updated successfully across all school platforms!");
+                await loadAcademicSessionsDropdown();
+            } catch (err) {
+                alert("Failed to modify active session records: " + err.message);
             }
         }
 
@@ -773,8 +867,8 @@
             }
         }
 
+        // Renders ledger sheet filtered by active classes, term dropdown, and active session dropdown
         async function loadClassScoresToScreen(selectedClass) {
-            // Re-run session check prior to executing heavy database fetches on selection
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
@@ -783,6 +877,9 @@
             const printBtn = document.getElementById('print-ledger-btn');
             const printSubtitle = document.getElementById('print-sheet-subtitle');
             const uploadBar = document.getElementById('upload-bar-container');
+
+            const chosenTerm = document.getElementById('active-term-selector').value;
+            const chosenSessionId = document.getElementById('active-session-selector').value;
 
             if (!selectedClass) {
                 wrapper.classList.add('hidden');
@@ -822,10 +919,14 @@
             }
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
+
+            // Dual-filtered query: filters class scores by selected student IDs, selected term, AND selected session
             const { data: results, error: resultsError } = await supabaseClient
                 .from('student_results')
                 .select('*')
-                .in('student_id', studentIds);
+                .in('student_id', studentIds)
+                .eq('term', chosenTerm)
+                .eq('session_id', chosenSessionId);
 
             if (resultsError) {
                 alert("Error loading class scores: " + resultsError.message);
@@ -907,7 +1008,7 @@
             });
 
             if (recordsDisplayedCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet for this session and term.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
                 uploadBar.classList.add('hidden');
@@ -922,18 +1023,24 @@
             printBtn.style.opacity = "1";
         }
 
+        // Approves class grades, linking them back safely via both chosen session and chosen term
         async function finalizeUploadGlobally() {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
+            const chosenTerm = document.getElementById('active-term-selector').value;
+            const chosenSessionId = document.getElementById('active-session-selector').value;
+
             if (currentlyLoadedClassStudents.length === 0) return;
-            if (!confirm("Are you sure you want to approve this ledger and release report cards onto all student portal panels?")) return;
+            if (!confirm(`Are you sure you want to approve this ledger and release report cards for ${chosenTerm} onto all student portal panels?`)) return;
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
             const { error } = await supabaseClient
                 .from('student_results')
                 .update({ results_released: true })
-                .in('student_id', studentIds);
+                .in('student_id', studentIds)
+                .eq('term', chosenTerm)
+                .eq('session_id', chosenSessionId);
 
             if (error) {
                 alert("Some records failed to update: " + error.message);
@@ -945,18 +1052,24 @@
             }
         }
 
+        // Rejects class ledger, turning edit permission back to teacher for chosen session/term parameters
         async function rejectWholeClass() {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
+            const chosenTerm = document.getElementById('active-term-selector').value;
+            const chosenSessionId = document.getElementById('active-session-selector').value;
+
             if (currentlyLoadedClassStudents.length === 0) return;
-            if (!confirm("Reject ledger? This returns edit access back to the teacher and removes it from your view until re-submitted.")) return;
+            if (!confirm(`Reject ledger? This returns edit access back to the teacher for ${chosenTerm} and removes it from your view.`)) return;
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
             const { error } = await supabaseClient
                 .from('student_results')
                 .update({ ledger_submitted: false, results_released: false })
-                .in('student_id', studentIds);
+                .in('student_id', studentIds)
+                .eq('term', chosenTerm)
+                .eq('session_id', chosenSessionId);
 
             if (error) {
                 alert("An error occurred returning workspace: " + error.message);

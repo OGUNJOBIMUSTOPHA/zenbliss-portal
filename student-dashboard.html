@@ -8,11 +8,16 @@
     <style>
         :root {
             --primary-blue: #1A365D;
+            --primary-light: #2B6CB0;
             --accent-red: #9B2C2C;
             --background-white: #FFFFFF;
-            --light-gray: #EDF2F7;
-            --border-color: #CBD5E0;
+            --light-gray: #F7FAFC;
+            --border-color: #E2E8F0;
             --text-dark: #2D3748;
+            --text-muted: #718096;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.06);
+            --border-radius: 8px;
         }
 
         * {
@@ -22,24 +27,25 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: #F7FAFC;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #F8FAFC;
             color: var(--text-dark);
-            line-height: 1.4;
-            padding-bottom: 30px;
+            line-height: 1.5;
+            padding-bottom: 40px;
         }
 
         .portal-header {
             background-color: var(--primary-blue);
             color: var(--background-white);
-            padding: 12px 0;
+            padding: 14px 0;
             border-bottom: 4px solid var(--accent-red);
+            box-shadow: var(--shadow-sm);
         }
 
         .header-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -52,71 +58,109 @@
         }
 
         .school-logo-img {
-            max-height: 45px;
-            border-radius: 4px;
+            max-height: 48px;
+            border-radius: 6px;
             background: white;
-            padding: 2px;
+            padding: 3px;
+            box-shadow: var(--shadow-sm);
         }
 
         .school-logo-text {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         .portal-badge {
             background-color: var(--accent-red);
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .main-container {
-            max-width: 950px;
-            margin: 20px auto;
-            padding: 0 15px;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
 
         .gate-card {
             background: var(--background-white);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 35px;
+            border-radius: var(--border-radius);
+            padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            box-shadow: var(--shadow-md);
+            max-width: 500px;
+            margin: 40px auto;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 340px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        .selector-group label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-blue);
         }
 
         .term-select {
-            padding: 10px;
+            padding: 12px 16px;
             border-radius: 6px;
             border: 1px solid #CBD5E0;
-            font-size: 0.9rem;
-            width: 280px;
-            margin: 15px 0;
+            font-size: 0.95rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+            color: var(--text-dark);
+            background-color: var(--background-white);
+        }
+
+        .term-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
         }
 
         .btn-submit {
             display: inline-block;
-            padding: 9px 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
+            padding: 10px 24px;
+            font-size: 0.875rem;
+            font-weight: 700;
             background-color: var(--primary-blue);
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
         }
 
         .report-card-wrapper {
             position: relative;
             background: var(--background-white);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-md);
             z-index: 1;
+            overflow: hidden;
         }
 
         .report-card-wrapper::before {
@@ -130,7 +174,7 @@
             background-position: center 45%;
             background-repeat: no-repeat;
             background-size: 320px;
-            opacity: 0.12;
+            opacity: 0.08;
             z-index: -1;
             pointer-events: none;
         }
@@ -140,36 +184,47 @@
         }
 
         .report-header-banner {
-            border-bottom: 2px double var(--primary-blue);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            border-bottom: 3px double var(--primary-blue);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
             text-align: center;
         }
 
         .student-meta-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px 15px;
-            margin-bottom: 12px;
-            background: rgba(247, 250, 252, 0.85);
-            padding: 10px 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 24px;
+            margin-bottom: 18px;
+            background: rgba(247, 250, 252, 0.9);
+            padding: 14px 20px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.875rem;
+        }
+
+        .student-meta-grid div {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #E2E8F0;
+            padding-bottom: 4px;
+        }
+
+        .student-meta-grid div strong {
+            color: var(--primary-blue);
         }
 
         .scores-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
             background: transparent;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
 
         .scores-table th,
         .scores-table td {
             border: 1px solid var(--border-color);
-            padding: 6px 8px;
+            padding: 8px 10px;
             text-align: center;
         }
 
@@ -177,30 +232,34 @@
             background-color: var(--primary-blue);
             color: white;
             font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
         }
 
         .subject-cell {
             text-align: left !important;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
         .behavior-grid {
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
-            gap: 15px;
+            gap: 18px;
         }
 
         .commentary-box {
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 14px;
             border-radius: 6px;
-            background: rgba(247, 250, 252, 0.85);
-            margin-bottom: 10px;
-            font-size: 0.8rem;
+            background: rgba(247, 250, 252, 0.9);
+            margin-bottom: 12px;
+            font-size: 0.85rem;
         }
 
         .commentary-box p {
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
         .hidden {
@@ -208,9 +267,9 @@
         }
 
         .action-utilities-bar {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         @media print {
@@ -255,7 +314,7 @@
             }
 
             .report-card-wrapper::before {
-                opacity: 0.14 !important;
+                opacity: 0.12 !important;
                 background-size: 280px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -263,8 +322,9 @@
 
             .student-meta-grid {
                 padding: 8px !important;
-                background: #F7FAFC !important;
+                background: #F8FAFC !important;
                 border: 1px solid #000 !important;
+                grid-template-columns: repeat(2, 1fr) !important;
             }
 
             .scores-table {
@@ -283,7 +343,7 @@
             }
 
             .commentary-box {
-                background: #F7FAFC !important;
+                background: #F8FAFC !important;
                 border: 1px solid #000 !important;
                 padding: 8px !important;
             }
@@ -306,25 +366,33 @@
     <div class="main-container">
 
         <div id="term-gate-box" class="gate-card">
-            <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Welcome to Your Academic Report Vault</h2>
-            <p style="color: #718096;">Select the term context below to render your verified assessment parameters.</p>
+            <h2 style="color: var(--primary-blue); margin-bottom: 10px; font-weight: 800;">Academic Report Vault</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Select the academic context below to render your
+                verified assessment parameters.</p>
 
-            <select id="selected-term" class="term-select">
-                <option value="1st Term">First Term Report</option>
-                <option value="2nd Term">Second Term Report</option>
-                <option value="3rd Term" selected>Third Term Report (Current)</option>
-            </select>
-            <br>
-            <button class="btn-submit" onclick="fetchStudentTermScores()"> View Result</button>
+            <div class="selector-group">
+                <label for="selected-session">Academic Session</label>
+                <select id="selected-session" class="term-select">
+                </select>
+
+                <label for="selected-term">Term Period</label>
+                <select id="selected-term" class="term-select">
+                    <option value="1st Term">First Term Report</option>
+                    <option value="2nd Term">Second Term Report</option>
+                    <option value="3rd Term" selected>Third Term Report (Current)</option>
+                </select>
+            </div>
+
+            <button class="btn-submit" onclick="fetchStudentTermScores()">View Result</button>
         </div>
 
         <div id="dashboard-workspace" class="report-card-wrapper hidden">
 
             <div class="action-utilities-bar">
-                <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()"> Return to
-                    Term Selector</button>
-                <button class="btn-submit" style="background-color: #2B6CB0;" onclick="window.print()"> Print Report
-                    Card</button>
+                <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">Return to
+                    Selector</button>
+                <button class="btn-submit" style="background-color: var(--primary-light);"
+                    onclick="window.print()">Print Report Card</button>
             </div>
 
             <div class="print-logo-header">
@@ -332,21 +400,22 @@
             </div>
 
             <div class="report-header-banner">
-                <h2 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 0.5px; font-size: 1.4rem;">
+                <h2 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 0.5px; font-size: 1.5rem;">
                     ZENBLISS COLLEGE</h2>
-                <h3 style="color: var(--primary-blue); font-weight: 800; letter-spacing: 0.5px; font-size: 1.4rem;">
-                    Tel:08038128006, 09063463396, 08055500931</h3>
+                <p style="color: var(--primary-blue); font-weight: 700; font-size: 0.85rem; margin-top: 2px;">
+                    Tel: 08038128006, 09063463396, 08055500931</p>
                 <p
-                    style="font-size: 0.75rem; text-transform: uppercase; color: #718096; margin-top: 1px; font-weight: bold;">
+                    style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-red); margin-top: 4px; font-weight: bold; letter-spacing: 1px;">
                     Official Report Profile Document</p>
-                <h4 id="card-term-title" style="margin-top: 4px; color: var(--accent-red); font-size: 0.9rem;"></h4>
+                <h4 id="card-term-title"
+                    style="margin-top: 6px; color: var(--primary-blue); font-size: 0.95rem; font-weight: 800;"></h4>
             </div>
 
             <div class="student-meta-grid">
                 <div><strong>Student Full Name:</strong> <span id="card-student-name">-</span></div>
                 <div><strong>No. in Class:</strong> <span id="card-class-count">-</span></div>
                 <div><strong>Class:</strong> <span id="card-class-arm">-</span></div>
-                <div><strong>Term:</strong> <span id="card-term">-</span></div>
+                <div><strong>Term/Session:</strong> <span id="card-term">-</span></div>
                 <div><strong>Department:</strong> <span id="card-dept">-</span></div>
                 <div><strong>Attendance:</strong> <span id="card-attendance-log">-</span></div>
             </div>
@@ -367,29 +436,37 @@
             <div class="behavior-grid">
                 <div class="commentary-box">
                     <h4
-                        style="color: var(--primary-blue); margin-bottom: 6px; border-bottom: 1px solid #CBD5E0; padding-bottom: 2px; font-size: 0.85rem;">
+                        style="color: var(--primary-blue); margin-bottom: 8px; border-bottom: 1px solid #CBD5E0; padding-bottom: 4px; font-size: 0.85rem; font-weight: 800;">
                         Behavioral & Skill Diagnostics</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px;">
-                        <p>Punctuality: <strong id="rate-punctual">-</strong>/5</p>
-                        <p>Handwriting: <strong id="rate-handwriting">-</strong>/5</p>
-                        <p>Leadership: <strong id="rate-leadership">-</strong>/5</p>
-                        <p>Hardwork: <strong id="rate-hardwork">-</strong>/5</p>
-                        <p>Maturity: <strong id="rate-maturity">-</strong>/5</p>
-                        <p>Sport: <strong id="rate-sport">-</strong>/5</p>
-                        <p>Cleanliness: <strong id="rate-cleanliness">-</strong>/5</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;">
+                        <p style="display:flex; justify-content:space-between;">Punctuality: <span><strong
+                                    id="rate-punctual">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between;">Handwriting: <span><strong
+                                    id="rate-handwriting">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between;">Leadership: <span><strong
+                                    id="rate-leadership">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between;">Hardwork: <span><strong
+                                    id="rate-hardwork">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between;">Maturity: <span><strong
+                                    id="rate-maturity">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between;">Sport: <span><strong
+                                    id="rate-sport">-</strong>/5</span></p>
+                        <p style="display:flex; justify-content:space-between; grid-column: span 2;">Cleanliness:
+                            <span><strong id="rate-cleanliness">-</strong>/5</span></p>
                     </div>
                 </div>
                 <div>
-                    <div class="commentary-box" style="margin-bottom: 6px;">
-                        <h4 style="color: var(--primary-blue); margin-bottom: 2px; font-size: 0.85rem;">Teacher's
-                            Comment</h4>
-                        <p id="card-teacher-comment" style="font-style: italic; color: #4A5568; line-height: 1.3;">-</p>
+                    <div class="commentary-box" style="margin-bottom: 10px;">
+                        <h4
+                            style="color: var(--primary-blue); margin-bottom: 4px; font-size: 0.85rem; font-weight: 800;">
+                            Teacher's Comment</h4>
+                        <p id="card-teacher-comment" style="font-style: italic; color: #4A5568; line-height: 1.4;">-</p>
                     </div>
                     <div class="commentary-box" style="margin-bottom: 0;">
-                        <h4 style="color: var(--accent-red); margin-bottom: 2px; font-size: 0.85rem;">Principal's
-                            Assessment Statement</h4>
+                        <h4 style="color: var(--accent-red); margin-bottom: 4px; font-size: 0.85rem; font-weight: 800;">
+                            Principal's Assessment</h4>
                         <p id="card-principal-comment"
-                            style="font-weight: 600; color: var(--primary-blue); line-height: 1.3;">-</p>
+                            style="font-weight: 600; color: var(--primary-blue); line-height: 1.4;">-</p>
                     </div>
                 </div>
             </div>
@@ -408,6 +485,40 @@
             'lit', 'phy', 'chem', 'bio', 'fmath', 'crk', 'comp', 'td',
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
+
+        // Fetch academic sessions dynamically from the DB, matching teacher configuration
+        async function loadAcademicSessions() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('academic_sessions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const sessionDropdown = document.getElementById('selected-session');
+                sessionDropdown.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(session => {
+                        const option = document.createElement('option');
+                        option.value = session.id;
+                        option.textContent = session.name;
+                        if (session.is_active) {
+                            option.selected = true;
+                        }
+                        sessionDropdown.appendChild(option);
+                    });
+                } else {
+                    sessionDropdown.innerHTML = `<option value="fallback">No sessions found</option>`;
+                }
+            } catch (err) {
+                console.error("Error loading sessions: ", err);
+                document.getElementById('selected-session').innerHTML = `<option value="default">Active Session</option>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadAcademicSessions);
 
         function getSubjectFullTitle(prefix, isSenior, dept = "None") {
             if (!isSenior) {
@@ -444,6 +555,9 @@
 
         async function fetchStudentTermScores() {
             const chosenTerm = document.getElementById('selected-term').value;
+            const sessionDropdown = document.getElementById('selected-session');
+            const chosenSessionId = sessionDropdown.value;
+            const chosenSessionName = sessionDropdown.options[sessionDropdown.selectedIndex]?.text || "Current Session";
             const currentStudentId = localStorage.getItem('current_student_id');
             const localSessionId = localStorage.getItem('active_session_id');
 
@@ -467,31 +581,33 @@
 
             // Concurrent session hijacking safety check
             if (student.current_session_id !== localSessionId) {
-                alert(" Access Denied: This Student account has been logged in from another device or browser window. Disconnecting session.");
+                alert("Access Denied: This Student account has been logged in from another device. Disconnecting session.");
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
             }
 
+            // Dynamic Query filtering by both chosen term and session id
             const { data: termRecord, error: recordErr } = await supabaseClient
                 .from('student_results')
                 .select('*')
                 .eq('student_id', currentStudentId)
                 .eq('term', chosenTerm)
+                .eq('session_id', chosenSessionId)
                 .maybeSingle();
 
             if (recordErr) {
-                alert("Error pulling term data columns: " + recordErr.message);
+                alert("Error pulling term data: " + recordErr.message);
                 return;
             }
 
             if (!termRecord) {
-                alert("No compiled database record found for your account under the chosen term framework.");
+                alert(`No compiled database record found for your account under the chosen term framework (${chosenTerm} - ${chosenSessionName}).`);
                 return;
             }
 
             if (termRecord.ledger_submitted === false) {
-                alert(" Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
+                alert("Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
                 return;
             }
 
@@ -523,8 +639,8 @@
             document.getElementById('card-student-name').innerText = student.admission_number || "Unnamed Student";
             document.getElementById('card-class-count').innerText = totalInClass;
             document.getElementById('card-class-arm').innerText = assignedClassStr;
-            document.getElementById('card-term').innerText = chosenTerm.toUpperCase();
-            document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL REPORT CARD`;
+            document.getElementById('card-term').innerText = `${chosenTerm.toUpperCase()} (${chosenSessionName})`;
+            document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL REPORT CARD — ${chosenSessionName}`;
             document.getElementById('card-dept').innerText = dept;
             document.getElementById('card-attendance-log').innerText = `${termRecord.days_present || 0}/90`;
 
