@@ -604,7 +604,7 @@
                 const { error: resetErr } = await supabaseClient
                     .from('academic_sessions')
                     .update({ is_active: false })
-                    .neq('id', '00000000-0000-0000-0000-000000000000'); // Generic safe execution filter
+                    .neq('id', -1);
 
                 if (resetErr) throw resetErr;
 
@@ -622,7 +622,6 @@
                 alert("Failed to modify active session records: " + err.message);
             }
         }
-
         async function fetchTeachers() {
             const tbody = document.getElementById('staff-registry-rows');
             const selectDropdown = document.getElementById('assign-staff-select');
