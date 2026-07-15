@@ -586,7 +586,7 @@
 
                 // Verify that the locally cached session token matches the database value
                 if (user.current_session_id !== localSessionId) {
-                    alert("🔒 Access Denied: This Faculty account has been logged in from another device or browser tab. You have been disconnected.");
+                    alert(" Access Denied: This Faculty account has been logged in from another device or browser tab. You have been disconnected.");
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -750,7 +750,8 @@
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
-                .eq('is_approved', true);
+                .eq('is_approved', true)
+                .eq('is_active', true);
 
             if (studentError) {
                 alert("Failed to query student registry: " + studentError.message);
