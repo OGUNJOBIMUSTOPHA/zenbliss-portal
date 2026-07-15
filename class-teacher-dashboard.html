@@ -720,7 +720,7 @@
             const thRow1 = document.getElementById('dynamic-th-row-1');
             const thRow2 = document.getElementById('dynamic-th-row-2');
 
-            let th1Html = `< th rowspan = "2" class="student-name-cell" > Student Full Name</th > `;
+            let th1Html = `<th rowspan = "2" class="student-name-cell" > Student Full Name</th> `;
             let th2Html = ``;
 
             activePrefixes.forEach(pref => {
@@ -728,17 +728,17 @@
                 if (isSenior && pref === 'crk') {
                     title = "C.R.K / Marketing";
                 }
-                th1Html += `< th colspan = "4" class="subject-header-group" > ${title}</th > `;
-                th2Html += `< th > CA1</th ><th>CA2</th><th>EX</th><th>TOT</th>`;
+                th1Html += `<th colspan="4" class="subject-header-group">${title}</th>`;
+                th2Html += `<th>CA1</th><th>CA2</th><th>EX</th><th>TOT</th>`;
             });
 
-            th1Html += `< th rowspan = "2" style = "background:#2D3748;" > Grand Total</th ><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action Operations</th>`;
+            th1Html += `<th rowspan = "2" style = "background:#2D3748;" > Grand Total</th ><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action Operations</th>`;
 
             thRow1.innerHTML = th1Html;
             thRow2.innerHTML = th2Html;
 
             const tbody = document.getElementById('dynamic-student-rows');
-            tbody.innerHTML = `< tr > <td colspan="65" style="text-align:center;">Querying database records...</td></tr > `;
+            tbody.innerHTML = `<tr > <td colspan="65" style="text-align:center;">Querying database records...</td></tr> `;
 
             const { data: students, error: studentError } = await supabaseClient
                 .from('users')
