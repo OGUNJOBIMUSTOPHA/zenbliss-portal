@@ -966,7 +966,7 @@
                         if (prefix === 'lit' && (dept === "Science" || dept === "Commercial")) isLocked = true;
                         if (prefix === 'phy' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
                         if (prefix === 'chem' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
-                        if (prefix === 'fmath' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'fmath' && dept === "Humanity") isLocked = true;
                         if (prefix === 'td' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
                     } else {
                         if (['econ', 'comm', 'gov', 'acc', 'lit', 'phy', 'chem', 'fmath', 'td'].includes(prefix)) {
