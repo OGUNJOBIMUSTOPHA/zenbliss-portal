@@ -667,8 +667,6 @@
             `;
         }
 
-        const uniqueTerms = [...new Set(data.map(item => item.term))].filter(Boolean).sort();
-
         if (uniqueTerms.length === 0) {
             termSelector.innerHTML = '<option value="">No opened terms from Admin</option>';
             return;
