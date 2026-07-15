@@ -667,19 +667,6 @@
             `;
         }
 
-        if (uniqueTerms.length === 0) {
-            termSelector.innerHTML = '<option value="">No opened terms from Admin</option>';
-            return;
-        }
-
-        termSelector.innerHTML = '';
-        uniqueTerms.forEach(term => {
-            const optionLabel = term.endsWith('Term') ? `${term} Ledger` : term;
-            const isSelected = term === "3rd Term" ? "selected" : "";
-            termSelector.innerHTML += `< option value = "${term}" ${isSelected}> ${optionLabel}</option > `;
-        });
-        }
-
         function isSubjectLockedForTrack(prefix, isSenior, dept) {
             if (isSenior) {
                 if (['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(prefix)) {
