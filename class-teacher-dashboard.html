@@ -316,9 +316,9 @@
                 </p>
             </div>
             <div class="profile-actions">
-                <span
+                <span id="teacher-sessions-display"
                     style="background:#EBF8FF; color:#2B6CB0; padding:8px 12px; font-weight: bold; border-radius:4px;">Session
-                    2026/2027</span>
+                    Loading...</span>
                 <button onclick="handleLogout()" class="btn-submit accent-red"
                     style="padding:8px 15px; font-size:0.85rem; cursor: pointer;"> Log Out</button>
             </div>
@@ -629,7 +629,25 @@
                         classSelector.innerHTML += `<option value="${cls}">${cls}</option>`;
                     });
                 }
+                // 1. Fetch the currently active academic session
+                const { data: activeSession, error: sessionError } = await supabaseClient
+                    .from('academic_sessions')
+                    .select('*')
+                    .eq('is_active', true)
+                    .single();
 
+                if (!sessionError && activeSession) {
+                    // 2. Update the header label with the real active session name (e.g. "Session 2025/2026")
+                    const sessionSpan = document.getElementById('teacher-session-display');
+                    if (sessionSpan) {
+                        sessionSpan.textContent = `Session ${activeSession.name}`;
+                    }
+
+                    // 3. Keep track of the active session ID globally for database queries
+                    window.currentActiveSessionId = activeSession.id;
+                } else {
+                    console.warn("Could not retrieve an active academic session state:", sessionError);
+                }
                 // Dynamic dropdown terms initialized strictly by Admin inside the database
                 await populateTargetTermsDropdown();
 
