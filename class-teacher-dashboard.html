@@ -659,34 +659,27 @@
         async function populateTargetTermsDropdown() {
             const termSelector = document.getElementById('target-compilation-term');
             if (!termSelector) return;
-
-            const { data, error } = await supabaseClient
-                .from('student_results')
-                .select('term');
-
-            if (error) {
-                console.error("Could not fetch active system compilation targets: ", error.message);
-                termSelector.innerHTML = `
-                    <option value="1st Term">First Term Ledger</option>
+            //This puts the terms directly into thevdropdown, ignoring weather student_results is empty!
+            termSelector.innerHTML = `
+                <option value="1st Term">First Term Ledger</option>
                     <option value="2nd Term">Second Term Ledger</option>
-                    <option value="3rd Term" selected>Third Term Ledger (Current)</option>
-                `;
-                return;
-            }
+                    <option value="3rd Term">Third Term Ledger</option>
+            `;
+        }
 
-            const uniqueTerms = [...new Set(data.map(item => item.term))].filter(Boolean).sort();
+        const uniqueTerms = [...new Set(data.map(item => item.term))].filter(Boolean).sort();
 
-            if (uniqueTerms.length === 0) {
-                termSelector.innerHTML = '<option value="">No opened terms from Admin</option>';
-                return;
-            }
+        if (uniqueTerms.length === 0) {
+            termSelector.innerHTML = '<option value="">No opened terms from Admin</option>';
+            return;
+        }
 
-            termSelector.innerHTML = '';
-            uniqueTerms.forEach(term => {
-                const optionLabel = term.endsWith('Term') ? `${term} Ledger` : term;
-                const isSelected = term === "3rd Term" ? "selected" : "";
-                termSelector.innerHTML += `<option value="${term}" ${isSelected}>${optionLabel}</option>`;
-            });
+        termSelector.innerHTML = '';
+        uniqueTerms.forEach(term => {
+            const optionLabel = term.endsWith('Term') ? `${term} Ledger` : term;
+            const isSelected = term === "3rd Term" ? "selected" : "";
+            termSelector.innerHTML += `< option value = "${term}" ${isSelected}> ${optionLabel}</option > `;
+        });
         }
 
         function isSubjectLockedForTrack(prefix, isSenior, dept) {
@@ -742,7 +735,7 @@
             const thRow1 = document.getElementById('dynamic-th-row-1');
             const thRow2 = document.getElementById('dynamic-th-row-2');
 
-            let th1Html = `<th rowspan="2" class="student-name-cell">Student Full Name</th>`;
+            let th1Html = `< th rowspan = "2" class="student-name-cell" > Student Full Name</th > `;
             let th2Html = ``;
 
             activePrefixes.forEach(pref => {
@@ -750,17 +743,17 @@
                 if (isSenior && pref === 'crk') {
                     title = "C.R.K / Marketing";
                 }
-                th1Html += `<th colspan="4" class="subject-header-group">${title}</th>`;
-                th2Html += `<th>CA1</th><th>CA2</th><th>EX</th><th>TOT</th>`;
+                th1Html += `< th colspan = "4" class="subject-header-group" > ${title}</th > `;
+                th2Html += `< th > CA1</th ><th>CA2</th><th>EX</th><th>TOT</th>`;
             });
 
-            th1Html += `<th rowspan="2" style="background:#2D3748;">Grand Total</th><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action Operations</th>`;
+            th1Html += `< th rowspan = "2" style = "background:#2D3748;" > Grand Total</th ><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action Operations</th>`;
 
             thRow1.innerHTML = th1Html;
             thRow2.innerHTML = th2Html;
 
             const tbody = document.getElementById('dynamic-student-rows');
-            tbody.innerHTML = `<tr><td colspan="65" style="text-align:center;">Querying database records...</td></tr>`;
+            tbody.innerHTML = `< tr > <td colspan="65" style="text-align:center;">Querying database records...</td></tr > `;
 
             const { data: students, error: studentError } = await supabaseClient
                 .from('users')
@@ -781,10 +774,10 @@
 
             tbody.innerHTML = "";
             const totalStudentsCount = classStudents.length;
-            document.getElementById('class-size-display-badge').innerText = `Total Students: ${totalStudentsCount}`;
+            document.getElementById('class-size-display-badge').innerText = `Total Students: ${totalStudentsCount} `;
 
             if (totalStudentsCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="65" style="text-align:center; color:#a0aec0;">No approved students found registered under ${chosenClass}.</td></tr>`;
+                tbody.innerHTML = `< tr > <td colspan="65" style="text-align:center; color:#a0aec0;">No approved students found registered under ${chosenClass}.</td></tr > `;
                 return;
             }
 
@@ -830,9 +823,9 @@
                 activePrefixes.forEach(pref => {
                     const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
 
-                    const ca1 = record[`${pref}_ca1`] !== undefined && record[`${pref}_ca1`] !== null ? record[`${pref}_ca1`] : "";
-                    const ca2 = record[`${pref}_ca2`] !== undefined && record[`${pref}_ca2`] !== null ? record[`${pref}_ca2`] : "";
-                    const ex = record[`${pref}_ex`] !== undefined && record[`${pref}_ex`] !== null ? record[`${pref}_ex`] : "";
+                    const ca1 = record[`${pref} _ca1`] !== undefined && record[`${pref} _ca1`] !== null ? record[`${pref} _ca1`] : "";
+                    const ca2 = record[`${pref} _ca2`] !== undefined && record[`${pref} _ca2`] !== null ? record[`${pref} _ca2`] : "";
+                    const ex = record[`${pref} _ex`] !== undefined && record[`${pref} _ex`] !== null ? record[`${pref} _ex`] : "";
 
                     let total = 0;
                     let hasScore = false;
@@ -845,14 +838,14 @@
                     }
 
                     const tdClassStyle = isLocked ? `class="disabled-subject-cell"` : ``;
-                    const elementDisabledState = (isLocked || isLedgerSubmitted) ? `disabled placeholder="-"` : ``;
+                    const elementDisabledState = (isLocked || isLedgerSubmitted) ? `disabled placeholder = "-"` : ``;
 
                     subjectsHtml += `
-                        <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ca1" min="0" max="20" value="${isLocked ? '' : ca1}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
+                < td ${tdClassStyle}><input type="number" class="score-input ${pref}-ca1" min="0" max="20" value="${isLocked ? '' : ca1}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ca2" min="0" max="20" value="${isLocked ? '' : ca2}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td ${tdClassStyle}><input type="number" class="score-input ${pref}-ex" min="0" max="60" value="${isLocked ? '' : ex}" ${elementDisabledState} ${globalDisabledAttr} oninput="calculateMatrixRow(this)"></td>
                         <td ${tdClassStyle}><span class="sub-total-span ${pref}-tot">${(hasScore && !isLocked) ? total : '-'}</span></td>
-                    `;
+            `;
                 });
 
                 const globalAvg = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
@@ -868,24 +861,24 @@
                 const existingSport = record.sport_rating || "5";
 
                 tbody.innerHTML += `
-                    <tr class="ledger-row" 
-                        data-id="${student.id}" 
-                        data-record-id="${record.id || ''}"
-                        data-dept="${dept}"
-                        data-comment="${encodeURIComponent(existingComment)}"
-                        data-present="${existingDaysPresent}"
-                        data-total-students="${totalStudentsCount}"
-                        data-punctual="${existingPunctual}"
-                        data-leadership="${existingLeadership}"
-                        data-maturity="${existingMaturity}"
-                        data-cleanliness="${existingCleanliness}"
-                        data-handwriting="${existingHandwriting}"
-                        data-hardwork="${existingHardwork}"
-                        data-sport="${existingSport}">
-                        <td class="student-name-cell">
-                            ${student.admission_number || 'Unnamed Student'}
-                            <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
-                        </td>
+                < tr class="ledger-row"
+            data - id="${student.id}"
+            data - record - id="${record.id || ''}"
+            data - dept="${dept}"
+            data - comment="${encodeURIComponent(existingComment)}"
+            data - present="${existingDaysPresent}"
+            data - total - students="${totalStudentsCount}"
+            data - punctual="${existingPunctual}"
+            data - leadership="${existingLeadership}"
+            data - maturity="${existingMaturity}"
+            data - cleanliness="${existingCleanliness}"
+            data - handwriting="${existingHandwriting}"
+            data - hardwork="${existingHardwork}"
+            data - sport="${existingSport}" >
+                <td class="student-name-cell">
+                    ${student.admission_number || 'Unnamed Student'}
+                    <br><span style="font-size:0.7rem; color:#718096; font-weight:normal;">Dept: ${dept}</span>
+                </td>
                         ${subjectsHtml}
                         <td><span class="row-total" style="font-weight:bold;">${grandTotal}</span></td>
                         <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">${globalAvg}</span></td>
@@ -895,7 +888,7 @@
                                 ${isLedgerSubmitted ? 'View Card' : 'Configure Card'}
                             </button>
                         </td>
-                    </tr>
+                    </tr >
                 `;
             });
 
@@ -944,9 +937,9 @@
             activePrefixes.forEach(pref => {
                 const isLocked = isSubjectLockedForTrack(pref, isSenior, dept);
 
-                const ca1Raw = row.querySelector(`.${pref}-ca1`).value;
-                const ca2Raw = row.querySelector(`.${pref}-ca2`).value;
-                const exRaw = row.querySelector(`.${pref}-ex`).value;
+                const ca1Raw = row.querySelector(`.${pref} -ca1`).value;
+                const ca2Raw = row.querySelector(`.${pref} -ca2`).value;
+                const exRaw = row.querySelector(`.${pref} -ex`).value;
 
                 if (!isLocked && (ca1Raw !== "" || ca2Raw !== "" || exRaw !== "")) {
                     const ca1 = parseFloat(ca1Raw) || 0;
@@ -954,11 +947,11 @@
                     const ex = parseFloat(exRaw) || 0;
                     const total = ca1 + ca2 + ex;
 
-                    row.querySelector(`.${pref}-tot`).innerText = total;
+                    row.querySelector(`.${pref} -tot`).innerText = total;
                     grandTotal += total;
                     scoredSubjectsCount++;
                 } else {
-                    row.querySelector(`.${pref}-tot`).innerText = "-";
+                    row.querySelector(`.${pref} -tot`).innerText = "-";
                 }
             });
 
@@ -1014,17 +1007,17 @@
                         (isSenior && ['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref));
 
                     if (isLocked) {
-                        updatePayload[`${pref}_ca1`] = null;
-                        updatePayload[`${pref}_ca2`] = null;
-                        updatePayload[`${pref}_ex`] = null;
+                        updatePayload[`${pref} _ca1`] = null;
+                        updatePayload[`${pref} _ca2`] = null;
+                        updatePayload[`${pref} _ex`] = null;
                     } else {
-                        const ca1 = row.querySelector(`.${pref}-ca1`).value;
-                        const ca2 = row.querySelector(`.${pref}-ca2`).value;
-                        const ex = row.querySelector(`.${pref}-ex`).value;
+                        const ca1 = row.querySelector(`.${pref} -ca1`).value;
+                        const ca2 = row.querySelector(`.${pref} -ca2`).value;
+                        const ex = row.querySelector(`.${pref} -ex`).value;
 
-                        updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
-                        updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
-                        updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                        updatePayload[`${pref} _ca1`] = ca1 !== "" ? Number(ca1) : null;
+                        updatePayload[`${pref} _ca2`] = ca2 !== "" ? Number(ca2) : null;
+                        updatePayload[`${pref} _ex`] = ex !== "" ? Number(ex) : null;
                     }
                 });
 
@@ -1033,7 +1026,7 @@
                     .upsert(updatePayload);
 
                 if (error) {
-                    console.error(`Error archiving records for student ${studentId}:`, error.message);
+                    console.error(`Error archiving records for student ${studentId}: `, error.message);
                     errorsOccurred = true;
                 }
             }
@@ -1051,7 +1044,7 @@
 
         function loadToReportCardView(studentId, name, isSubmitted = false) {
             selectedTargetStudentId = studentId;
-            const row = document.querySelector(`tr[data-id="${studentId}"]`);
+            const row = document.querySelector(`tr[data - id= "${studentId}"]`);
 
             const avgText = row.querySelector('.row-avg').innerText;
             const avgPercentage = parseFloat(avgText) || 0;
@@ -1110,7 +1103,7 @@
                     return;
                 }
 
-                const row = document.querySelector(`tr[data-id="${studentId}"]`);
+                const row = document.querySelector(`tr[data - id= "${studentId}"]`);
                 const recordId = row.getAttribute('data-record-id');
                 const chosenTerm = document.getElementById('target-compilation-term').value;
                 const chosenClass = document.getElementById('teacher-class-selector').value;
@@ -1152,17 +1145,17 @@
                         (isSenior && ['bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref));
 
                     if (isLocked) {
-                        updatePayload[`${pref}_ca1`] = null;
-                        updatePayload[`${pref}_ca2`] = null;
-                        updatePayload[`${pref}_ex`] = null;
+                        updatePayload[`${pref} _ca1`] = null;
+                        updatePayload[`${pref} _ca2`] = null;
+                        updatePayload[`${pref} _ex`] = null;
                     } else {
-                        const ca1 = row.querySelector(`.${pref}-ca1`).value;
-                        const ca2 = row.querySelector(`.${pref}-ca2`).value;
-                        const ex = row.querySelector(`.${pref}-ex`).value;
+                        const ca1 = row.querySelector(`.${pref} -ca1`).value;
+                        const ca2 = row.querySelector(`.${pref} -ca2`).value;
+                        const ex = row.querySelector(`.${pref} -ex`).value;
 
-                        updatePayload[`${pref}_ca1`] = ca1 !== "" ? Number(ca1) : null;
-                        updatePayload[`${pref}_ca2`] = ca2 !== "" ? Number(ca2) : null;
-                        updatePayload[`${pref}_ex`] = ex !== "" ? Number(ex) : null;
+                        updatePayload[`${pref} _ca1`] = ca1 !== "" ? Number(ca1) : null;
+                        updatePayload[`${pref} _ca2`] = ca2 !== "" ? Number(ca2) : null;
+                        updatePayload[`${pref} _ex`] = ex !== "" ? Number(ex) : null;
                     }
                 });
 
@@ -1212,7 +1205,7 @@
                 return;
             }
 
-            if (!confirm(`Are you sure you want to officially submit the ${chosenTerm} ledger for ${chosenClass} to the admin?`)) {
+            if (!confirm(`Are you sure you want to officially submit the ${chosenTerm} ledger for ${chosenClass} to the admin ? `)) {
                 return;
             }
 
@@ -1232,7 +1225,7 @@
                     .eq('term', chosenTerm);
 
                 if (error) {
-                    console.error(`Error setting lock status for student ${studentId}:`, error.message);
+                    console.error(`Error setting lock status for student ${studentId}: `, error.message);
                     errorsOccurred = true;
                 }
             }
