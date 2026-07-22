@@ -474,8 +474,8 @@
                             <h4
                                 style="margin-bottom: 10px; color: var(--primary-blue); text-transform:uppercase; font-size:0.9rem; border-bottom:1px solid #CBD5E0; padding-bottom:4px;">
                                 Attendance Log</h4>
-                            <label>Days Present (Max 90)</label>
-                            <input type="number" id="card-attendance" min="0" max="90" placeholder="e.g. 85"
+                            <label>Days Present (Max 122)</label>
+                            <input type="number" id="card-attendance" min="0" max="122" placeholder="e.g. 100"
                                 style="padding:10px; border-radius:6px; border:1px solid #CBD5E0; width:100%; margin-top:5px;">
                         </div>
                     </div>
@@ -491,7 +491,7 @@
                         </div>
                     </div>
                     <div style="text-align:right; margin-top:15px;">
-                        <button class="btn-submit primary-blue" id="commit-btn-sync">Save Individual Card
+                        <button type="button" class="btn-submit primary-blue" id="commit-btn-sync">Save Student Card
                             Details</button>
                     </div>
                 </div>
@@ -586,7 +586,7 @@
 
                 // Verify that the locally cached session token matches the database value
                 if (user.current_session_id !== localSessionId) {
-                    alert(" Access Denied: This Faculty account has been logged in from another device or browser tab. You have been disconnected.");
+                    alert(" Access Denied: This Staff account has been logged in from another device or browser tab. You have been disconnected.");
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -972,7 +972,7 @@
             const rows = document.querySelectorAll('#dynamic-student-rows .ledger-row');
             if (rows.length === 0) {
                 alert("No student data available to save.");
-                saveBtn.innerText = "💾 Save Ledger Progress";
+                saveBtn.innerText = " Save Ledger Progress";
                 saveBtn.disabled = false;
                 return;
             }
@@ -1234,6 +1234,24 @@
                 returnToGate();
             }
         }
+        document.getElementById('commit-btn-sync').addEventListener('click', async function (event) {
+            // 1. Prevent the page from reloading
+            event.preventDefault();
+
+            try {
+                // 2. Perform your Supabase save update
+                const { error } = await supabaseClient
+                    .from('student_cards')
+                    .update({ /* card details here */ })
+                    .eq('student_id', selectedTargetStudentId);
+
+                if (error) throw error;
+
+                alert("Student card details saved!");
+            } catch (err) {
+                alert("Error saving details: " + err.message);
+            }
+        });
     </script>
 </body>
 
