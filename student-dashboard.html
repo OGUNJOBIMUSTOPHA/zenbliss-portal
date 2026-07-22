@@ -583,7 +583,7 @@
                 return;
             }
             const welcomeElement = document.getElementById('student-welcome-heading');
-            if (welcomeElement && student.admission_number) { welcomeElement.innerText = 'Welcome ${student.admission_number}'; }
+            if (welcomeElement && student.admission_number) { welcomeElement.innerText = `Welcome ${student.admission_number}`; }
             // Concurrent session hijacking safety check
             if (student.current_session_id !== localSessionId) {
                 alert("Access Denied: This Student account has been logged in from another device. Disconnecting session.");
@@ -725,6 +725,10 @@
             document.getElementById('term-gate-box').classList.add('hidden');
             document.getElementById('dashboard-workspace').classList.remove('hidden');
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStudentTermScores();
+
+        });
     </script>
 </body>
 
