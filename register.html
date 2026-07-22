@@ -223,32 +223,77 @@
             const department = departmentSelect.value || "None";
             const userPassword = document.getElementById('password').value;
 
+
+        }
+async function registerStudent(studentData) {
+                const { name, department, isSenior } = studentData;
+
+                try {
+                    // Build the check query based on student level
+                    let query = supabaseClient
+                        .from('users')
+                        .select('id')
+                        .ilike('admission_number', name.trim()); // 'ilike' makes the name check case-insensitive
+
+                    // If senior school, also check for matching department
+                    if (isSenior && department) {
+                        query = query.eq('department', department);
+                    }
+
+                    const { data: existingUsers, error: checkError } = await query;
+
+                    if (checkError) {
+                        console.error("Error checking duplicates:", checkError);
+                        alert("An error occurred while verifying account information.");
+                        return;
+                    }
+
+                    // If a match is found, block registration and show the alert
+                    if (existingUsers && existingUsers.length > 0) {
+                        alert("An account with the same information is already in existence.");
+                        return; // Stop the registration process
+                    }
+
+                    // Proceed with inserting the new student...
+                    const { data: newStudent, error: insertError } = await supabaseClient
+                        .from('users')
+                        .insert([studentData]);
+
+                    if (insertError) throw insertError;
+
+                    alert("Account registered successfully!");
+
+                } catch (err) {
+                    console.error("Registration failed:", err);
+                    alert("Registration failed: " + err.message);
+                }
+            }
             // Direct cloud pipeline transmission 
             const { data, error } = await supabaseClient
-                .from('users')
-                .insert([
-                    {
-                        admission_number: fullName, // Saves Name into layout field token slot directly
-                        password: userPassword,
-                        role: 'student',
-                        is_approved: false, // Ensures row appears on Admin pending screen
-                        assigned_classes: [selectedClass], // Matched array allocation 
-                        department: department,
-                        phone: phoneNumber // Land tracking data asset field row mapping safely
-                    }
-                ]);
+            .from('users')
+            .insert([
+                {
+                    admission_number: fullName, // Saves Name into layout field token slot directly
+                    password: userPassword,
+                    role: 'student',
+                    is_approved: false, // Ensures row appears on Admin pending screen
+                    assigned_classes: [selectedClass], // Matched array allocation 
+                    department: department,
+                    phone: phoneNumber // Land tracking data asset field row mapping safely
+                }
+            ]);
 
-            if (error) {
-                alert("Registration Submission Failed: " + error.message);
-                return;
-            }
+        if (error) {
+            alert("Registration Submission Failed: " + error.message);
+            return;
+        }
 
-            alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
+        alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
 
-            // Resetting view layers cleanly
-            this.reset();
-            departmentGroup.classList.add('hidden');
-            departmentSelect.removeAttribute('required');
+        // Resetting view layers cleanly
+        this.reset();
+        departmentGroup.classList.add('hidden');
+        departmentSelect.removeAttribute('required');
         });
     </script>
 
