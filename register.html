@@ -214,33 +214,27 @@
             }
         });
 
-        document.getElementById('registrationForm').addEventListener('submit', async function (e) 
+        document.getElementById('registrationForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-        const fullName = document.getElementById('fullName').value.trim();
-        const phoneNumber = document.getElementById('phoneNumber').value.trim();
-        const selectedClass = document.getElementById('classSelect').value;
-        const department = departmentSelect.value || "None";
-        const userPassword = document.getElementById('password').value;
-
-
-
-        async function registerStudent(studentData) {
-            const { name, department, isSenior } = studentData;
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const selectedClass = document.getElementById('classSelect').value;
+            const department = departmentSelect.value || "None";
+            const userPassword = document.getElementById('password').value;
 
             try {
-                // Build the check query based on student level
-                let query = supabaseClient
+                // Check if account already exists with same name (and department if senior)
+                let checkQuery = supabaseClient
                     .from('users')
                     .select('id')
-                    .ilike('admission_number', name.trim()); // 'ilike' makes the name check case-insensitive
+                    .ilike('admission_number', fullName);
 
-                // If senior school, also check for matching department
-                if (isSenior && department) {
-                    query = query.eq('department', department);
+                if (department && department !== "None") {
+                    checkQuery = checkQuery.eq('department', department);
                 }
 
-                const { data: existingUsers, error: checkError } = await query;
+                const { data: existingUsers, error: checkError } = await checkQuery;
 
                 if (checkError) {
                     console.error("Error checking duplicates:", checkError);
@@ -248,52 +242,42 @@
                     return;
                 }
 
-                // If a match is found, block registration and show the alert
                 if (existingUsers && existingUsers.length > 0) {
                     alert("An account with the same information is already in existence.");
-                    return; // Stop the registration process
+                    return;
                 }
 
-                // Proceed with inserting the new student...
-                const { data: newStudent, error: insertError } = await supabaseClient
+                // Direct cloud pipeline transmission 
+                const { data, error } = await supabaseClient
                     .from('users')
-                    .insert([studentData]);
+                    .insert([
+                        {
+                            admission_number: fullName,
+                            password: userPassword,
+                            role: 'student',
+                            is_approved: false,
+                            assigned_classes: [selectedClass],
+                            department: department,
+                            phone: phoneNumber
+                        }
+                    ]);
 
-                if (insertError) throw insertError;
+                if (error) {
+                    alert("Registration Submission Failed: " + error.message);
+                    return;
+                }
 
-                alert("Account registered successfully!");
+                alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
+
+                // Resetting view layers cleanly
+                this.reset();
+                departmentGroup.classList.add('hidden');
+                departmentSelect.removeAttribute('required');
 
             } catch (err) {
-                console.error("Registration failed:", err);
+                console.error("Registration error:", err);
                 alert("Registration failed: " + err.message);
             }
-        }
-        // Direct cloud pipeline transmission 
-        const { data, error } = await supabaseClient
-            .from('users')
-            .insert([
-                {
-                    admission_number: fullName, // Saves Name into layout field token slot directly
-                    password: userPassword,
-                    role: 'student',
-                    is_approved: false, // Ensures row appears on Admin pending screen
-                    assigned_classes: [selectedClass], // Matched array allocation 
-                    department: department,
-                    phone: phoneNumber // Land tracking data asset field row mapping safely
-                }
-            ]);
-
-        if (error) {
-            alert("Registration Submission Failed: " + error.message);
-            return;
-        }
-
-        alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
-
-        // Resetting view layers cleanly
-        this.reset();
-        departmentGroup.classList.add('hidden');
-        departmentSelect.removeAttribute('required');
         });
     </script>
 
