@@ -490,7 +490,7 @@
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
 
-        // Fetch academic sessions dynamically from the DB, matching teacher configuration
+        // Fetch academic sessions dynamically from the DB
         async function loadAcademicSessions() {
             try {
                 const { data, error } = await supabaseClient
@@ -523,6 +523,61 @@
         }
 
         window.addEventListener('DOMContentLoaded', loadAcademicSessions);
+
+        // Prompts promoted SS 1 students to select their department
+        async function checkSeniorDepartmentSelection(student) {
+            let assignedClassStr = "";
+            if (student.assigned_classes) {
+                if (Array.isArray(student.assigned_classes)) {
+                    assignedClassStr = student.assigned_classes[0] || "";
+                } else {
+                    assignedClassStr = student.assigned_classes.toString().replace(/[{}"\\[\]]/g, '').split(',')[0];
+                }
+            }
+
+            const isSenior = assignedClassStr.startsWith("SS");
+            const needsDepartment = !student.department || student.department.trim() === "" || student.department === "General" || student.department === "None";
+
+            if (isSenior && needsDepartment) {
+                let chosenDept = "";
+
+                while (!["Science", "Commercial", "Humanity"].includes(chosenDept)) {
+                    const input = prompt(
+                        `🎉 Welcome to Senior Secondary (${assignedClassStr})!\n\nPlease select your Academic Department:\n\n• Science\n• Commercial\n• Humanity\n\n(Type Science, Commercial, or Humanity below):`,
+                        "Science"
+                    );
+
+                    if (input === null) {
+                        alert("Department selection is required to access your senior portal.");
+                        localStorage.clear();
+                        window.location.replace("index.html");
+                        return false;
+                    }
+
+                    const formattedInput = input.trim();
+                    if (["Science", "Commercial", "Humanity"].includes(formattedInput)) {
+                        chosenDept = formattedInput;
+                    } else {
+                        alert("Invalid selection! Please type 'Science', 'Commercial', or 'Humanity'.");
+                    }
+                }
+
+                // Update department in Supabase database
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({ department: chosenDept })
+                    .eq('id', student.id);
+
+                if (error) {
+                    alert("Failed to save department selection: " + error.message);
+                    return false;
+                }
+
+                alert(`🎉 Congratulations! Your department is set to: ${chosenDept}`);
+                student.department = chosenDept;
+            }
+            return true;
+        }
 
         function getSubjectFullTitle(prefix, isSenior, dept = "None") {
             if (!isSenior) {
@@ -582,8 +637,14 @@
                 alert("Failed to synchronize academic profiles structure.");
                 return;
             }
+
+            // Department Check & Selection Prompt for Promoted Seniors
+            const passedDeptCheck = await checkSeniorDepartmentSelection(student);
+            if (!passedDeptCheck) return;
+
             const welcomeElement = document.getElementById('student-welcome-heading');
             if (welcomeElement && student.admission_number) { welcomeElement.innerText = `Welcome ${student.admission_number}`; }
+
             // Concurrent session hijacking safety check
             if (student.current_session_id !== localSessionId) {
                 alert("Access Denied: This Student account has been logged in from another device. Disconnecting session.");
@@ -725,9 +786,9 @@
             document.getElementById('term-gate-box').classList.add('hidden');
             document.getElementById('dashboard-workspace').classList.remove('hidden');
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             fetchStudentTermScores();
-
         });
     </script>
 </body>

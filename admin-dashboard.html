@@ -95,6 +95,37 @@
             padding: 0 20px;
         }
 
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 20px 25px;
+            flex: 1;
+            max-width: 320px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+        }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -260,6 +291,7 @@
             }
 
             .portal-header,
+            .stats-bar,
             .dashboard-grid,
             .control-box,
             .broadsheet-card>h2,
@@ -322,32 +354,49 @@
 
     <div id="dashboard-content-wrapper" class="admin-container hidden">
 
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3>Total Active Students</h3>
+                <div class="stat-value" id="total-students-count">0</div>
+            </div>
+        </div>
+
         <div class="control-box" style="margin-bottom: 30px;">
-            <h2>Configure active term period & Academic Session</h2>
-            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Setting a session to active determines
-                the academic framework students and teachers see automatically when they log into their portals.</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
-                <div style="flex: 1; min-width: 200px;">
-                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Current
-                        Active Session</label>
-                    <select id="active-session-selector"
-                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                    </select>
-                </div>
-                <div style="flex: 1; min-width: 200px;">
-                    <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Target
-                        Work Term</label>
-                    <select id="active-term-selector"
-                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                        <option value="1st Term">First Term Report</option>
-                        <option value="2nd Term">Second Term Report</option>
-                        <option value="3rd Term" selected>Third Term Report</option>
-                    </select>
-                </div>
-                <div>
-                    <button onclick="handleActiveSessionUpdate()"
-                        style="padding: 10px 20px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 42px;">Publish
-                    </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 style="margin:0; border:none; padding:0;">Configure Active Term Period & Academic Session</h2>
+                <button id="toggle-term-config-btn" onclick="toggleTermConfigForm()"
+                    style="padding: 8px 16px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: none;">
+                    ⚙️ Configure New Term
+                </button>
+            </div>
+
+            <div id="term-config-form-body">
+                <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Setting a session to active
+                    determines the academic framework students and teachers see automatically when they log into their
+                    portals.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label
+                            style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Current
+                            Active Session</label>
+                        <select id="active-session-selector"
+                            style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block;">Target
+                            Work Term</label>
+                        <select id="active-term-selector"
+                            style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
+                            <option value="1st Term">First Term Report</option>
+                            <option value="2nd Term">Second Term Report</option>
+                            <option value="3rd Term" selected>Third Term Report</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button onclick="handleActiveSessionUpdate()"
+                            style="padding: 10px 20px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 42px;">Publish</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -506,19 +555,47 @@
         ];
 
         window.onload = async function () {
-            // Guardrail execution check to inspect simultaneous terminal parameters
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
-            // Make the system interface visible only when the structural tokens pass
             document.getElementById('dashboard-content-wrapper').classList.remove('hidden');
 
+            await fetchTotalStudentsCount();
             await loadAcademicSessionsDropdown();
             fetchTeachers();
             fetchPendingApplications();
         };
 
-        // Enforce Concurrent Session Control single login routine tracking
+        // Fetch Total Active Approved Students Count
+        async function fetchTotalStudentsCount() {
+            try {
+                const { count, error } = await supabaseClient
+                    .from('users')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('role', 'student')
+                    .eq('is_approved', true);
+
+                if (error) throw error;
+                document.getElementById('total-students-count').textContent = count || 0;
+            } catch (err) {
+                console.error("Failed to fetch student count:", err.message);
+            }
+        }
+
+        // Toggle Term Configuration Visibility
+        function toggleTermConfigForm() {
+            const formBody = document.getElementById('term-config-form-body');
+            const toggleBtn = document.getElementById('toggle-term-config-btn');
+
+            if (formBody.classList.contains('hidden')) {
+                formBody.classList.remove('hidden');
+                toggleBtn.style.display = 'none';
+            } else {
+                formBody.classList.add('hidden');
+                toggleBtn.style.display = 'inline-block';
+            }
+        }
+
         async function verifyActiveAdminSession() {
             const currentAdminId = localStorage.getItem('current_admin_id');
             const localSessionId = localStorage.getItem('active_session_id');
@@ -560,7 +637,6 @@
             }
         }
 
-        // Pull active sessions dynamically to build selection parameters
         async function loadAcademicSessionsDropdown() {
             try {
                 const { data: sessions, error } = await supabaseClient
@@ -591,13 +667,31 @@
             }
         }
 
-        // Safely updates the active session to active=true and marks all other records as false
+        // Student Promotion Map
+        function getNextStudentClass(currentClass) {
+            const classProgression = {
+                "JSS 1": "JSS 2",
+                "JSS 2": "JSS 3",
+                "JSS 3": "SS 1",
+                "SS 1": "SS 2",
+                "SS 2": "SS 3",
+                "SS 3": "Graduated"
+            };
+            return classProgression[currentClass] || currentClass;
+        }
+
         async function handleActiveSessionUpdate() {
             const selectedSessionId = document.getElementById('active-session-selector').value;
             if (!selectedSessionId) {
                 alert("Please select a valid academic session target.");
                 return;
             }
+
+            const confirmRollover = confirm(
+                "Publishing a new session will promote all active students to their next class in the database (JSS 3 moves to SS 1, and SS 3 will graduate).\n\nTeacher assignments will stay unchanged.\n\nDo you want to proceed?"
+            );
+
+            if (!confirmRollover) return;
 
             try {
                 // Step 1: Force all sessions is_active states to FALSE
@@ -616,12 +710,61 @@
 
                 if (setErr) throw setErr;
 
-                alert("Academic session configurations updated successfully across all school platforms!");
+                // Step 3: Promote students in the database
+                const { data: students, error: studentFetchErr } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('role', 'student')
+                    .eq('is_approved', true);
+
+                if (studentFetchErr) throw studentFetchErr;
+
+                for (const student of students) {
+                    if (student.assigned_classes && student.assigned_classes.length > 0) {
+                        const currentClass = student.assigned_classes[0];
+                        const nextClass = getNextStudentClass(currentClass);
+
+                        if (nextClass === "Graduated") {
+                            await supabaseClient
+                                .from('users')
+                                .update({
+                                    is_approved: false,
+                                    assigned_classes: ["Graduated"]
+                                })
+                                .eq('id', student.id);
+                        } else if (currentClass === "JSS 3" && nextClass === "SS 1") {
+                            await supabaseClient
+                                .from('users')
+                                .update({
+                                    assigned_classes: ["SS 1"],
+                                    department: ""
+                                })
+                                .eq('id', student.id);
+                        } else {
+                            await supabaseClient
+                                .from('users')
+                                .update({
+                                    assigned_classes: [nextClass]
+                                })
+                                .eq('id', student.id);
+                        }
+                    }
+                }
+
+                alert("New academic session published! All student classes have been updated in the database.");
+
                 await loadAcademicSessionsDropdown();
+                await fetchTotalStudentsCount();
+
+                // Automatically hide the configuration form
+                document.getElementById('term-config-form-body').classList.add('hidden');
+                document.getElementById('toggle-term-config-btn').style.display = 'inline-block';
+
             } catch (err) {
-                alert("Failed to modify active session records: " + err.message);
+                alert("Failed to update active session: " + err.message);
             }
         }
+
         async function fetchTeachers() {
             const tbody = document.getElementById('staff-registry-rows');
             const selectDropdown = document.getElementById('assign-staff-select');
@@ -716,6 +859,7 @@
                     alert("Account permanently deleted.");
                     await fetchTeachers();
                     fetchPendingApplications();
+                    await fetchTotalStudentsCount();
                     const matrixZone = document.getElementById('admin-dynamic-class-matrix-zone');
                     if (matrixZone) matrixZone.innerHTML = `<p style="color:#a0aec0; font-size:0.85rem; font-style: italic;">Select a registered staff profile to load classroom maps...</p>`;
                 }
@@ -863,10 +1007,10 @@
             } else {
                 alert("Student application approved successfully!");
                 fetchPendingApplications();
+                fetchTotalStudentsCount();
             }
         }
 
-        // Renders ledger sheet filtered by active classes, term dropdown, and active session dropdown
         async function loadClassScoresToScreen(selectedClass) {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
@@ -919,7 +1063,6 @@
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
 
-            // Dual-filtered query: filters class scores by selected student IDs, selected term, AND selected session
             const { data: results, error: resultsError } = await supabaseClient
                 .from('student_results')
                 .select('*')
@@ -1022,7 +1165,6 @@
             printBtn.style.opacity = "1";
         }
 
-        // Approves class grades, linking them back safely via both chosen session and chosen term
         async function finalizeUploadGlobally() {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
@@ -1051,7 +1193,6 @@
             }
         }
 
-        // Rejects class ledger, turning edit permission back to teacher for chosen session/term parameters
         async function rejectWholeClass() {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
