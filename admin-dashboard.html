@@ -101,7 +101,6 @@
             margin-bottom: 20px;
         }
 
-        /* --- REDUCED SIZE FOR STAT CARD --- */
         .stat-card {
             background: var(--background-white);
             border: 1px solid var(--border-color);
@@ -566,7 +565,6 @@
             fetchPendingApplications();
         };
 
-        // Fetch Total Active Approved Students Count
         async function fetchTotalStudentsCount() {
             try {
                 const { count, error } = await supabaseClient
@@ -582,7 +580,6 @@
             }
         }
 
-        // Toggle Term Configuration Visibility
         function toggleTermConfigForm() {
             const formBody = document.getElementById('term-config-form-body');
             const toggleBtn = document.getElementById('toggle-term-config-btn');
@@ -653,8 +650,7 @@
                     sessions.forEach(session => {
                         const option = document.createElement('option');
                         option.value = session.id;
-                        // Assuming session identifier string or display label
-                        option.textContent = session.session_name || session.id;
+                        option.textContent = session.name || `Session #${session.id}`;
                         if (session.is_active) {
                             option.selected = true;
                         }
@@ -668,7 +664,6 @@
             }
         }
 
-        // Student Promotion Map
         function getNextStudentClass(currentClass) {
             const classProgression = {
                 "JSS 1": "JSS 2",
@@ -681,7 +676,6 @@
             return classProgression[currentClass] || currentClass;
         }
 
-        // Updated Session Update Handler using 'name' boolean
         async function handleActiveSessionUpdate() {
             const selectedSessionId = document.getElementById('active-session-selector').value;
             if (!selectedSessionId) {
@@ -690,7 +684,6 @@
             }
 
             try {
-                // Step 1: Fetch target session details to check 'name' boolean state
                 const { data: targetSession, error: targetErr } = await supabaseClient
                     .from('academic_sessions')
                     .select('*')
@@ -702,7 +695,14 @@
                     return;
                 }
 
-                // Step 2: Deactivate all other sessions is_active states
+                // STOP HERE IF ALREADY ACTIVE: Prevents re-promoting students for the active year
+                if (targetSession.is_active) {
+                    alert("This session is already currently active. Active settings saved (no student promotions triggered).");
+                    document.getElementById('term-config-form-body').classList.add('hidden');
+                    document.getElementById('toggle-term-config-btn').style.display = 'inline-block';
+                    return;
+                }
+
                 const { error: resetErr } = await supabaseClient
                     .from('academic_sessions')
                     .update({ is_active: false })
@@ -710,7 +710,6 @@
 
                 if (resetErr) throw resetErr;
 
-                // Step 3: Activate targeted session
                 const { error: setErr } = await supabaseClient
                     .from('academic_sessions')
                     .update({ is_active: true })
@@ -718,73 +717,59 @@
 
                 if (setErr) throw setErr;
 
-                // Step 4: Check 'name' boolean
-                if (targetSession.name === true) {
-                    // Session already processed previously -> Skip promotion
-                    alert("Active session switched successfully. (Promotion already ran previously for this session, so students were not promoted again.)");
-                } else {
-                    // Session 'name' is false -> Promote students and flip 'name' to true
-                    const confirmPromo = confirm(
-                        "This is a new academic session! All students will now be promoted to their next class in the database.\n\nDo you want to proceed?"
-                    );
+                const confirmPromo = confirm(
+                    "You are activating a NEW academic session! Do you want to promote students to their next class?\n\nClick OK to promote, or Cancel to keep current classes."
+                );
 
-                    if (confirmPromo) {
-                        const { data: students, error: studentFetchErr } = await supabaseClient
-                            .from('users')
-                            .select('*')
-                            .eq('role', 'student')
-                            .eq('is_approved', true);
+                if (confirmPromo) {
+                    const { data: students, error: studentFetchErr } = await supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('role', 'student')
+                        .eq('is_approved', true);
 
-                        if (studentFetchErr) throw studentFetchErr;
+                    if (studentFetchErr) throw studentFetchErr;
 
-                        for (const student of students) {
-                            if (student.assigned_classes && student.assigned_classes.length > 0) {
-                                const currentClass = student.assigned_classes[0];
-                                const nextClass = getNextStudentClass(currentClass);
+                    for (const student of students) {
+                        if (student.assigned_classes && student.assigned_classes.length > 0) {
+                            const currentClass = student.assigned_classes[0];
+                            const nextClass = getNextStudentClass(currentClass);
 
-                                if (nextClass === "Graduated") {
-                                    await supabaseClient
-                                        .from('users')
-                                        .update({
-                                            is_approved: false,
-                                            assigned_classes: ["Graduated"]
-                                        })
-                                        .eq('id', student.id);
-                                } else if (currentClass === "JSS 3" && nextClass === "SS 1") {
-                                    await supabaseClient
-                                        .from('users')
-                                        .update({
-                                            assigned_classes: ["SS 1"],
-                                            department: ""
-                                        })
-                                        .eq('id', student.id);
-                                } else {
-                                    await supabaseClient
-                                        .from('users')
-                                        .update({
-                                            assigned_classes: [nextClass]
-                                        })
-                                        .eq('id', student.id);
-                                }
+                            if (nextClass === "Graduated") {
+                                await supabaseClient
+                                    .from('users')
+                                    .update({
+                                        is_approved: false,
+                                        assigned_classes: ["Graduated"]
+                                    })
+                                    .eq('id', student.id);
+                            } else if (currentClass === "JSS 3" && nextClass === "SS 1") {
+                                await supabaseClient
+                                    .from('users')
+                                    .update({
+                                        assigned_classes: ["SS 1"],
+                                        department: ""
+                                    })
+                                    .eq('id', student.id);
+                            } else {
+                                await supabaseClient
+                                    .from('users')
+                                    .update({
+                                        assigned_classes: [nextClass]
+                                    })
+                                    .eq('id', student.id);
                             }
                         }
-
-                        // Set 'name' boolean to TRUE so promotion will not trigger again
-                        await supabaseClient
-                            .from('academic_sessions')
-                            .update({ name: true })
-                            .eq('id', selectedSessionId);
-
-                        alert("🎉 New academic session activated! All students have been promoted.");
-                    } else {
-                        alert("Session activated. Student promotion was skipped.");
                     }
+
+                    alert("🎉 New session activated and students have been promoted.");
+                } else {
+                    alert("Session activated. Student promotion was skipped.");
                 }
 
                 await loadAcademicSessionsDropdown();
                 await fetchTotalStudentsCount();
 
-                // Automatically hide the configuration form
                 document.getElementById('term-config-form-body').classList.add('hidden');
                 document.getElementById('toggle-term-config-btn').style.display = 'inline-block';
 
@@ -1050,12 +1035,29 @@
             const uploadBar = document.getElementById('upload-bar-container');
 
             const chosenTerm = document.getElementById('active-term-selector').value;
-            const chosenSessionId = document.getElementById('active-session-selector').value;
+            let rawSessionId = document.getElementById('active-session-selector').value;
 
             if (!selectedClass) {
                 wrapper.classList.add('hidden');
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
+                return;
+            }
+
+            if (!rawSessionId) {
+                const { data: activeSession } = await supabaseClient
+                    .from('academic_sessions')
+                    .select('id')
+                    .eq('is_active', true)
+                    .single();
+                if (activeSession) {
+                    rawSessionId = activeSession.id;
+                }
+            }
+
+            const cleanSessionId = parseInt(rawSessionId, 10);
+            if (isNaN(cleanSessionId)) {
+                alert("Invalid academic session selected.");
                 return;
             }
 
@@ -1096,7 +1098,7 @@
                 .select('*')
                 .in('student_id', studentIds)
                 .eq('term', chosenTerm)
-                .eq('session_id', chosenSessionId);
+                .eq('session_id', cleanSessionId);
 
             if (resultsError) {
                 alert("Error loading class scores: " + resultsError.message);
@@ -1198,7 +1200,12 @@
             if (!passedSecurityCheck) return;
 
             const chosenTerm = document.getElementById('active-term-selector').value;
-            const chosenSessionId = document.getElementById('active-session-selector').value;
+            const cleanSessionId = parseInt(document.getElementById('active-session-selector').value, 10);
+
+            if (isNaN(cleanSessionId)) {
+                alert("Please select a valid academic session.");
+                return;
+            }
 
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm(`Are you sure you want to approve this ledger and release report cards for ${chosenTerm} onto all student portal panels?`)) return;
@@ -1209,7 +1216,7 @@
                 .update({ results_released: true })
                 .in('student_id', studentIds)
                 .eq('term', chosenTerm)
-                .eq('session_id', chosenSessionId);
+                .eq('session_id', cleanSessionId);
 
             if (error) {
                 alert("Some records failed to update: " + error.message);
@@ -1226,7 +1233,12 @@
             if (!passedSecurityCheck) return;
 
             const chosenTerm = document.getElementById('active-term-selector').value;
-            const chosenSessionId = document.getElementById('active-session-selector').value;
+            const cleanSessionId = parseInt(document.getElementById('active-session-selector').value, 10);
+
+            if (isNaN(cleanSessionId)) {
+                alert("Please select a valid academic session.");
+                return;
+            }
 
             if (currentlyLoadedClassStudents.length === 0) return;
             if (!confirm(`Reject ledger? This returns edit access back to the teacher for ${chosenTerm} and removes it from your view.`)) return;
@@ -1237,7 +1249,7 @@
                 .update({ ledger_submitted: false, results_released: false })
                 .in('student_id', studentIds)
                 .eq('term', chosenTerm)
-                .eq('session_id', chosenSessionId);
+                .eq('session_id', cleanSessionId);
 
             if (error) {
                 alert("An error occurred returning workspace: " + error.message);
