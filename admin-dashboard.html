@@ -355,7 +355,7 @@
 
         <div class="stats-bar">
             <div class="stat-card">
-                <h3>Total Active Students</h3>
+                <h3>Total Students</h3>
                 <div class="stat-value" id="total-students-count">0</div>
             </div>
         </div>
@@ -365,11 +365,11 @@
                 <h2 style="margin:0; border:none; padding:0;">Configure Active Term Period & Academic Session</h2>
                 <button id="toggle-term-config-btn" onclick="toggleTermConfigForm()"
                     style="padding: 8px 16px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: none;">
-                    ⚙️ Configure New Term
+                    Configure New Term
                 </button>
             </div>
 
-            <div id="term-config-form-body">
+            <div id="term-config-form-body" class="hidden">
                 <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Setting a session to active
                     determines the academic framework students and teachers see automatically when they log into their
                     portals.</p>
@@ -656,6 +656,11 @@
                         }
                         sessionDropdown.appendChild(option);
                     });
+                    const handleActiveSession = sessions.some(s => s.is_active);
+                    if (handleActiveSession) {
+                        document.getElementById('term-config-form-body').classList.add('hidden');
+                        document.getElementById('toggle-term-config-btn').style.display = 'inline-block';
+                    }
                 } else {
                     sessionDropdown.innerHTML = `<option value="">No academic sessions configured</option>`;
                 }
