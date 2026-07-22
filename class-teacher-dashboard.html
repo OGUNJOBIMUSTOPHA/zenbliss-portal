@@ -1241,7 +1241,7 @@
             try {
                 // 2. Perform your Supabase save update
                 const { error } = await supabaseClient
-                    .from('student_cards')
+                    .from('student_results')
                     .update({ /* card details here */ })
                     .eq('student_id', selectedTargetStudentId);
 
