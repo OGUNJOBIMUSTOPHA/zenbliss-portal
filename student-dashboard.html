@@ -514,15 +514,13 @@
                         sessionDropdown.appendChild(option);
                     });
                 } else {
-                    sessionDropdown.innerHTML = `<option value="fallback">No sessions found</option>`;
+                    sessionDropdown.innerHTML = `<option value="">No sessions found</option>`;
                 }
             } catch (err) {
                 console.error("Error loading sessions: ", err);
-                document.getElementById('selected-session').innerHTML = `<option value="default">Active Session</option>`;
+                document.getElementById('selected-session').innerHTML = `<option value="">Active Session</option>`;
             }
         }
-
-        window.addEventListener('DOMContentLoaded', loadAcademicSessions);
 
         // Prompts promoted SS 1 students to select their department
         async function checkSeniorDepartmentSelection(student) {
@@ -616,6 +614,13 @@
             const chosenTerm = document.getElementById('selected-term').value;
             const sessionDropdown = document.getElementById('selected-session');
             const chosenSessionId = sessionDropdown.value;
+
+            // Guard against empty session selection before database call
+            if (!chosenSessionId || chosenSessionId === "") {
+                alert("Please select a valid academic session.");
+                return;
+            }
+
             const chosenSessionName = sessionDropdown.options[sessionDropdown.selectedIndex]?.text || "Current Session";
             const currentStudentId = localStorage.getItem('current_student_id');
             const localSessionId = localStorage.getItem('active_session_id');
@@ -659,7 +664,7 @@
                 .select('*')
                 .eq('student_id', currentStudentId)
                 .eq('term', chosenTerm)
-                .eq('session_id', chosenSessionId)
+                .eq('session_id', Number(chosenSessionId))
                 .maybeSingle();
 
             if (recordErr) {
@@ -743,25 +748,25 @@
                 const title = getSubjectFullTitle(pref, isSenior, dept);
 
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="subject-cell">${title}</td>
-                        <td>${ca1 !== "" ? ca1 : "-"}</td>
-                        <td>${ca2 !== "" ? ca2 : "-"}</td>
-                        <td>${ex !== "" ? ex : "-"}</td>
-                        <td style="font-weight:bold; color:var(--primary-blue);">${totalScore}</td>
-                    </tr>
-                `;
+                <tr>
+                    <td class="subject-cell">${title}</td>
+                    <td>${ca1 !== "" ? ca1 : "-"}</td>
+                    <td>${ca2 !== "" ? ca2 : "-"}</td>
+                    <td>${ex !== "" ? ex : "-"}</td>
+                    <td style="font-weight:bold; color:var(--primary-blue);">${totalScore}</td>
+                </tr>
+            `;
             });
 
             const globalAvg = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) : "0.0";
 
             tbody.innerHTML += `
-                <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
-                    <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE METRICS</td>
-                    <td colspan="2" style="color:white;">TOTAL SUM: ${grandTotal}</td>
-                    <td colspan="2" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}%</td>
-                </tr>
-            `;
+            <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
+                <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE METRICS</td>
+                <td colspan="2" style="color:white;">TOTAL SUM: ${grandTotal}</td>
+                <td colspan="2" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}%</td>
+            </tr>
+        `;
 
             document.getElementById('rate-punctual').innerText = termRecord.punctuality_rating || "-";
             document.getElementById('rate-leadership').innerText = termRecord.leadership_rating || "-";
@@ -787,8 +792,10 @@
             document.getElementById('dashboard-workspace').classList.remove('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchStudentTermScores();
+        // Sequence execution properly on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAcademicSessions();
+            await fetchStudentTermScores();
         });
     </script>
 </body>
