@@ -407,10 +407,10 @@
                 <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
                     <div class="form-row" style="display: flex; gap: 10px;">
                         <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
-                            style="flex:2; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                        <div style="flex: 2; position: relative; display: flex; align-items: center; width: 100%;">
+                            style="flex:2; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
+                        <div style="flex: 1; position: relative; display: flex; align-items: center; min-width: 0;">
                             <input type="password" id="new-staff-pass" placeholder="Create password" required
-                                style="width: 100%; flex: 1; padding: 10px 36px 10px 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box;">
+                                style="width: 100%; flex: 1; padding: 10px 36px 10px 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box;height: 42px;">
                             <button type="button" onclick="toggleTeacherPasswordVisibility()"
                                 style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
                                 <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
