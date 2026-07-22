@@ -98,30 +98,30 @@
         .stats-bar {
             display: flex;
             gap: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
+        /* --- REDUCED SIZE FOR STAT CARD --- */
         .stat-card {
             background: var(--background-white);
             border: 1px solid var(--border-color);
-            border-left: 5px solid var(--primary-blue);
-            border-radius: 8px;
-            padding: 20px 25px;
-            flex: 1;
-            max-width: 320px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 6px;
+            padding: 10px 16px;
+            max-width: 220px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         .stat-card h3 {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #718096;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .stat-card .stat-value {
-            font-size: 2rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--primary-blue);
         }
@@ -653,7 +653,8 @@
                     sessions.forEach(session => {
                         const option = document.createElement('option');
                         option.value = session.id;
-                        option.textContent = session.name;
+                        // Assuming session identifier string or display label
+                        option.textContent = session.session_name || session.id;
                         if (session.is_active) {
                             option.selected = true;
                         }
@@ -680,6 +681,7 @@
             return classProgression[currentClass] || currentClass;
         }
 
+        // Updated Session Update Handler using 'name' boolean
         async function handleActiveSessionUpdate() {
             const selectedSessionId = document.getElementById('active-session-selector').value;
             if (!selectedSessionId) {
@@ -687,14 +689,20 @@
                 return;
             }
 
-            const confirmRollover = confirm(
-                "Publishing a new session will promote all active students to their next class in the database (JSS 3 moves to SS 1, and SS 3 will graduate).\n\nTeacher assignments will stay unchanged.\n\nDo you want to proceed?"
-            );
-
-            if (!confirmRollover) return;
-
             try {
-                // Step 1: Force all sessions is_active states to FALSE
+                // Step 1: Fetch target session details to check 'name' boolean state
+                const { data: targetSession, error: targetErr } = await supabaseClient
+                    .from('academic_sessions')
+                    .select('*')
+                    .eq('id', selectedSessionId)
+                    .single();
+
+                if (targetErr || !targetSession) {
+                    alert("Selected session not found in database.");
+                    return;
+                }
+
+                // Step 2: Deactivate all other sessions is_active states
                 const { error: resetErr } = await supabaseClient
                     .from('academic_sessions')
                     .update({ is_active: false })
@@ -702,7 +710,7 @@
 
                 if (resetErr) throw resetErr;
 
-                // Step 2: Set chosen targeted session's is_active field to TRUE
+                // Step 3: Activate targeted session
                 const { error: setErr } = await supabaseClient
                     .from('academic_sessions')
                     .update({ is_active: true })
@@ -710,48 +718,68 @@
 
                 if (setErr) throw setErr;
 
-                // Step 3: Promote students in the database
-                const { data: students, error: studentFetchErr } = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .eq('role', 'student')
-                    .eq('is_approved', true);
+                // Step 4: Check 'name' boolean
+                if (targetSession.name === true) {
+                    // Session already processed previously -> Skip promotion
+                    alert("Active session switched successfully. (Promotion already ran previously for this session, so students were not promoted again.)");
+                } else {
+                    // Session 'name' is false -> Promote students and flip 'name' to true
+                    const confirmPromo = confirm(
+                        "This is a new academic session! All students will now be promoted to their next class in the database.\n\nDo you want to proceed?"
+                    );
 
-                if (studentFetchErr) throw studentFetchErr;
+                    if (confirmPromo) {
+                        const { data: students, error: studentFetchErr } = await supabaseClient
+                            .from('users')
+                            .select('*')
+                            .eq('role', 'student')
+                            .eq('is_approved', true);
 
-                for (const student of students) {
-                    if (student.assigned_classes && student.assigned_classes.length > 0) {
-                        const currentClass = student.assigned_classes[0];
-                        const nextClass = getNextStudentClass(currentClass);
+                        if (studentFetchErr) throw studentFetchErr;
 
-                        if (nextClass === "Graduated") {
-                            await supabaseClient
-                                .from('users')
-                                .update({
-                                    is_approved: false,
-                                    assigned_classes: ["Graduated"]
-                                })
-                                .eq('id', student.id);
-                        } else if (currentClass === "JSS 3" && nextClass === "SS 1") {
-                            await supabaseClient
-                                .from('users')
-                                .update({
-                                    assigned_classes: ["SS 1"],
-                                    department: ""
-                                })
-                                .eq('id', student.id);
-                        } else {
-                            await supabaseClient
-                                .from('users')
-                                .update({
-                                    assigned_classes: [nextClass]
-                                })
-                                .eq('id', student.id);
+                        for (const student of students) {
+                            if (student.assigned_classes && student.assigned_classes.length > 0) {
+                                const currentClass = student.assigned_classes[0];
+                                const nextClass = getNextStudentClass(currentClass);
+
+                                if (nextClass === "Graduated") {
+                                    await supabaseClient
+                                        .from('users')
+                                        .update({
+                                            is_approved: false,
+                                            assigned_classes: ["Graduated"]
+                                        })
+                                        .eq('id', student.id);
+                                } else if (currentClass === "JSS 3" && nextClass === "SS 1") {
+                                    await supabaseClient
+                                        .from('users')
+                                        .update({
+                                            assigned_classes: ["SS 1"],
+                                            department: ""
+                                        })
+                                        .eq('id', student.id);
+                                } else {
+                                    await supabaseClient
+                                        .from('users')
+                                        .update({
+                                            assigned_classes: [nextClass]
+                                        })
+                                        .eq('id', student.id);
+                                }
+                            }
                         }
+
+                        // Set 'name' boolean to TRUE so promotion will not trigger again
+                        await supabaseClient
+                            .from('academic_sessions')
+                            .update({ name: true })
+                            .eq('id', selectedSessionId);
+
+                        alert("🎉 New academic session activated! All students have been promoted.");
+                    } else {
+                        alert("Session activated. Student promotion was skipped.");
                     }
                 }
-
-                alert("New academic session published! All student classes have been updated in the database.");
 
                 await loadAcademicSessionsDropdown();
                 await fetchTotalStudentsCount();
