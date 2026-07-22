@@ -364,6 +364,9 @@
     </header>
 
     <div class="main-container">
+        <h2 id="student-welcome-heading"
+            style="color: var(--primary-blue); font-size: 1.5rem; margin-bottom: 15px; font-weight: 700;">Welcome...
+        </h2>
 
         <div id="term-gate-box" class="gate-card">
             <h2 style="color: var(--primary-blue); margin-bottom: 10px; font-weight: 800;">Academic Report Vault</h2>
@@ -452,7 +455,8 @@
                         <p style="display:flex; justify-content:space-between;">Sport: <span><strong
                                     id="rate-sport">-</strong>/5</span></p>
                         <p style="display:flex; justify-content:space-between; grid-column: span 2;">Cleanliness:
-                            <span><strong id="rate-cleanliness">-</strong>/5</span></p>
+                            <span><strong id="rate-cleanliness">-</strong>/5</span>
+                        </p>
                     </div>
                 </div>
                 <div>
@@ -578,7 +582,8 @@
                 alert("Failed to synchronize academic profiles structure.");
                 return;
             }
-
+            const welcomeElement = document.getElementById('student-welcome-heading');
+            if (welcomeElement && student.admission_number) { welcomeElement.innerText = 'Welcome ${student.admission_number}'; }
             // Concurrent session hijacking safety check
             if (student.current_session_id !== localSessionId) {
                 alert("Access Denied: This Student account has been logged in from another device. Disconnecting session.");
