@@ -364,6 +364,42 @@
                 color: #000 !important;
             }
         }
+
+        /* STAFF REGISTRY FIXES */
+        .staff-form-grid {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .password-field-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            /* Forces input width to expand */
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field-wrapper input {
+            width: 100%;
+            padding-right: 45px !important;
+            /* Space for eye icon inside input */
+        }
+
+        .eye-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            height: 100%;
+        }
     </style>
 </head>
 
@@ -440,17 +476,15 @@
             <div class="control-box staff-registry-box">
                 <h2>Staff Registry (Add / Delete Teachers)</h2>
                 <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 25px;">
-                    <div class="form-row" style="display: flex; gap: 12px; width: 100%; align-items: center;">
+                    <div class="staff-form-grid">
                         <input type="text" id="new-staff-name" class="staff-registry-input"
                             placeholder="Teacher Name (e.g. Mrs. Alao)" required>
 
-                        <div style="flex: 1; position: relative; display: flex; align-items: center; min-width: 0;">
+                        <div class="password-field-wrapper">
                             <input type="password" id="new-staff-pass" class="staff-registry-input"
-                                placeholder="Create password" required
-                                style="width: 100%; padding-right: 48px !important;">
-                            <button type="button" onclick="toggleTeacherPasswordVisibility()"
-                                style="position: absolute; right: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; height: 100%;">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                                placeholder="Create password" required>
+                            <button type="button" class="eye-toggle-btn" onclick="toggleTeacherPasswordVisibility()">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -462,7 +496,6 @@
                         <button type="submit" class="staff-registry-btn">Add Staff</button>
                     </div>
                 </form>
-
                 <table class="data-table">
                     <thead>
                         <tr>
