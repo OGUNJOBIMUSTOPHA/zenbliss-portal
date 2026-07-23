@@ -146,6 +146,41 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         }
 
+        /* ENLARGED STAFF REGISTRY SECTION STYLES */
+        .staff-registry-box {
+            padding: 30px;
+        }
+
+        .staff-registry-box h2 {
+            font-size: 1.5rem !important;
+            margin-bottom: 20px !important;
+            padding-bottom: 12px !important;
+        }
+
+        .staff-registry-input {
+            flex: 1;
+            padding: 14px 16px !important;
+            font-size: 1rem !important;
+            border: 1px solid #CBD5E0;
+            border-radius: 6px !important;
+            box-sizing: border-box;
+            height: 52px !important;
+        }
+
+        .staff-registry-btn {
+            margin: 0;
+            padding: 0 28px !important;
+            background-color: #1A365D;
+            color: white;
+            border: none;
+            border-radius: 6px !important;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem !important;
+            height: 52px !important;
+            white-space: nowrap;
+        }
+
         .control-box h2 {
             color: var(--primary-blue);
             font-size: 1.25rem;
@@ -162,10 +197,10 @@
 
         .data-table th,
         .data-table td {
-            padding: 10px;
+            padding: 12px 10px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         .data-table th {
@@ -174,10 +209,10 @@
         }
 
         .action-btn {
-            padding: 6px 12px;
+            padding: 8px 14px;
             border: none;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             margin-right: 4px;
@@ -402,19 +437,20 @@
 
         <div class="dashboard-grid">
 
-            <div class="control-box">
+            <div class="control-box staff-registry-box">
                 <h2>Staff Registry (Add / Delete Teachers)</h2>
-                <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
-                    <div class="form-row" style="display: flex; gap: 10px; width: 100%; align-items: center;">
-                        <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
-                            style="flex: 1; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
+                <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 25px;">
+                    <div class="form-row" style="display: flex; gap: 12px; width: 100%; align-items: center;">
+                        <input type="text" id="new-staff-name" class="staff-registry-input"
+                            placeholder="Teacher Name (e.g. Mrs. Alao)" required>
 
                         <div style="flex: 1; position: relative; display: flex; align-items: center; min-width: 0;">
-                            <input type="password" id="new-staff-pass" placeholder="Create password" required
-                                style="width: 100%; padding: 10px 38px 10px 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
+                            <input type="password" id="new-staff-pass" class="staff-registry-input"
+                                placeholder="Create password" required
+                                style="width: 100%; padding-right: 48px !important;">
                             <button type="button" onclick="toggleTeacherPasswordVisibility()"
-                                style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; height: 100%;">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                style="position: absolute; right: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; height: 100%;">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
                                     viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -423,18 +459,16 @@
                             </button>
                         </div>
 
-                        <button type="submit"
-                            style="margin:0; padding:0 20px; background-color: #1A365D; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 42px; white-space: nowrap;">Add
-                            Staff</button>
+                        <button type="submit" class="staff-registry-btn">Add Staff</button>
                     </div>
                 </form>
 
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Teacher Name</th>
-                            <th>Password</th>
-                            <th>Action</th>
+                            <th style="font-size: 0.95rem;">Teacher Name</th>
+                            <th style="font-size: 0.95rem;">Password</th>
+                            <th style="font-size: 0.95rem;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="staff-registry-rows"></tbody>
@@ -866,7 +900,7 @@
                     : " (No Level Assigned)";
 
                 tbody.innerHTML += `<tr>
-                    <td style="font-weight: 600;">${teacher.admission_number || '—'}<span style="color:#718096; font-size:0.75rem; font-weight:normal;">${activeAssignedStr}</span></td>
+                    <td style="font-weight: 600;">${teacher.admission_number || '—'}<span style="color:#718096; font-size:0.8rem; font-weight:normal;">${activeAssignedStr}</span></td>
                     <td>••••••••</td>
                     <td>
                         <button class="action-btn btn-delete" onclick="deleteStaff('${teacher.id}')">Delete Account</button>
@@ -1315,11 +1349,9 @@
 
             if (passInput.type === 'password') {
                 passInput.type = 'text';
-                // Eye with slash (Hide)
                 eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
             } else {
                 passInput.type = 'password';
-                // Open Eye (Show)
                 eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
             }
         }
