@@ -295,7 +295,7 @@
             .control-box,
             .broadsheet-card>h2,
             .broadsheet-card>p,
-            .broadsheet-card>div:first-of-type,
+            .broadsheet-card>.ledger-controls-container,
             .global-upload-bar {
                 display: none !important;
             }
@@ -405,13 +405,13 @@
             <div class="control-box">
                 <h2>Staff Registry (Add / Delete Teachers)</h2>
                 <form class="portal-form" id="Staff-form" onsubmit="addStaffMember(event)" style="margin-bottom: 20px;">
-                    <div class="form-row" style="display: flex; gap: 10px;">
+                    <div class="form-row" style="display: flex; gap: 10px; width: 100%; align-items: center;">
                         <input type="text" id="new-staff-name" placeholder="Teacher Name (e.g. Mrs. Alao)" required
-                            style="flex:2; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
-                        <div
-                            style="flex: 1 1 0% !important; position: relative !important; display: flex; align-items: center; min-width: 0 !important;">
+                            style="flex: 1; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
+
+                        <div style="flex: 1; position: relative; display: flex; align-items: center; min-width: 0;">
                             <input type="password" id="new-staff-pass" placeholder="Create password" required
-                                style="width: 100%; flex: 1; padding: 10px 36px 10px 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box;height: 42px;">
+                                style="width: 100%; padding: 10px 36px 10px 10px; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; height: 42px;">
                             <button type="button" onclick="toggleTeacherPasswordVisibility()"
                                 style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
                                 <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -424,7 +424,7 @@
                         </div>
 
                         <button type="submit"
-                            style="margin:0; padding:10px 20px; background-color: #1A365D; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Add
+                            style="margin:0; padding:0 20px; background-color: #1A365D; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; height: 42px; white-space: nowrap;">Add
                             Staff</button>
                     </div>
                 </form>
@@ -482,26 +482,53 @@
 
         <div class="broadsheet-card">
             <h2>Review Uploaded Class Results</h2>
-            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Select a class to review the complete
-                grade metrics updated by the respective Class Teacher.</p>
+            <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">Select Class, Session, and Term to view
+                or print the grade metrics uploaded by Class Teachers.</p>
 
-            <div style="margin-bottom: 20px;">
-                <select id="broadsheet-selector" onchange="loadClassScoresToScreen(this.value)"
-                    style="padding: 8px; border: 1px solid #CBD5E0; border-radius: 4px;">
-                    <option value="">-- Choose Class Ledger --</option>
-                    <option value="JSS 1">JSS 1 Master Sheet</option>
-                    <option value="JSS 2">JSS 2 Master Sheet</option>
-                    <option value="JSS 3">JSS 3 Master Sheet</option>
-                    <option value="SS 1">SS 1 Master Sheet</option>
-                    <option value="SS 2">SS 2 Master Sheet</option>
-                    <option value="SS 3">SS 3 Master Sheet</option>
-                </select>
+            <div class="ledger-controls-container"
+                style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
                 <button id="print-ledger-btn" onclick="window.print()" disabled
-                    style="margin-left: 10px; padding: 8px 15px; cursor: pointer; font-weight: bold; border: 1px solid #CBD5E0; border-radius: 4px; background: white; opacity: 0.6;">🖨️
+                    style="padding: 10px 18px; cursor: pointer; font-weight: bold; border: 1px solid #CBD5E0; border-radius: 4px; background: white; opacity: 0.6; height: 42px;">🖨️
                     Print Class Ledger</button>
+
+                <div style="flex: 1; min-width: 140px;">
+                    <select id="ledger-class-select"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; height: 42px;">
+                        <option value="">-- Select Class --</option>
+                        <option value="JSS 1">JSS 1</option>
+                        <option value="JSS 2">JSS 2</option>
+                        <option value="JSS 3">JSS 3</option>
+                        <option value="SS 1">SS 1</option>
+                        <option value="SS 2">SS 2</option>
+                        <option value="SS 3">SS 3</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 160px;">
+                    <select id="ledger-session-select"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; height: 42px;">
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 140px;">
+                    <select id="ledger-term-select"
+                        style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; height: 42px;">
+                        <option value="1st Term">1st Term</option>
+                        <option value="2nd Term">2nd Term</option>
+                        <option value="3rd Term" selected>3rd Term</option>
+                    </select>
+                </div>
+
+                <button onclick="loadClassScoresToScreen()"
+                    style="padding: 0 20px; background-color: var(--primary-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; height: 42px; white-space: nowrap;">
+                    View Class Ledger
+                </button>
             </div>
 
             <div id="matrix-display-wrapper" class="hidden">
+                <h3 id="ledger-view-title"
+                    style="color: var(--primary-blue); margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                </h3>
                 <div class="broadsheet-scroll">
                     <table class="matrix-table">
                         <thead>
@@ -657,7 +684,10 @@
                 if (error) throw error;
 
                 const sessionDropdown = document.getElementById('active-session-selector');
+                const ledgerSessionDropdown = document.getElementById('ledger-session-select');
+
                 sessionDropdown.innerHTML = '';
+                ledgerSessionDropdown.innerHTML = '<option value="">-- Select Session --</option>';
 
                 if (sessions && sessions.length > 0) {
                     sessions.forEach(session => {
@@ -668,6 +698,9 @@
                             option.selected = true;
                         }
                         sessionDropdown.appendChild(option);
+
+                        const ledgerOpt = option.cloneNode(true);
+                        ledgerSessionDropdown.appendChild(ledgerOpt);
                     });
                     const handleActiveSession = sessions.some(s => s.is_active);
                     if (handleActiveSession) {
@@ -676,6 +709,7 @@
                     }
                 } else {
                     sessionDropdown.innerHTML = `<option value="">No academic sessions configured</option>`;
+                    ledgerSessionDropdown.innerHTML = `<option value="">No sessions available</option>`;
                 }
             } catch (err) {
                 console.error("Failed to compile session dropdown structures: ", err.message);
@@ -713,7 +747,6 @@
                     return;
                 }
 
-                // STOP HERE IF ALREADY ACTIVE: Prevents re-promoting students for the active year
                 if (targetSession.is_active) {
                     alert("This session is already currently active. Active settings saved (no student promotions triggered).");
                     document.getElementById('term-config-form-body').classList.add('hidden');
@@ -1042,44 +1075,39 @@
             }
         }
 
-        async function loadClassScoresToScreen(selectedClass) {
+        async function loadClassScoresToScreen() {
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
+
+            const selectedClass = document.getElementById('ledger-class-select').value;
+            const selectedSessionId = document.getElementById('ledger-session-select').value;
+            const selectedTerm = document.getElementById('ledger-term-select').value;
+
+            const sessionSelectElem = document.getElementById('ledger-session-select');
+            const selectedSessionText = sessionSelectElem.options[sessionSelectElem.selectedIndex]?.text || '';
+
+            if (!selectedClass || !selectedSessionId || !selectedTerm) {
+                alert("Please select Class, Academic Session, and Term to view the ledger.");
+                return;
+            }
 
             const wrapper = document.getElementById('matrix-display-wrapper');
             const tbody = document.getElementById('matrix-rows');
             const printBtn = document.getElementById('print-ledger-btn');
             const printSubtitle = document.getElementById('print-sheet-subtitle');
             const uploadBar = document.getElementById('upload-bar-container');
+            const ledgerTitle = document.getElementById('ledger-view-title');
 
-            const chosenTerm = document.getElementById('active-term-selector').value;
-            let rawSessionId = document.getElementById('active-session-selector').value;
-
-            if (!selectedClass) {
-                wrapper.classList.add('hidden');
-                printBtn.disabled = true;
-                printBtn.style.opacity = "0.6";
-                return;
-            }
-
-            if (!rawSessionId) {
-                const { data: activeSession } = await supabaseClient
-                    .from('academic_sessions')
-                    .select('id')
-                    .eq('is_active', true)
-                    .single();
-                if (activeSession) {
-                    rawSessionId = activeSession.id;
-                }
-            }
-
-            const cleanSessionId = parseInt(rawSessionId, 10);
+            const cleanSessionId = parseInt(selectedSessionId, 10);
             if (isNaN(cleanSessionId)) {
                 alert("Invalid academic session selected.");
                 return;
             }
 
-            printSubtitle.innerText = `${selectedClass} Terminal Master Compilation Ledger Sheet`;
+            const ledgerHeadline = `${selectedClass} - ${selectedTerm} (${selectedSessionText}) Official Class Ledger`;
+            printSubtitle.innerText = ledgerHeadline;
+            ledgerTitle.innerText = ledgerHeadline;
+
             tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
             wrapper.classList.remove('hidden');
             uploadBar.classList.remove('hidden');
@@ -1115,7 +1143,7 @@
                 .from('student_results')
                 .select('*')
                 .in('student_id', studentIds)
-                .eq('term', chosenTerm)
+                .eq('term', selectedTerm)
                 .eq('session_id', cleanSessionId);
 
             if (resultsError) {
@@ -1217,8 +1245,8 @@
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
-            const chosenTerm = document.getElementById('active-term-selector').value;
-            const cleanSessionId = parseInt(document.getElementById('active-session-selector').value, 10);
+            const selectedTerm = document.getElementById('ledger-term-select').value;
+            const cleanSessionId = parseInt(document.getElementById('ledger-session-select').value, 10);
 
             if (isNaN(cleanSessionId)) {
                 alert("Please select a valid academic session.");
@@ -1226,14 +1254,14 @@
             }
 
             if (currentlyLoadedClassStudents.length === 0) return;
-            if (!confirm(`Are you sure you want to approve this ledger and release report cards for ${chosenTerm} onto all student portal panels?`)) return;
+            if (!confirm(`Are you sure you want to approve this ledger and release report cards for ${selectedTerm} onto all student portal panels?`)) return;
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
             const { error } = await supabaseClient
                 .from('student_results')
                 .update({ results_released: true })
                 .in('student_id', studentIds)
-                .eq('term', chosenTerm)
+                .eq('term', selectedTerm)
                 .eq('session_id', cleanSessionId);
 
             if (error) {
@@ -1241,8 +1269,7 @@
             } else {
                 alert("Success! All class results are now live for students.");
                 document.getElementById('upload-bar-container').classList.add('hidden');
-                const targetCls = document.getElementById('broadsheet-selector').value;
-                if (targetCls) loadClassScoresToScreen(targetCls);
+                loadClassScoresToScreen();
             }
         }
 
@@ -1250,8 +1277,8 @@
             const passedSecurityCheck = await verifyActiveAdminSession();
             if (!passedSecurityCheck) return;
 
-            const chosenTerm = document.getElementById('active-term-selector').value;
-            const cleanSessionId = parseInt(document.getElementById('active-session-selector').value, 10);
+            const selectedTerm = document.getElementById('ledger-term-select').value;
+            const cleanSessionId = parseInt(document.getElementById('ledger-session-select').value, 10);
 
             if (isNaN(cleanSessionId)) {
                 alert("Please select a valid academic session.");
@@ -1259,23 +1286,24 @@
             }
 
             if (currentlyLoadedClassStudents.length === 0) return;
-            if (!confirm(`Reject ledger? This returns edit access back to the teacher for ${chosenTerm} and removes it from your view.`)) return;
+            if (!confirm(`Reject ledger? This returns edit access back to the teacher for ${selectedTerm} and removes it from your view.`)) return;
 
             const studentIds = currentlyLoadedClassStudents.map(s => s.id);
             const { error } = await supabaseClient
                 .from('student_results')
                 .update({ ledger_submitted: false, results_released: false })
                 .in('student_id', studentIds)
-                .eq('term', chosenTerm)
+                .eq('term', selectedTerm)
                 .eq('session_id', cleanSessionId);
 
             if (error) {
                 alert("An error occurred returning workspace: " + error.message);
             } else {
                 alert("Ledger rejected and sent back to teacher desk.");
-                loadClassScoresToScreen(document.getElementById('broadsheet-selector').value);
+                loadClassScoresToScreen();
             }
         }
+
         function toggleTeacherPasswordVisibility() {
             const passInput = document.getElementById('new-staff-pass');
             const eyeIcon = document.getElementById('eye-icon');
