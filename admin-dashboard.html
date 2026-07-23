@@ -370,7 +370,7 @@
         .staff-form-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 13px;
+            gap: 17px;
             width: 100%;
             align-items: center;
         }
@@ -1252,8 +1252,7 @@
                     let isLocked = false;
                     if (isSenior) {
                         if (prefix === 'bio' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
-                        if (prefix === 'econ' && dept === "Humanity") isLocked = true;
-                        if (prefix === 'comm' && (dept === "Science" || dept === "Humanity")) isLocked = true;
+                        if (prefix === 'comm' && (dept === "Science")) isLocked = true;
                         if (prefix === 'gov' && dept === "Science") isLocked = true;
                         if (prefix === 'acc' && (dept === "Science" || dept === "Humanity")) isLocked = true;
                         if (prefix === 'lit' && (dept === "Science" || dept === "Commercial")) isLocked = true;
