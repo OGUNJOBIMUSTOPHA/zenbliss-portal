@@ -681,7 +681,7 @@
                 if (dept === "Science" || dept === "Science & Tech") {
                     return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
                 } else if (dept === "Humanity") {
-                    return ['phy', 'chem', 'bio', 'fmath', 'td', 'acc'].includes(prefix);
+                    return ['phy', 'chem', 'bio', 'td', 'acc'].includes(prefix);
                 } else if (dept === "Commercial") {
                     return ['bio', 'lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
                 }
@@ -1056,13 +1056,38 @@
             document.getElementById('card-sport').value = row.getAttribute('data-sport') || "5";
 
             const principalCommentBox = document.getElementById('card-principal-comment');
-            if (avgPercentage >= 75) {
-                principalCommentBox.innerText = "An outstanding performance. Keep maintaining this standard of excellence.";
-            } else if (avgPercentage >= 50) {
-                principalCommentBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
+
+            // 1. Build the base comment based on score thresholds
+            let commentText = "";
+
+            if (avgPercentage >= 0 && avgPercentage <= 45.4) {
+                commentText = "Below average, serious improvement is required.";
+            } else if (avgPercentage > 45.4 && avgPercentage <= 49.4) {
+                commentText = "Close to average, put in more effort.";
+            } else if (avgPercentage > 49.4 && avgPercentage <= 59.4) {
+                commentText = "Average, try more next term.";
+            } else if (avgPercentage > 59.4 && avgPercentage <= 69.4) {
+                commentText = "A good performance. Keep working consistently.";
+            } else if (avgPercentage > 69.4 && avgPercentage <= 79.4) {
+                commentText = "Very good performance. Keep it up";
+            } else if (avgPercentage > 79.4 && avgPercentage <= 100) {
+                commentText = "Excellent performance. Maintain this outstanding standard.";
             } else {
-                principalCommentBox.innerText = "Performance is below average. Intense academic revision is recommended.";
+                commentText = "Performance is below average. Intense academic revision is recommended.";
             }
+
+            // 2. Append promotion statement if it is 3rd Term
+            if (typeof currentTerm !== 'undefined' && (currentTerm === '3rd Term' || currentTerm === 'Third Term')) {
+                const nextClass = (typeof getNextClassName === 'function' && typeof currentClass !== 'undefined')
+                    ? getNextClassName(currentClass)
+                    : 'the next class';
+
+                commentText += ` Promoted to ${nextClass}.`;
+            }
+
+            // 3. Assign final combined text to the DOM element
+            principalCommentBox.innerText = commentText;
+
 
             const commitBtn = document.getElementById('commit-btn-sync');
             const shouldDisable = isSubmitted;
@@ -1252,6 +1277,20 @@
                 alert("Error saving details: " + err.message);
             }
         });
+        // Helper function to map current class to next class
+        function getNextClassName(currentClass) {
+            const classProgression = {
+                "JSS 1": "JSS 2",
+                "JSS 2": "JSS 3",
+                "JSS 3": "SS 1",
+                "SS 1": "SS 2",
+                "SS 2": "SS 3",
+                "SS 3": "Graduated"
+            };
+
+            // Returns the next class, or 'the next class' if not found in list
+            return classProgression[currentClass] || "the next class";
+        }
     </script>
 </body>
 
