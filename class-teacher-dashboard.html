@@ -1076,8 +1076,15 @@
                 commentText = "Performance is below average. Intense academic revision is recommended.";
             }
 
-            // 2. Append promotion statement if it is 3rd Term
-            if (typeof currentTerm !== 'undefined' && (currentTerm === '3rd Term' || currentTerm === 'Third Term')) {
+            // Get whatever term value is active
+            const activeTerm = (typeof currentTerm !== 'undefined' && currentTerm)
+                ? String(currentTerm)
+                : (document.getElementById('ledger-term-select')?.value || '');
+
+            // Check if it contains "3rd" or "third" (case-insensitive)
+            const isThirdTerm = activeTerm.toLowerCase().includes('3rd') || activeTerm.toLowerCase().includes('third');
+
+            if (isThirdTerm) {
                 const nextClass = (typeof getNextClassName === 'function' && typeof currentClass !== 'undefined')
                     ? getNextClassName(currentClass)
                     : 'the next class';
