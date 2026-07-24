@@ -1075,7 +1075,8 @@
             } else {
                 commentText = "Performance is below average. Intense academic revision is recommended.";
             }
-
+            console.log("DEBUG - currentTerm:", typeof currentTerm !== 'undefined' ? currentTerm : 'UNDEFINED');
+            console.log("DEBUG - currentClass:", typeof currentClass !== 'undefined' ? currentClass : 'UNDEFINED');
             // Get whatever term value is active
             const activeTerm = (typeof currentTerm !== 'undefined' && currentTerm)
                 ? String(currentTerm)
