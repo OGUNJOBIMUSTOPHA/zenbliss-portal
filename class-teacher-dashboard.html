@@ -522,6 +522,20 @@
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
 
+        // Helper function to map current class to next class
+        function getNextClassName(currentClass) {
+            const classProgression = {
+                "JSS 1": "JSS 2",
+                "JSS 2": "JSS 3",
+                "JSS 3": "SS 1",
+                "SS 1": "SS 2",
+                "SS 2": "SS 3",
+                "SS 3": "Graduated"
+            };
+
+            return classProgression[currentClass] || "the next class";
+        }
+
         function getSubjectFullTitle(prefix, isSenior, dept = "None") {
             if (!isSenior) {
                 const jssMaps = {
@@ -665,7 +679,6 @@
         async function populateTargetTermsDropdown() {
             const termSelector = document.getElementById('target-compilation-term');
             if (!termSelector) return;
-            // This puts the terms directly into the dropdown, ignoring whether student_results is empty!
             termSelector.innerHTML = `
                 <option value="1st Term">First Term Ledger</option>
                 <option value="2nd Term">Second Term Ledger</option>
@@ -952,7 +965,6 @@
         }
 
         async function saveEntireLedgerProgress() {
-            // Confirm explicit database access alignment parameters
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
                 alert("Save Blocked: Session key expired or overridden by another login instance.");
@@ -987,7 +999,7 @@
                 const updatePayload = {
                     student_id: studentId,
                     term: chosenTerm,
-                    session_id: window.currentActiveSessionId // Dynamically links result with current active database session
+                    session_id: window.currentActiveSessionId
                 };
 
                 if (recordId && recordId !== "") {
@@ -1057,7 +1069,7 @@
 
             const principalCommentBox = document.getElementById('card-principal-comment');
 
-            // 1. Build the base comment based on score thresholds
+            // 1. Build base remark by score range
             let commentText = "";
 
             if (avgPercentage >= 0 && avgPercentage <= 45.4) {
@@ -1069,33 +1081,30 @@
             } else if (avgPercentage > 59.4 && avgPercentage <= 69.4) {
                 commentText = "A good performance. Keep working consistently.";
             } else if (avgPercentage > 69.4 && avgPercentage <= 79.4) {
-                commentText = "Very good performance. Keep it up";
+                commentText = "Very good performance. Keep it up.";
             } else if (avgPercentage > 79.4 && avgPercentage <= 100) {
                 commentText = "Excellent performance. Maintain this outstanding standard.";
             } else {
                 commentText = "Performance is below average. Intense academic revision is recommended.";
             }
-            console.log("DEBUG - currentTerm:", typeof currentTerm !== 'undefined' ? currentTerm : 'UNDEFINED');
-            console.log("DEBUG - currentClass:", typeof currentClass !== 'undefined' ? currentClass : 'UNDEFINED');
-            // Get whatever term value is active
-            const activeTerm = (typeof currentTerm !== 'undefined' && currentTerm)
-                ? String(currentTerm)
-                : (document.getElementById('ledger-term-select')?.value || '');
 
-            // Check if it contains "3rd" or "third" (case-insensitive)
-            const isThirdTerm = activeTerm.toLowerCase().includes('3rd') || activeTerm.toLowerCase().includes('third');
+            // 2. Fetch current selected term & class directly from page selectors
+            const targetTermElement = document.getElementById('target-compilation-term');
+            const targetClassElement = document.getElementById('teacher-class-selector');
+
+            const selectedTermVal = targetTermElement ? targetTermElement.value : '';
+            const selectedClassVal = targetClassElement ? targetClassElement.value : '';
+
+            // Check if selected term is 3rd Term
+            const isThirdTerm = selectedTermVal.toLowerCase().includes('3rd') || selectedTermVal.toLowerCase().includes('third');
 
             if (isThirdTerm) {
-                const nextClass = (typeof getNextClassName === 'function' && typeof currentClass !== 'undefined')
-                    ? getNextClassName(currentClass)
-                    : 'the next class';
-
+                const nextClass = getNextClassName(selectedClassVal);
                 commentText += ` Promoted to ${nextClass}.`;
             }
 
-            // 3. Assign final combined text to the DOM element
+            // 3. Assign completed comment string to box
             principalCommentBox.innerText = commentText;
-
 
             const commitBtn = document.getElementById('commit-btn-sync');
             const shouldDisable = isSubmitted;
@@ -1150,7 +1159,7 @@
                 const updatePayload = {
                     student_id: studentId,
                     term: chosenTerm,
-                    session_id: window.currentActiveSessionId, // Links card configurations dynamically to active academic session ID
+                    session_id: window.currentActiveSessionId,
                     teacher_comment: commentVal,
                     days_present: attendanceVal,
                     punctuality_rating: punctualVal,
@@ -1266,38 +1275,6 @@
                 alert(`The ${chosenClass} (${chosenTerm}) ledger has been officially submitted to the Admin!`);
                 returnToGate();
             }
-        }
-        document.getElementById('commit-btn-sync').addEventListener('click', async function (event) {
-            // 1. Prevent the page from reloading
-            event.preventDefault();
-
-            try {
-                // 2. Perform your Supabase save update
-                const { error } = await supabaseClient
-                    .from('student_results')
-                    .update({ /* card details here */ })
-                    .eq('student_id', selectedTargetStudentId);
-
-                if (error) throw error;
-
-                alert("Student card details saved!");
-            } catch (err) {
-                alert("Error saving details: " + err.message);
-            }
-        });
-        // Helper function to map current class to next class
-        function getNextClassName(currentClass) {
-            const classProgression = {
-                "JSS 1": "JSS 2",
-                "JSS 2": "JSS 3",
-                "JSS 3": "SS 1",
-                "SS 1": "SS 2",
-                "SS 2": "SS 3",
-                "SS 3": "Graduated"
-            };
-
-            // Returns the next class, or 'the next class' if not found in list
-            return classProgression[currentClass] || "the next class";
         }
     </script>
 </body>
