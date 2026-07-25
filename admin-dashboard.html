@@ -615,7 +615,7 @@
                 <div class="broadsheet-scroll">
                     <table class="matrix-table">
                         <thead>
-                            <tr>
+                            <tr id="matrix-header-row">
                                 <th style="text-align: left;">Student Name</th>
                                 <th>Math</th>
                                 <th>English</th>
@@ -671,10 +671,31 @@
         let currentlyLoadedClassStudents = [];
         const MASTER_SCHOOL_CLASSES = ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
-        const subjectPrefixes = [
+        const allSubjectPrefixes = [
             'mat', 'eng', 'bio', 'econ', 'civic', 'comm', 'gov', 'acc',
             'lit', 'phy', 'chem', 'fmath', 'crk', 'yor', 'comp', 'td'
         ];
+
+        const jssSubjectPrefixes = ['mat', 'eng', 'civic', 'crk', 'yor', 'comp'];
+
+        const subjectHeadersMap = {
+            'mat': 'Math',
+            'eng': 'English',
+            'bio': 'Biology',
+            'econ': 'Economics',
+            'civic': 'Civic',
+            'comm': 'Commerce',
+            'gov': 'Govt',
+            'acc': 'Account',
+            'lit': 'Literature',
+            'phy': 'Physics',
+            'chem': 'Chemistry',
+            'fmath': 'F.Math',
+            'crk': 'CRK',
+            'yor': 'Yoruba',
+            'comp': 'Computer',
+            'td': 'Tech. Draw'
+        };
 
         window.onload = async function () {
             const passedSecurityCheck = await verifyActiveAdminSession();
@@ -1174,6 +1195,20 @@
                 return;
             }
 
+            const isJuniorClass = selectedClass.startsWith("JSS");
+            const activePrefixes = isJuniorClass ? jssSubjectPrefixes : allSubjectPrefixes;
+
+            // Dynamically adjust table headers based on Class level
+            const headerRow = document.getElementById('matrix-header-row');
+            let headerHtml = `<th style="text-align: left;">Student Name</th>`;
+            activePrefixes.forEach(pref => {
+                headerHtml += `<th>${subjectHeadersMap[pref]}</th>`;
+            });
+            headerHtml += `<th>Total Mark</th><th>Average %</th>`;
+            headerRow.innerHTML = headerHtml;
+
+            const totalCols = activePrefixes.length + 3;
+
             const wrapper = document.getElementById('matrix-display-wrapper');
             const tbody = document.getElementById('matrix-rows');
             const printBtn = document.getElementById('print-ledger-btn');
@@ -1191,7 +1226,7 @@
             printSubtitle.innerText = ledgerHeadline;
             ledgerTitle.innerText = ledgerHeadline;
 
-            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;">Querying submitted ledger cards...</td></tr>`;
             wrapper.classList.remove('hidden');
             uploadBar.classList.remove('hidden');
 
@@ -1213,7 +1248,7 @@
             });
 
             if (currentlyLoadedClassStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No registered students found in this class.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No registered students found in this class.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
                 uploadBar.classList.add('hidden');
@@ -1255,11 +1290,10 @@
                 let rowCellsHtml = `<td style="text-align:left; font-weight:600;">${student.admission_number || 'Unnamed Student'}</td>`;
 
                 const dept = student.department ? student.department.trim() : "None";
-                const isSenior = selectedClass.startsWith("SS");
 
-                subjectPrefixes.forEach(prefix => {
+                activePrefixes.forEach(prefix => {
                     let isLocked = false;
-                    if (isSenior) {
+                    if (!isJuniorClass) {
                         if (prefix === 'bio' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
                         if (prefix === 'comm' && (dept === "Science")) isLocked = true;
                         if (prefix === 'gov' && dept === "Science") isLocked = true;
@@ -1268,10 +1302,6 @@
                         if (prefix === 'phy' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
                         if (prefix === 'chem' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
                         if (prefix === 'td' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
-                    } else {
-                        if (['econ', 'comm', 'gov', 'acc', 'lit', 'phy', 'chem', 'fmath', 'td'].includes(prefix)) {
-                            isLocked = true;
-                        }
                     }
 
                     if (isLocked) {
@@ -1307,7 +1337,7 @@
             });
 
             if (recordsDisplayedCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet for this session and term.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet for this session and term.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
                 uploadBar.classList.add('hidden');
