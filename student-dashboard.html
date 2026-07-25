@@ -276,8 +276,10 @@
 
             .portal-header,
             .profile-card,
-            .welcome-bahher,
+            #student-welcome-heading,
             #student-header-title,
+            .action-utilities-bar,
+            #term-gate-box,
             button {
                 display: none !important;
             }
@@ -288,17 +290,12 @@
             }
 
             body {
+                background: #FFF !important;
                 color: #000 !important;
                 padding: 0 !important;
                 font-size: 11px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-            }
-
-            .portal-header,
-            .action-utilities-bar,
-            #term-gate-box {
-                display: none !important;
             }
 
             .print-logo-header {
@@ -515,6 +512,19 @@
                     welcomeElement.innerText = `Welcome, ${student.admission_number}`;
                 }
             }
+        }
+
+        // Helper function to derive next class for 3rd term promotion remarks
+        function getNextClassName(currentClassStr) {
+            if (!currentClassStr) return "the Next Class";
+            const upper = currentClassStr.trim().toUpperCase();
+            if (upper.includes("JSS 1") || upper.includes("JSS1")) return currentClassStr.replace(/JSS\s*1/i, "JSS 2");
+            if (upper.includes("JSS 2") || upper.includes("JSS2")) return currentClassStr.replace(/JSS\s*2/i, "JSS 3");
+            if (upper.includes("JSS 3") || upper.includes("JSS3")) return currentClassStr.replace(/JSS\s*3/i, "SS 1");
+            if (upper.includes("SS 1") || upper.includes("SS1")) return currentClassStr.replace(/SS\s*1/i, "SS 2");
+            if (upper.includes("SS 2") || upper.includes("SS2")) return currentClassStr.replace(/SS\s*2/i, "SS 3");
+            if (upper.includes("SS 3") || upper.includes("SS3")) return "Graduated / Higher Education";
+            return "the Next Class";
         }
 
         // Fetch academic sessions dynamically from DB
@@ -807,15 +817,37 @@
 
             document.getElementById('card-teacher-comment').innerText = termRecord.teacher_comment ? decodeURIComponent(termRecord.teacher_comment) : "No qualitative remarks registered yet for this session.";
 
-            const principalBox = document.getElementById('card-principal-comment');
-            const calculatedAvg = parseFloat(globalAvg) || 0;
-            if (calculatedAvg >= 75) {
-                principalBox.innerText = "An outstanding performance. Keep maintaining this standard of excellence.";
-            } else if (calculatedAvg >= 50) {
-                principalBox.innerText = "Good effort. Promising results, with more focus can achieve greater scores.";
+            // 1:1 EXACT MATCH WITH TEACHER DASHBOARD LOGIC
+            const principalCommentBox = document.getElementById('card-principal-comment');
+            const avgPercentage = parseFloat(globalAvg) || 0;
+            let commentText = "";
+
+            if (avgPercentage >= 0 && avgPercentage <= 45.4) {
+                commentText = "Below average, serious improvement is required.";
+            } else if (avgPercentage > 45.4 && avgPercentage <= 49.4) {
+                commentText = "Close to average, put in more effort.";
+            } else if (avgPercentage > 49.4 && avgPercentage <= 59.4) {
+                commentText = "Average, try more next term.";
+            } else if (avgPercentage > 59.4 && avgPercentage <= 69.4) {
+                commentText = "A good performance. Keep working consistently.";
+            } else if (avgPercentage > 69.4 && avgPercentage <= 79.4) {
+                commentText = "Very good performance. Keep it up.";
+            } else if (avgPercentage > 79.4 && avgPercentage <= 100) {
+                commentText = "Excellent performance. Maintain this outstanding standard.";
             } else {
-                principalBox.innerText = "Performance is below average. Intense academic revision is recommended.";
+                commentText = "Performance is below average. Intense academic revision is recommended.";
             }
+
+            // Append promotion status for 3rd Term
+            const isThirdTerm = chosenTerm.toLowerCase().includes('3rd') || chosenTerm.toLowerCase().includes('third');
+            if (isThirdTerm) {
+                const nextClass = (typeof getNextClassName === 'function' && typeof assignedClassStr !== 'undefined')
+                    ? getNextClassName(assignedClassStr)
+                    : 'the next class';
+                commentText += ` Promoted to ${nextClass}.`;
+            }
+
+            principalCommentBox.innerText = commentText;
 
             document.getElementById('term-gate-box').classList.add('hidden');
             document.getElementById('dashboard-workspace').classList.remove('hidden');
