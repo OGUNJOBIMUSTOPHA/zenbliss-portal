@@ -273,13 +273,21 @@
         }
 
         @media print {
+
+            .portal-header,
+            .profile-card,
+            .welcome-bahher,
+            #student-header-title,
+            button {
+                display: none !important;
+            }
+
             @page {
                 size: A4 portrait;
                 margin: 0.4cm 0.5cm;
             }
 
             body {
-                background: #FFF !important;
                 color: #000 !important;
                 padding: 0 !important;
                 font-size: 11px !important;
