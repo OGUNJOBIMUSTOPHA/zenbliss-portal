@@ -397,7 +397,7 @@
         <div id="dashboard-workspace" class="report-card-wrapper hidden">
 
             <div class="action-utilities-bar">
-                <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">Return to
+                <button class="btn-submit" style="background-color: #718096;" onclick="location.reload()">Return to term
                     Selector</button>
                 <button class="btn-submit" style="background-color: var(--primary-light);"
                     onclick="window.print()">Print Report Card</button>
@@ -436,7 +436,7 @@
                         <th style="width: 12%;">CA 2 (20)</th>
                         <th style="width: 12%;">Exam (60)</th>
                         <th style="width: 19%;">Total Score</th>
-                        <th style="width: 10%;">Grades</th>
+                        <th style="width: 10%;">Grade</th>
                     </tr>
                 </thead>
                 <tbody id="report-subjects-body"></tbody>
@@ -474,7 +474,7 @@
                     </div>
                     <div class="commentary-box" style="margin-bottom: 0;">
                         <h4 style="color: var(--accent-red); margin-bottom: 4px; font-size: 0.85rem; font-weight: 800;">
-                            Principal's Assessment</h4>
+                            Principal's Comment</h4>
                         <p id="card-principal-comment"
                             style="font-weight: 600; color: var(--primary-blue); line-height: 1.4;">-</p>
                     </div>
@@ -687,7 +687,7 @@
 
             const welcomeElement = document.getElementById('student-welcome-heading');
             if (welcomeElement && student.admission_number) {
-                welcomeElement.innerText = `Welcome ${student.admission_number}`;
+                welcomeElement.innerText = `Welcome, ${student.admission_number}`;
             }
 
             // Session check
@@ -804,7 +804,7 @@
 
             tbody.innerHTML += `
                 <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
-                    <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE METRICS</td>
+                    <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE</td>
                     <td colspan="2" style="color:white;">TOTAL SUM: ${grandTotal}</td>
                     <td colspan="3" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}% (Grade: ${overallGrade})</td>
                 </tr>
