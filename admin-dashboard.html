@@ -762,7 +762,7 @@
             }
 
             if (adminUser.current_session_id !== localSessionId) {
-                alert("🔒 Access Denied: This Admin account has been logged in from another device or window. You have been logged out.");
+                alert(" Access Denied: This Admin account has been logged in from another device or window. You have been logged out.");
                 localStorage.clear();
                 window.location.href = "admin-login.html";
                 return false;
@@ -852,7 +852,7 @@
                 }
 
                 if (targetSession.is_active) {
-                    alert("This session is already currently active. Active settings saved (no student promotions triggered).");
+                    alert("This session is already active. Active settings saved (no student promotions triggered).");
                     document.getElementById('term-config-form-body').classList.add('hidden');
                     document.getElementById('toggle-term-config-btn').style.display = 'inline-block';
                     return;
@@ -917,7 +917,7 @@
                         }
                     }
 
-                    alert("🎉 New session activated and students have been promoted.");
+                    alert(" New session activated and students have been promoted.");
                 } else {
                     alert("Session activated. Student promotion was skipped.");
                 }
@@ -1061,17 +1061,17 @@
                 const assignedToOtherTeacherName = classGlobalOwnershipMap[cls];
 
                 let checkedAttr = isOwnedByCurrentTeacher ? "checked" : "";
-                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;">✅ Available for Allocation</span>`;
+                let tileStatusText = `<b>${cls}</b> — <span style="color:#2f855a; font-weight:bold;"> Available for Allocation</span>`;
                 let disabledAttr = "";
                 let tileBackgroundStyle = "background:#fafafa;";
 
                 if (isOwnedByCurrentTeacher) {
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;">🎯 Currently Assigned to This Teacher</span>`;
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#2b6cb0; font-weight:bold;"> Currently Assigned to This Teacher</span>`;
                     tileBackgroundStyle = "background: #ebf8ff; border: 1px solid #90cdf4;";
                 } else if (assignedToOtherTeacherName) {
                     checkedAttr = "";
                     disabledAttr = "disabled";
-                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;">🔒 Occupied by ${assignedToOtherTeacherName}</span>`;
+                    tileStatusText = `<b>${cls}</b> — <span style="color:#c53030; font-size:0.8rem;"> Occupied by ${assignedToOtherTeacherName}</span>`;
                     tileBackgroundStyle = "background: #edf2f7; opacity: 0.65; cursor: not-allowed;";
                 }
 
@@ -1337,7 +1337,7 @@
             });
 
             if (recordsDisplayedCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted this class ledger yet for this session and term.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center; color:#c53030; font-weight:bold; padding:20px;">No records found. The teacher has not officially submitted the class ledger for this session and term.</td></tr>`;
                 printBtn.disabled = true;
                 printBtn.style.opacity = "0.6";
                 uploadBar.classList.add('hidden');

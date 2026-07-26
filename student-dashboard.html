@@ -436,6 +436,7 @@
                         <th style="width: 12%;">CA 2 (20)</th>
                         <th style="width: 12%;">Exam (60)</th>
                         <th style="width: 19%;">Total Score</th>
+                        <th style="width: 10%;">Grades</th>
                     </tr>
                 </thead>
                 <tbody id="report-subjects-body"></tbody>
@@ -793,17 +794,19 @@
                         <td>${ca2 !== "" ? ca2 : "-"}</td>
                         <td>${ex !== "" ? ex : "-"}</td>
                         <td style="font-weight:bold; color:var(--primary-blue);">${totalScore}</td>
+                        <td style="font-weight:bold;">${getGrade(totalScore)}</td>
                     </tr>
                 `;
             });
 
             const globalAvg = scoredSubjectsCount > 0 ? ((grandTotal / (scoredSubjectsCount * 100)) * 100).toFixed(1) : "0.0";
+            const overallGrade = getGrade(globalAvg);
 
             tbody.innerHTML += `
                 <tr style="background:var(--primary-blue); color:white; font-weight:bold;">
                     <td style="text-align:left; color:white;">AGGREGATE PERFORMANCE METRICS</td>
                     <td colspan="2" style="color:white;">TOTAL SUM: ${grandTotal}</td>
-                    <td colspan="2" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}%</td>
+                    <td colspan="3" style="color:white; text-align:right;">OVERALL AVERAGE: ${globalAvg}% (Grade: ${overallGrade})</td>
                 </tr>
             `;
 
@@ -858,6 +861,16 @@
             await initializeStudentHeader();
             await loadAcademicSessions();
         });
+        function getGrade(score) {
+            const num = Number(score);
+            if (isNaN(num)) return "-";
+            if (num >= 75) return "A";
+            if (num >= 65) return "B";
+            if (num >= 50) return "C";
+            if (num >= 45) return "D";
+            if (num >= 40) return "E";
+            return "F";
+        }
     </script>
 </body>
 
