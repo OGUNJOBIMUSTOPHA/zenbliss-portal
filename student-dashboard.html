@@ -640,9 +640,9 @@
                 if (dept === "Science" || dept === "Science & Tech") {
                     return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
                 } else if (dept === "Humanity") {
-                    return ['phy', 'chem', 'bio', 'fmath', 'td', 'acc'].includes(prefix);
+                    return ['phy', 'chem', 'td', 'acc'].includes(prefix);
                 } else if (dept === "Commercial") {
-                    return ['bio', 'lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
+                    return ['lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
                 }
             }
             return false;
