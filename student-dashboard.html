@@ -753,7 +753,7 @@
             document.getElementById('card-term').innerText = `${chosenTerm.toUpperCase()} (${chosenSessionName})`;
             document.getElementById('card-term-title').innerText = `${chosenTerm.toUpperCase()} OFFICIAL REPORT CARD — ${chosenSessionName}`;
             document.getElementById('card-dept').innerText = dept;
-            document.getElementById('card-attendance-log').innerText = `${termRecord.days_present || 0}/90`;
+            document.getElementById('card-attendance-log').innerText = `${termRecord.days_present || 0}/122`;
 
             const activePrefixes = subjectPrefixes.filter(pref => {
                 if (!isSenior) {
