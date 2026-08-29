@@ -300,67 +300,86 @@
             }
         }
 
-        // Initialize toggles for both forms
         setupPasswordToggle('student-pass', 'toggleStudentPassBtn', 'studentEyeIcon');
         setupPasswordToggle('teacher-pass', 'toggleTeacherPassBtn', 'teacherEyeIcon');
 
-        // Helper function to generate a randomized dynamic tracking token
         function createUniqueSessionToken() {
             return 'zb_sess_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
         }
 
-        // 1. Student Login Logic Flow
+        // Helper to format email matching registration format
+        function getFormattedEmail(nameInput) {
+            const cleanId = nameInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            return nameInput.includes('@') ? nameInput : `${cleanId}@zenbliss.school`;
+        }
+
+        // 1. Student Login Logic Flow using Supabase Auth
         async function handleStudentLogin(event) {
             event.preventDefault();
             event.stopPropagation();
 
             const typedName = document.getElementById('student-name').value.trim();
             const password = document.getElementById('student-pass').value;
+            const userEmail = getFormattedEmail(typedName);
 
-            const { data: user, error } = await supabaseClient
+            // Supabase Auth Authentication
+            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                email: userEmail,
+                password: password
+            });
+
+            if (authError) {
+                alert("Login Failed: Invalid credentials or incorrect password.");
+                return;
+            }
+
+            // Fetch user profile details
+            const { data: profile, error: profileError } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', typedName)
-                .eq('role', 'student');
+                .eq('id', authData.user.id)
+                .single();
 
-            if (error || !user || user.length === 0) {
-                alert("Invalid Student Name. Please try again or check registration spelling.");
+            if (profileError || !profile) {
+                alert("User profile record not found.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            const currentUser = user[0];
+            if (profile.role !== 'student') {
+                alert("This account is not registered as a student.");
+                await supabaseClient.auth.signOut();
+                return;
+            }
 
-            if (!currentUser.is_approved) {
+            if (!profile.is_approved) {
                 alert("Your account application is still pending review by the School Administration.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            if (password !== currentUser.password && password !== "123456") {
-                alert("Incorrect Password.");
-                return;
-            }
-
-            // Generate security token mapping parameters
+            // Single session token generator & update
             const dynamicSession = createUniqueSessionToken();
-
-            // Commit token update parameters to the active database profile
             const { error: tokenUpdateError } = await supabaseClient
                 .from('users')
                 .update({ current_session_id: dynamicSession })
-                .eq('id', currentUser.id);
+                .eq('id', profile.id);
 
             if (tokenUpdateError) {
                 alert("Database synchronization failure during session security setup.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            // Sync structural localStorage keys
+            // Store active session parameters
             localStorage.setItem('active_session_id', dynamicSession);
-            localStorage.setItem('current_student_id', currentUser.id.toString());
+            localStorage.setItem('current_student_id', profile.id);
+            localStorage.setItem('zb_user_role', 'student');
+
             window.location.href = "student-dashboard.html";
         }
 
-        // 2. Staff & Admin Login Logic Flow
+        // 2. Staff & Admin Login Logic Flow using Supabase Auth
         async function handleTeacherLogin(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -368,48 +387,67 @@
             const typedStaffName = document.getElementById('teacher-name').value.trim();
             const password = document.getElementById('teacher-pass').value;
 
-            // Administrative Master Key bypass routing shortcut check
+            // Admin bypass routing option check
             if (typedStaffName.toLowerCase() === 'admin' && password === 'admin123') {
                 window.location.href = "admin-dashboard.html";
                 return;
             }
 
-            const { data: user, error } = await supabaseClient
+            const userEmail = getFormattedEmail(typedStaffName);
+
+            // Supabase Auth Authentication
+            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                email: userEmail,
+                password: password
+            });
+
+            if (authError) {
+                alert("Login Failed: Invalid Staff credentials or incorrect password.");
+                return;
+            }
+
+            // Fetch teacher profile details
+            const { data: profile, error: profileError } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('admission_number', typedStaffName)
-                .eq('role', 'teacher');
+                .eq('id', authData.user.id)
+                .single();
 
-            if (error || !user || user.length === 0) {
-                alert("Invalid Staff Name. Access Denied.");
+            if (profileError || !profile) {
+                alert("Staff profile record not found.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            const currentUser = user[0];
-
-            if (password !== currentUser.password && password !== "123456") {
-                alert("Incorrect Password.");
+            if (profile.role !== 'teacher' && profile.role !== 'admin') {
+                alert("Access Denied: Account is not authorized as staff.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            // Generate security token mapping parameters
+            // Single session token generator & update
             const dynamicSession = createUniqueSessionToken();
-
-            // Commit token update parameters to the active database profile
             const { error: tokenUpdateError } = await supabaseClient
                 .from('users')
                 .update({ current_session_id: dynamicSession })
-                .eq('id', currentUser.id);
+                .eq('id', profile.id);
 
             if (tokenUpdateError) {
                 alert("Database synchronization failure during session security setup.");
+                await supabaseClient.auth.signOut();
                 return;
             }
 
-            // Sync structural localStorage keys
+            // Store active session parameters
             localStorage.setItem('active_session_id', dynamicSession);
-            localStorage.setItem('current_teacher_id', currentUser.id.toString());
-            window.location.href = "class-teacher-dashboard.html";
+            localStorage.setItem('current_teacher_id', profile.id);
+            localStorage.setItem('zb_user_role', profile.role);
+
+            if (profile.role === 'admin') {
+                window.location.href = "admin-dashboard.html";
+            } else {
+                window.location.href = "class-teacher-dashboard.html";
+            }
         }
     </script>
 </body>

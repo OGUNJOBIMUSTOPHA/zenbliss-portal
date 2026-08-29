@@ -557,8 +557,9 @@
             return seniorMaps[prefix] || prefix.toUpperCase();
         }
 
-        function handleLogout() {
+        async function handleLogout() {
             if (confirm("Are you sure you want to log out?")) {
+                await supabaseClient.auth.signOut();
                 localStorage.clear();
                 window.location.replace("index.html");
             }
@@ -580,6 +581,7 @@
 
                 if (!teacherId || !localSessionId) {
                     alert("Session context missing or expired. Please log in again.");
+                    await supabaseClient.auth.signOut();
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -593,6 +595,7 @@
 
                 if (error || !user) {
                     alert("Security check error. Profile matching failed.");
+                    await supabaseClient.auth.signOut();
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -600,7 +603,8 @@
 
                 // Verify that the locally cached session token matches the database value
                 if (user.current_session_id !== localSessionId) {
-                    alert(" Access Denied: This Staff account has been logged in from another device or browser tab. You have been disconnected.");
+                    alert("Access Denied: This Staff account has been logged in from another device or browser tab. You have been disconnected.");
+                    await supabaseClient.auth.signOut();
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -654,12 +658,10 @@
                         .single();
 
                     if (!sessionError && activeSession) {
-                        // 2. Update the header label with the real active session name (e.g. "Session 2026/2027")
                         const sessionSpan = document.getElementById('teacher-sessions-display');
                         if (sessionSpan) {
                             sessionSpan.textContent = `Session ${activeSession.name}`;
                         }
-                        // 3. Keep track of the active session ID globally for database queries
                         window.currentActiveSessionId = activeSession.id;
                     } else {
                         console.warn("Could not retrieve active session:", sessionError);
@@ -668,7 +670,6 @@
                     console.error("Session load crash:", sessErr);
                 }
 
-                // Dynamic dropdown terms initialized strictly by Admin inside the database
                 await populateTargetTermsDropdown();
 
             } catch (err) {
@@ -707,6 +708,7 @@
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
                 alert("Session invalidated: Another login was detected.");
+                await supabaseClient.auth.signOut();
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
@@ -968,6 +970,7 @@
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
                 alert("Save Blocked: Session key expired or overridden by another login instance.");
+                await supabaseClient.auth.signOut();
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;
@@ -1069,7 +1072,6 @@
 
             const principalCommentBox = document.getElementById('card-principal-comment');
 
-            // 1. Build base remark by score range
             let commentText = "";
 
             if (avgPercentage >= 0 && avgPercentage <= 45.4) {
@@ -1088,14 +1090,12 @@
                 commentText = "Performance is below average. Intense academic revision is recommended.";
             }
 
-            // 2. Fetch current selected term & class directly from page selectors
             const targetTermElement = document.getElementById('target-compilation-term');
             const targetClassElement = document.getElementById('teacher-class-selector');
 
             const selectedTermVal = targetTermElement ? targetTermElement.value : '';
             const selectedClassVal = targetClassElement ? targetClassElement.value : '';
 
-            // Check if selected term is 3rd Term
             const isThirdTerm = selectedTermVal.toLowerCase().includes('3rd') || selectedTermVal.toLowerCase().includes('third');
 
             if (isThirdTerm) {
@@ -1103,7 +1103,6 @@
                 commentText += ` Promoted to ${nextClass}.`;
             }
 
-            // 3. Assign completed comment string to box
             principalCommentBox.innerText = commentText;
 
             const commitBtn = document.getElementById('commit-btn-sync');
@@ -1115,7 +1114,6 @@
             document.getElementById('card-punctual').disabled = shouldDisable;
             document.getElementById('card-leadership').disabled = shouldDisable;
             document.getElementById('card-maturity').disabled = shouldDisable;
-            document.getElementById('card-cleanliness').disabled = shouldDisable;
             document.getElementById('card-handwriting').disabled = shouldDisable;
             document.getElementById('card-hardwork').disabled = shouldDisable;
             document.getElementById('card-sport').disabled = shouldDisable;
@@ -1133,6 +1131,7 @@
                 const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
                 if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
                     alert("Session invalidated: Another login was detected.");
+                    await supabaseClient.auth.signOut();
                     localStorage.clear();
                     window.location.replace("index.html");
                     return;
@@ -1227,6 +1226,7 @@
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
                 alert("Submission Blocked: Active session expired.");
+                await supabaseClient.auth.signOut();
                 localStorage.clear();
                 window.location.replace("index.html");
                 return;

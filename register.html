@@ -249,14 +249,12 @@
 
             if (isPassword) {
                 passwordInput.setAttribute('type', 'text');
-                // Change icon to 'Eye Off'
                 eyeIcon.innerHTML = `
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                     <line x1="1" y1="1" x2="23" y2="23"></line>
                 `;
             } else {
                 passwordInput.setAttribute('type', 'password');
-                // Change icon back to regular 'Eye'
                 eyeIcon.innerHTML = `
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
@@ -276,6 +274,7 @@
             }
         });
 
+        // Updated Registration Logic with Supabase Auth Native System
         document.getElementById('registrationForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -286,52 +285,35 @@
             const userPassword = passwordInput.value;
 
             try {
-                // Check if account already exists with same name (and department if senior)
-                let checkQuery = supabaseClient
-                    .from('users')
-                    .select('id')
-                    .ilike('admission_number', fullName);
+                // 1. Format synthetic email for Supabase Auth requirement
+                const cleanId = fullName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const userEmail = fullName.includes('@')
+                    ? fullName
+                    : `${cleanId}@zenbliss.school`;
 
-                if (department && department !== "None") {
-                    checkQuery = checkQuery.eq('department', department);
-                }
-
-                const { data: existingUsers, error: checkError } = await checkQuery;
-
-                if (checkError) {
-                    console.error("Error checking duplicates:", checkError);
-                    alert("An error occurred while verifying account information.");
-                    return;
-                }
-
-                if (existingUsers && existingUsers.length > 0) {
-                    alert("An account with the same information is already in existence.");
-                    return;
-                }
-
-                // Direct cloud pipeline transmission 
-                const { data, error } = await supabaseClient
-                    .from('users')
-                    .insert([
-                        {
+                // 2. Register via Supabase Auth (Triggers automatic profile creation in public.users)
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                    email: userEmail,
+                    password: userPassword,
+                    options: {
+                        data: {
                             admission_number: fullName,
-                            password: userPassword,
                             role: 'student',
-                            is_approved: false,
-                            assigned_classes: [selectedClass],
                             department: department,
-                            phone: phoneNumber
+                            phone: phoneNumber,
+                            assigned_classes: selectedClass ? [selectedClass] : []
                         }
-                    ]);
+                    }
+                });
 
-                if (error) {
-                    alert("Registration Submission Failed: " + error.message);
+                if (authError) {
+                    alert("Registration Failed: " + authError.message);
                     return;
                 }
 
-                alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
+                alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access profile before logging in.`);
 
-                // Resetting view layers cleanly
+                // 3. Reset UI layers cleanly
                 this.reset();
                 passwordInput.setAttribute('type', 'password');
                 eyeIcon.innerHTML = `
