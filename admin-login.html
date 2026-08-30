@@ -152,12 +152,6 @@
             return 'zb_sess_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
         }
 
-        // Helper to format synthetic email derived from input username
-        function getFormattedEmail(nameInput) {
-            const cleanId = nameInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-            return nameInput.includes('@') ? nameInput : `${cleanId}@zenbliss.school`;
-        }
-
         async function handleAdminLogin(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -165,64 +159,46 @@
             const usernameInput = document.getElementById('admin-user').value.trim();
             const passwordInput = document.getElementById('admin-pass').value;
 
-            // Administrative Master Bypass Route
-            if (usernameInput.toLowerCase() === 'admin' && passwordInput === 'admin123') {
-                const adminSession = createUniqueSessionToken();
-                localStorage.setItem('active_session_id', adminSession);
-                localStorage.setItem('zb_user_role', 'admin');
-                window.location.href = "admin-dashboard.html";
-                return;
-            }
-
-            const userEmail = getFormattedEmail(usernameInput);
-
-            // Supabase Auth Native Login Pipeline
-            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-                email: userEmail,
-                password: passwordInput
-            });
-
-            if (authError) {
-                alert("Access Denied: Invalid Admin Credentials.");
-                return;
-            }
-
-            // Verify role in public.users table
-            const { data: profile, error: profileError } = await supabaseClient
+            const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('id', authData.user.id)
-                .single();
+                .eq('admission_number', usernameInput)
+                .eq('role', 'admin');
 
-            if (profileError || !profile) {
-                alert("Database Error: User profile unavailable.");
-                await supabaseClient.auth.signOut();
+            if (error) {
+                alert("Database Error: " + error.message);
                 return;
             }
 
-            if (profile.role !== 'admin') {
-                alert("Access Denied: You do not have Administrative privileges.");
-                await supabaseClient.auth.signOut();
+            if (!user || user.length === 0) {
+                alert("Access Denied: Invalid Admin Login ID.");
                 return;
             }
+
+            const currentAdmin = user[0];
+
+            if (passwordInput !== currentAdmin.password) {
+                alert("Access Denied: Incorrect Password.");
+                return;
+            }
+
+            // Generate security token mapping parameters
+            const dynamicSession = createUniqueSessionToken();
 
             // Commit token update parameters to the active database profile
-            const dynamicSession = createUniqueSessionToken();
             const { error: tokenUpdateError } = await supabaseClient
                 .from('users')
                 .update({ current_session_id: dynamicSession })
-                .eq('id', profile.id);
+                .eq('id', currentAdmin.id);
 
             if (tokenUpdateError) {
                 alert("Database synchronization failure during session security setup.");
-                await supabaseClient.auth.signOut();
                 return;
             }
 
             // Sync structural localStorage keys
             localStorage.setItem('active_session_id', dynamicSession);
-            localStorage.setItem('current_admin_id', profile.id);
-            localStorage.setItem('zb_user_role', 'admin');
+            localStorage.setItem('current_admin_id', currentAdmin.id.toString());
 
             window.location.href = "admin-dashboard.html";
         }

@@ -496,56 +496,6 @@
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
 
-        // Helper to format email matching admission number without domain modification
-        function getFormattedEmail(nameInput) {
-            const cleanId = nameInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-            return nameInput.includes('@') ? nameInput : `${cleanId}@zenbliss.school`;
-        }
-
-        // 1. Student Login Logic Flow using Supabase Auth
-        async function handleStudentLogin(event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            const typedName = document.getElementById('student-name').value.trim();
-            const password = document.getElementById('student-pass').value;
-            const userEmail = getFormattedEmail(typedName);
-
-            // Supabase Auth Authentication
-            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-                email: userEmail,
-                password: password
-            });
-
-            if (authError) {
-                alert("Login Failed: Invalid credentials or incorrect password.");
-                return;
-            }
-
-            // Fetch user profile details
-            const { data: profile, error: profileError } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('id', authData.user.id)
-                .single();
-
-            if (profileError || !profile) {
-                alert("User profile record not found.");
-                await supabaseClient.auth.signOut();
-                return;
-            }
-
-            if (profile.role !== 'student') {
-                alert("This account is not registered as a student.");
-                await supabaseClient.auth.signOut();
-                return;
-            }
-
-            // Save session data and redirect to dashboard
-            localStorage.setItem('current_student_id', profile.id);
-            window.location.href = 'student-dashboard.html';
-        }
-
         // Renders student greeting immediately on portal launch
         async function initializeStudentHeader() {
             const currentStudentId = localStorage.getItem('current_student_id');

@@ -143,6 +143,7 @@
             margin: 8mm;
         }
 
+
         .control-box {
             background: var(--background-white);
             border-radius: 8px;
@@ -151,65 +152,39 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
         }
 
+        /* ENLARGED STAFF REGISTRY SECTION STYLES */
         .staff-registry-box {
-            padding: 25px;
+            padding: 15px;
+            max-width: 500px;
         }
 
-        .staff-form-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            width: 100%;
-            align-items: center;
+        .staff-registry-box h2 {
+            font-size: 1rem !important;
+            margin-bottom: 15px !important;
+            padding-bottom: 7px !important;
         }
 
         .staff-registry-input {
             flex: 1;
-            min-width: 160px;
-            padding: 10px 14px;
-            font-size: 0.95rem;
+            padding: 14px 16px !important;
+            font-size: 1rem !important;
             border: 1px solid #CBD5E0;
-            border-radius: 6px;
+            border-radius: 6px !important;
             box-sizing: border-box;
-            height: 42px;
-        }
-
-        .password-field-wrapper {
-            position: relative;
-            flex: 1;
-            min-width: 160px;
-            display: flex;
-            align-items: center;
-        }
-
-        .password-field-wrapper input {
-            width: 100%;
-            padding-right: 40px !important;
-        }
-
-        .eye-toggle-btn {
-            position: absolute;
-            right: 10px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            height: 100%;
+            height: 30px !important;
         }
 
         .staff-registry-btn {
-            padding: 0 20px;
-            background-color: var(--primary-blue);
+            margin: 0;
+            padding: 0 28px !important;
+            background-color: #1A365D;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 6px !important;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.95rem;
-            height: 42px;
+            font-size: 1rem !important;
+            height: 32px !important;
             white-space: nowrap;
         }
 
@@ -333,7 +308,7 @@
                 background: #FFF !important;
                 color: #000 !important;
                 padding: 0 !important;
-                margin: 0 !important;
+                margin: o !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -398,6 +373,43 @@
                 border: 1px solid #000 !important;
                 color: #000 !important;
             }
+        }
+
+        /* STAFF REGISTRY FIXES */
+        .staff-form-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 17px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .password-field-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            /* Forces input width to expand */
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field-wrapper input {
+            width: 100%;
+            padding-right: 45px !important;
+            /* Space for eye icon inside input */
+        }
+
+        .eye-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            height: 100%;
         }
     </style>
 </head>
@@ -483,7 +495,7 @@
                             <input type="password" id="new-staff-pass" class="staff-registry-input"
                                 placeholder="Create password" required>
                             <button type="button" class="eye-toggle-btn" onclick="toggleTeacherPasswordVisibility()">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -1186,6 +1198,7 @@
             const isJuniorClass = selectedClass.startsWith("JSS");
             const activePrefixes = isJuniorClass ? jssSubjectPrefixes : allSubjectPrefixes;
 
+            // Dynamically adjust table headers based on Class level
             const headerRow = document.getElementById('matrix-header-row');
             let headerHtml = `<th style="text-align: left;">Student Name</th>`;
             activePrefixes.forEach(pref => {
