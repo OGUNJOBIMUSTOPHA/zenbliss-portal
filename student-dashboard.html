@@ -717,8 +717,8 @@
                 return;
             }
 
-            if (termRecord.ledger_submitted === false) {
-                alert("Notice: Term compilation ledgers are currently under management review. Results have not been released yet.");
+            if (termRecord.ledger_submitted === false || termRecord.results_released === false) {
+                alert("Notice: Results have not been released yet. Please check back later.");
                 return;
             }
 
