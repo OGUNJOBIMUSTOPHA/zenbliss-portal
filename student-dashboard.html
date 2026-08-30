@@ -270,7 +270,6 @@
             margin-bottom: 20px;
             display: flex;
             gap: 12px;
-            flex-wrap: wrap;
         }
 
         @media print {
@@ -393,8 +392,6 @@
             </div>
 
             <button class="btn-submit" onclick="fetchStudentTermScores()">View Result</button>
-            <button class="btn-submit" style="background-color: var(--accent-red); margin-top: 10px;"
-                onclick="handleUserLogout()">Sign Out</button>
         </div>
 
         <div id="dashboard-workspace" class="report-card-wrapper hidden">
@@ -404,8 +401,6 @@
                     Selector</button>
                 <button class="btn-submit" style="background-color: var(--primary-light);"
                     onclick="window.print()">Print Report Card</button>
-                <button class="btn-submit" style="background-color: var(--accent-red);"
-                    onclick="handleUserLogout()">Sign Out</button>
             </div>
 
             <div class="print-logo-header">
@@ -500,54 +495,6 @@
             'lit', 'phy', 'chem', 'bio', 'fmath', 'crk', 'comp', 'td',
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
-
-        /**
-         * Securely terminates the current user session on Supabase and clears local storage.
-         */
-        async function handleUserLogout() {
-            try {
-                // 1. Call Supabase Auth sign out endpoint
-                const { error } = await supabaseClient.auth.signOut();
-
-                if (error) {
-                    console.error("Error signing out from Supabase:", error.message);
-                }
-            } catch (err) {
-                console.error("Unexpected error during logout execution:", err);
-            } finally {
-                // 2. Clear all local application states regardless of API response
-                localStorage.clear();
-
-                // 3. Redirect back to the portal entry/login page
-                window.location.replace("index.html");
-            }
-        }
-
-        /**
-         * Validates session integrity on page load.
-         */
-        async function verifySessionIntegrity() {
-            try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
-
-                if (error || !session) {
-                    console.warn("Session integrity check failed: No active token found.");
-                    return false;
-                }
-                return true;
-            } catch (err) {
-                console.error("Error verifying session integrity:", err);
-                return false;
-            }
-        }
-
-        // Listen dynamically to real-time auth changes (e.g. token revocation or sign-out from another tab)
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_OUT' || !session) {
-                localStorage.clear();
-                window.location.replace("index.html");
-            }
-        });
 
         // Renders student greeting immediately on portal launch
         async function initializeStudentHeader() {
@@ -914,7 +861,6 @@
             await initializeStudentHeader();
             await loadAcademicSessions();
         });
-
         function getGrade(score) {
             const num = Number(score);
             if (isNaN(num)) return "-";
