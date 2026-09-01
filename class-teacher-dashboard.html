@@ -32,7 +32,6 @@
             padding-bottom: 40px;
         }
 
-        /* Header */
         .portal-header {
             background-color: var(--primary-blue);
             color: white;
@@ -197,7 +196,6 @@
             margin: 10px 16px;
         }
 
-        /* Main content */
         .class-container {
             max-width: 1450px;
             margin: 25px auto;
@@ -431,10 +429,8 @@
 
 <body>
 
-    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3>Teacher Menu</h3>
@@ -454,7 +450,6 @@
         </nav>
     </aside>
 
-    <!-- Header -->
     <header class="portal-header">
         <div class="header-container">
             <div class="header-left">
@@ -471,7 +466,6 @@
 
     <div id="teacher-portal-content" class="class-container hidden">
 
-        <!-- Profile Card (always visible) -->
         <div class="profile-card">
             <div>
                 <h2 style="color:var(--primary-blue); margin:0;" id="teacher-profile-name">Loading Profile...</h2>
@@ -488,7 +482,7 @@
             </div>
         </div>
 
-        <!-- ========== DASHBOARD SECTION ========== -->
+        <!-- DASHBOARD -->
         <div id="section-dashboard" class="section-panel active">
             <div class="control-box">
                 <h2>Teacher Dashboard</h2>
@@ -509,7 +503,7 @@
             </div>
         </div>
 
-        <!-- ========== ENTER RESULTS SECTION ========== -->
+        <!-- ENTER RESULTS -->
         <div id="section-results" class="section-panel">
             <div id="ledger-gate" class="gate-card">
                 <h3 style="color:var(--primary-blue); margin-bottom:10px;">Select Class & Term</h3>
@@ -572,109 +566,6 @@
                     </div>
                 </div>
 
-                <div id="report-card-box" class="compilation-card hidden">
-                    <h3 style="color:var(--primary-blue);">Report Card Setup: <span id="active-student-card-title"
-                            style="color:var(--accent-red);"></span></h3>
-                    <div
-                        style="background:#FAFAFA; border:2px dashed var(--border-color); border-radius:8px; padding:18px; margin-top:12px;">
-                        <!-- (Report card fields remain the same as original) -->
-                        <div
-                            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:14px;">
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Punctuality (1-5)</label>
-                                <select id="card-punctual" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Leadership (1-5)</label>
-                                <select id="card-leadership" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Maturity (1-5)</label>
-                                <select id="card-maturity" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Cleanliness (1-5)</label>
-                                <select id="card-cleanliness" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Handwriting (1-5)</label>
-                                <select id="card-handwriting" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Hardwork (1-5)</label>
-                                <select id="card-hardwork" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Sport (1-5)</label>
-                                <select id="card-sport" style="width:100%; padding:8px; margin-top:4px;">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3">3 - Fair</option>
-                                    <option value="2">2 - Poor</option>
-                                    <option value="1">1 - Worse</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-weight:bold; font-size:0.85rem;">Days Present (Max 122)</label>
-                                <input type="number" id="card-attendance" min="0" max="122"
-                                    style="width:100%; padding:8px; margin-top:4px; border:1px solid #CBD5E0; border-radius:4px;">
-                            </div>
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <label style="font-weight:bold; font-size:0.85rem;">Class Teacher's Remarks</label>
-                            <textarea id="card-teacher-comment" rows="3"
-                                style="width:100%; padding:8px; margin-top:4px; border:1px solid #CBD5E0; border-radius:4px;"></textarea>
-                        </div>
-                        <div style="margin-bottom:14px;">
-                            <label style="font-weight:bold; font-size:0.85rem;">Principal Comment (Auto)</label>
-                            <div id="card-principal-comment"
-                                style="background:#EDF2F7; padding:10px; border-radius:4px; border-left:4px solid var(--accent-red); font-weight:600; color:var(--primary-blue);">
-                                Awaiting performance calculations...
-                            </div>
-                        </div>
-                        <div style="text-align:right;">
-                            <button type="button" class="btn-submit primary-blue" id="commit-btn-sync">Save Student Card
-                                Details</button>
-                        </div>
-                    </div>
-                </div>
-
                 <div style="margin-top:16px;">
                     <button class="btn-submit" style="background:#718096;" onclick="returnToGate()">⬅ Close Ledger
                         Workspace</button>
@@ -682,7 +573,7 @@
             </div>
         </div>
 
-        <!-- ========== NOTIFICATIONS SECTION ========== -->
+        <!-- NOTIFICATIONS -->
         <div id="section-notifications" class="section-panel">
             <div class="control-box">
                 <h2>Notifications</h2>
@@ -692,19 +583,34 @@
             </div>
         </div>
 
-        <!-- ========== CONFIGURE STUDENT CARD SECTION ========== -->
+        <!-- CONFIGURE STUDENT CARD (Fixed: now requires Class + Term) -->
         <div id="section-configure" class="section-panel">
             <div class="control-box">
                 <h2>Configure Student Card</h2>
                 <p style="color:#718096; margin-bottom:14px; font-size:0.9rem;">
-                    Select a class to view students, then click “Configure Card” to edit soft skills and comments.
+                    Select Class and Term, then click “Load Students”. After that you can configure each student’s card.
                 </p>
-                <div style="margin-bottom:16px;">
-                    <label style="font-weight:bold; font-size:0.85rem; display:block; margin-bottom:5px;">Select
-                        Class</label>
-                    <select id="configure-class-select" class="term-select" onchange="loadConfigureStudents()">
-                    </select>
+
+                <div style="display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px; align-items:flex-end;">
+                    <div>
+                        <label
+                            style="font-weight:bold; font-size:0.85rem; display:block; margin-bottom:5px;">Class</label>
+                        <select id="configure-class-select" class="term-select"></select>
+                    </div>
+                    <div>
+                        <label
+                            style="font-weight:bold; font-size:0.85rem; display:block; margin-bottom:5px;">Term</label>
+                        <select id="configure-term-select" class="term-select">
+                            <option value="1st Term">1st Term</option>
+                            <option value="2nd Term">2nd Term</option>
+                            <option value="3rd Term">3rd Term</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn-submit primary-blue" onclick="loadConfigureStudents()">Load Students</button>
+                    </div>
                 </div>
+
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -715,14 +621,15 @@
                     </thead>
                     <tbody id="configure-students-rows">
                         <tr>
-                            <td colspan="3" style="text-align:center; color:#718096;">Select a class first</td>
+                            <td colspan="3" style="text-align:center; color:#718096;">Select Class and Term, then click
+                                Load Students</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ========== INPUT BILLS SECTION ========== -->
+        <!-- INPUT BILLS -->
         <div id="section-bills" class="section-panel">
             <div class="control-box">
                 <h2>Input School Bills</h2>
@@ -779,7 +686,6 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentTeacherProfile = null;
-        let selectedTargetStudentId = null;
         window.currentActiveSessionId = null;
 
         const subjectPrefixes = [
@@ -787,7 +693,6 @@
             'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'
         ];
 
-        // ========== SIDEBAR ==========
         function openSidebar() {
             document.getElementById('sidebar').classList.add('open');
             document.getElementById('sidebar-overlay').classList.add('active');
@@ -802,8 +707,7 @@
             if (target) target.classList.add('active');
 
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            // simple active state
-            event?.target?.classList?.add('active');
+            if (event && event.target) event.target.classList.add('active');
 
             closeSidebar();
 
@@ -816,7 +720,6 @@
             }
         }
 
-        // ========== INIT ==========
         window.onload = function () {
             verifyAndLoadTeacherSession();
         };
@@ -889,7 +792,6 @@
                     }
                 }
 
-                // Active session
                 const { data: activeSession } = await supabaseClient
                     .from('academic_sessions')
                     .select('*')
@@ -914,21 +816,17 @@
             }
         }
 
-        // ========== NOTIFICATIONS ==========
         async function loadTeacherNotifications() {
             const list = document.getElementById('notifications-list');
             const badge = document.getElementById('notif-badge');
             const teacherId = localStorage.getItem('current_teacher_id');
 
             try {
-                // Delete old notifications (>20 days) - optional cleanup
                 await supabaseClient
                     .from('notifications')
                     .delete()
                     .lt('created_at', new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString());
 
-                // For teacher, we can show messages related to their submissions
-                // (Admin creates more detailed ones later)
                 const { data: notifs } = await supabaseClient
                     .from('notifications')
                     .select('*')
@@ -953,7 +851,6 @@
             }
         }
 
-        // ========== HELPER FUNCTIONS (from original) ==========
         function getNextClassName(currentClass) {
             const map = { "JSS 1": "JSS 2", "JSS 2": "JSS 3", "JSS 3": "SS 1", "SS 1": "SS 2", "SS 2": "SS 3", "SS 3": "Graduated" };
             return map[currentClass] || "the next class";
@@ -979,7 +876,6 @@
             return false;
         }
 
-        // ========== ENTER RESULTS (core logic kept) ==========
         async function loadClassLedgerWorkspace() {
             const { data: checkUser } = await supabaseClient.from('users').select('current_session_id').eq('id', localStorage.getItem('current_teacher_id')).single();
             if (!checkUser || checkUser.current_session_id !== localStorage.getItem('active_session_id')) {
@@ -1014,12 +910,13 @@
                 th1Html += `<th colspan="4" class="subject-header-group">${title}</th>`;
                 th2Html += `<th>CA1</th><th>CA2</th><th>EX</th><th>TOT</th>`;
             });
-            th1Html += `<th rowspan="2" style="background:#2D3748;">Grand Total</th><th rowspan="2" style="background:#2D3748;">Average (%)</th><th rowspan="2">Action</th>`;
+            // Removed Action column
+            th1Html += `<th rowspan="2" style="background:#2D3748;">Grand Total</th><th rowspan="2" style="background:#2D3748;">Average (%)</th>`;
             thRow1.innerHTML = th1Html;
             thRow2.innerHTML = th2Html;
 
             const tbody = document.getElementById('dynamic-student-rows');
-            tbody.innerHTML = `<tr><td colspan="65" style="text-align:center;">Loading students...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="60" style="text-align:center;">Loading students...</td></tr>`;
 
             const { data: students, error: studentError } = await supabaseClient
                 .from('users')
@@ -1042,7 +939,7 @@
             tbody.innerHTML = "";
 
             if (classStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="65" style="text-align:center; color:#a0aec0;">No students found in ${chosenClass}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="60" style="text-align:center; color:#a0aec0;">No students found in ${chosenClass}</td></tr>`;
                 return;
             }
 
@@ -1097,20 +994,12 @@
 
                 const avg = scoredCount > 0 ? ((grandTotal / (scoredCount * 100)) * 100).toFixed(1) + "%" : "0.0%";
 
+                // No Action column
                 tbody.innerHTML += `
                     <tr class="ledger-row"
                         data-id="${student.id}"
                         data-record-id="${record.id || ''}"
-                        data-dept="${dept}"
-                        data-comment="${encodeURIComponent(record.teacher_comment || '')}"
-                        data-present="${record.days_present || 0}"
-                        data-punctual="${record.punctuality_rating || '5'}"
-                        data-leadership="${record.leadership_rating || '5'}"
-                        data-maturity="${record.maturity_rating || '5'}"
-                        data-cleanliness="${record.cleanliness_rating || '5'}"
-                        data-handwriting="${record.handwriting_rating || '5'}"
-                        data-hardwork="${record.hardwork_rating || '5'}"
-                        data-sport="${record.sport_rating || '5'}">
+                        data-dept="${dept}">
                         <td class="student-name-cell">
                             ${student.admission_number || 'Unnamed'}
                             <br><span style="font-size:0.7rem; color:#718096;">Dept: ${dept}</span>
@@ -1118,12 +1007,6 @@
                         ${subjectsHtml}
                         <td><span class="row-total" style="font-weight:bold;">${grandTotal}</span></td>
                         <td><span class="row-avg" style="font-weight:bold; color:var(--accent-red);">${avg}</span></td>
-                        <td>
-                            <button type="button" style="padding:5px 9px; cursor:pointer; font-weight:bold; background:#edf2f7; border:1px solid #cbd5e0; border-radius:4px;"
-                                onclick="loadToReportCardView('${student.id}', '${student.admission_number}', ${isLedgerSubmitted})">
-                                ${isLedgerSubmitted ? 'View' : 'Configure'}
-                            </button>
-                        </td>
                     </tr>
                 `;
             });
@@ -1134,7 +1017,6 @@
 
         function returnToGate() {
             document.getElementById('master-workspace').classList.add('hidden');
-            document.getElementById('report-card-box').classList.add('hidden');
             document.getElementById('ledger-gate').classList.remove('hidden');
         }
 
@@ -1234,95 +1116,6 @@
             }
         }
 
-        function loadToReportCardView(studentId, name, isSubmitted = false) {
-            selectedTargetStudentId = studentId;
-            const row = document.querySelector(`tr[data-id="${studentId}"]`);
-            const avg = parseFloat(row.querySelector('.row-avg').innerText) || 0;
-
-            document.getElementById('active-student-card-title').innerText = name;
-            document.getElementById('card-teacher-comment').value = decodeURIComponent(row.getAttribute('data-comment') || "");
-            document.getElementById('card-attendance').value = row.getAttribute('data-present') || "0";
-            document.getElementById('card-punctual').value = row.getAttribute('data-punctual') || "5";
-            document.getElementById('card-leadership').value = row.getAttribute('data-leadership') || "5";
-            document.getElementById('card-maturity').value = row.getAttribute('data-maturity') || "5";
-            document.getElementById('card-cleanliness').value = row.getAttribute('data-cleanliness') || "5";
-            document.getElementById('card-handwriting').value = row.getAttribute('data-handwriting') || "5";
-            document.getElementById('card-hardwork').value = row.getAttribute('data-hardwork') || "5";
-            document.getElementById('card-sport').value = row.getAttribute('data-sport') || "5";
-
-            let comment = "";
-            if (avg <= 45.4) comment = "Below average, serious improvement is required.";
-            else if (avg <= 49.4) comment = "Close to average, put in more effort.";
-            else if (avg <= 59.4) comment = "Average, try more next term.";
-            else if (avg <= 69.4) comment = "A good performance. Keep working consistently.";
-            else if (avg <= 79.4) comment = "Very good performance. Keep it up.";
-            else comment = "Excellent performance. Maintain this outstanding standard.";
-
-            const term = document.getElementById('target-compilation-term').value;
-            if (term.toLowerCase().includes('3rd') || term.toLowerCase().includes('third')) {
-                comment += ` Promoted to ${getNextClassName(document.getElementById('teacher-class-selector').value)}.`;
-            }
-            document.getElementById('card-principal-comment').innerText = comment;
-
-            const disable = isSubmitted;
-            document.getElementById('commit-btn-sync').style.display = disable ? 'none' : 'inline-block';
-            ['card-teacher-comment', 'card-attendance', 'card-punctual', 'card-leadership', 'card-maturity', 'card-cleanliness', 'card-handwriting', 'card-hardwork', 'card-sport']
-                .forEach(id => document.getElementById(id).disabled = disable);
-
-            document.getElementById('report-card-box').classList.remove('hidden');
-            document.getElementById('report-card-box').scrollIntoView({ behavior: 'smooth' });
-
-            document.getElementById('commit-btn-sync').onclick = () => commitStudentReportMetrics(studentId);
-        }
-
-        async function commitStudentReportMetrics(studentId) {
-            const row = document.querySelector(`tr[data-id="${studentId}"]`);
-            const recordId = row.getAttribute('data-record-id');
-            const chosenTerm = document.getElementById('target-compilation-term').value;
-            const chosenClass = document.getElementById('teacher-class-selector').value;
-            const isSenior = chosenClass.startsWith("SS");
-            const dept = row.getAttribute('data-dept') || "None";
-
-            const payload = {
-                student_id: studentId,
-                term: chosenTerm,
-                session_id: window.currentActiveSessionId,
-                teacher_comment: document.getElementById('card-teacher-comment').value.trim(),
-                days_present: parseInt(document.getElementById('card-attendance').value) || 0,
-                punctuality_rating: document.getElementById('card-punctual').value,
-                leadership_rating: document.getElementById('card-leadership').value,
-                maturity_rating: document.getElementById('card-maturity').value,
-                cleanliness_rating: document.getElementById('card-cleanliness').value,
-                handwriting_rating: document.getElementById('card-handwriting').value,
-                hardwork_rating: document.getElementById('card-hardwork').value,
-                sport_rating: document.getElementById('card-sport').value
-            };
-            if (recordId) payload.id = recordId;
-
-            subjectPrefixes.forEach(pref => {
-                const isLocked = isSubjectLockedForTrack(pref, isSenior, dept) ||
-                    (!isSenior && !['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'].includes(pref)) ||
-                    (isSenior && ['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(pref));
-                if (isLocked) {
-                    payload[`${pref}_ca1`] = null; payload[`${pref}_ca2`] = null; payload[`${pref}_ex`] = null;
-                } else {
-                    payload[`${pref}_ca1`] = row.querySelector(`.${pref}-ca1`).value !== "" ? Number(row.querySelector(`.${pref}-ca1`).value) : null;
-                    payload[`${pref}_ca2`] = row.querySelector(`.${pref}-ca2`).value !== "" ? Number(row.querySelector(`.${pref}-ca2`).value) : null;
-                    payload[`${pref}_ex`] = row.querySelector(`.${pref}-ex`).value !== "" ? Number(row.querySelector(`.${pref}-ex`).value) : null;
-                }
-            });
-
-            const { error } = await supabaseClient.from('student_results').upsert(payload);
-            if (error) {
-                alert("Error: " + error.message);
-                return;
-            }
-            alert("Student card saved!");
-            document.getElementById('report-card-box').classList.add('hidden');
-            loadClassLedgerWorkspace();
-        }
-
-        // ========== SUBMIT TO ADMIN + CREATE NOTIFICATION ==========
         async function submitLedgerToAdmin() {
             const submitBtn = document.getElementById('admin-submission-btn');
             const chosenClass = document.getElementById('teacher-class-selector').value;
@@ -1351,7 +1144,7 @@
                 if (error) errors = true;
             }
 
-            // Create notification for Admin
+            // Create notification
             try {
                 await supabaseClient.from('notifications').insert({
                     message: `${teacherName} submitted ${chosenClass} – ${chosenTerm} results`,
@@ -1372,7 +1165,7 @@
             }
         }
 
-        // ========== CONFIGURE STUDENT CARD (simplified list) ==========
+        // ========== CONFIGURE STUDENT CARD (Fixed) ==========
         function populateConfigureClassSelect() {
             const sel = document.getElementById('configure-class-select');
             const source = document.getElementById('teacher-class-selector');
@@ -1381,8 +1174,13 @@
 
         async function loadConfigureStudents() {
             const cls = document.getElementById('configure-class-select').value;
+            const term = document.getElementById('configure-term-select').value;
             const tbody = document.getElementById('configure-students-rows');
-            if (!cls) return;
+
+            if (!cls || !term) {
+                alert("Please select both Class and Term");
+                return;
+            }
 
             const { data: students } = await supabaseClient
                 .from('users')
@@ -1407,7 +1205,7 @@
                     <td>${s.department || '—'}</td>
                     <td>
                         <button class="btn-submit primary-blue" style="padding:6px 12px; font-size:0.8rem;"
-                            onclick="showSection('results'); document.getElementById('teacher-class-selector').value='${cls}'; loadClassLedgerWorkspace();">
+                            onclick="openConfigureForStudent('${s.id}', '${s.admission_number}', '${cls}', '${term}')">
                             Configure Card
                         </button>
                     </td>
@@ -1415,7 +1213,18 @@
             `).join('');
         }
 
-        // ========== INPUT BILLS ==========
+        function openConfigureForStudent(studentId, name, cls, term) {
+            // Switch to Enter Results, set class & term, load the ledger, then open the card
+            showSection('results');
+            document.getElementById('teacher-class-selector').value = cls;
+            document.getElementById('target-compilation-term').value = term;
+            loadClassLedgerWorkspace().then(() => {
+                // After loading, we can later enhance to auto-open the card
+                alert(`Ledger loaded for ${cls} – ${term}.\nYou can now use the main Enter Results section.`);
+            });
+        }
+
+        // ========== BILLS ==========
         function populateBillsClassSelect() {
             const sel = document.getElementById('bills-class-select');
             const source = document.getElementById('teacher-class-selector');
@@ -1451,7 +1260,6 @@
                 return;
             }
 
-            // Load existing bills
             const studentIds = filtered.map(s => s.id);
             const { data: bills } = await supabaseClient
                 .from('student_bills')
@@ -1498,7 +1306,7 @@
                 .upsert(payload, { onConflict: 'student_id,term,session_id' });
 
             if (error) alert("Error: " + error.message);
-            else alert("Bill saved for this student");
+            else alert("Bill saved");
         }
 
         async function saveAllBills() {
