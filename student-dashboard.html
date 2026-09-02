@@ -481,6 +481,8 @@
                 </div>
             </div>
         </div>
+        <!-- Bills Section (Bottom Left) -->
+        <div id="bills-section" style="display: none;"></div>
 
     </div>
 
@@ -840,6 +842,80 @@
             } else {
                 commentText = "Performance is below average. Intense academic revision is recommended.";
             }
+            // Load bills for this student
+            await loadAndDisplayBills(
+                currentStudentId,          // the logged-in student's id
+                chosenTerm,                // e.g. "3rd Term"
+                currentSessionId,          // the active session id
+                assignedClassStr           // e.g. "SS 2"
+            );
+            // ========== FETCH & DISPLAY BILLS ==========
+            async function loadAndDisplayBills(studentId, term, sessionId, studentClass) {
+                const billsContainer = document.getElementById('bills-section');
+
+                // Rule: Hide bills completely for SS 2 + 3rd Term
+                if (studentClass === "SS 2" && (term === "3rd Term" || term.toLowerCase().includes("third"))) {
+                    if (billsContainer) billsContainer.style.display = "none";
+                    return;
+                }
+
+                try {
+                    const { data: bill, error } = await supabaseClient
+                        .from('student_bills')
+                        .select('*')
+                        .eq('student_id', studentId)
+                        .eq('term', term)
+                        .eq('session_id', sessionId)
+                        .maybeSingle();
+
+                    if (error || !bill) {
+                        if (billsContainer) billsContainer.style.display = "none";
+                        return;
+                    }
+
+                    // Build the HTML
+                    let html = `
+            <div style="margin-top: 25px; padding: 12px 15px; border: 1px solid #CBD5E0; border-radius: 6px; background: #F7FAFC; max-width: 320px;">
+                <h4 style="margin: 0 0 10px 0; color: #1A365D; font-size: 0.95rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 5px;">
+                    School Bills
+                </h4>
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <tr>
+                        <td style="padding: 4px 0;">School Fees:</td>
+                        <td style="text-align: right; font-weight: 600;">₦${Number(bill.school_fees || 0).toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 0;">Stationery:</td>
+                        <td style="text-align: right; font-weight: 600;">₦${Number(bill.stationery || 0).toLocaleString()}</td>
+                    </tr>
+        `;
+
+                    // Only show Other Bills if it has a value > 0
+                    if (bill.other_bills && Number(bill.other_bills) > 0) {
+                        html += `
+                    <tr>
+                        <td style="padding: 4px 0;">Other Bills:</td>
+                        <td style="text-align: right; font-weight: 600;">₦${Number(bill.other_bills).toLocaleString()}</td>
+                    </tr>
+            `;
+                    }
+
+                    html += `
+                </table>
+            </div>
+        `;
+
+                    if (billsContainer) {
+                        billsContainer.innerHTML = html;
+                        billsContainer.style.display = "block";
+                    }
+
+                } catch (err) {
+                    console.error("Error loading bills:", err);
+                    if (billsContainer) billsContainer.style.display = "none";
+                }
+            }
+
 
             // Append promotion status for 3rd Term
             const isThirdTerm = chosenTerm.toLowerCase().includes('3rd') || chosenTerm.toLowerCase().includes('third');

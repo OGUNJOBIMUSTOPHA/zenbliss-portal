@@ -977,60 +977,52 @@
                 console.error("Failed to fetch teacher count:", err.message);
             }
         }
-
-        // ========== NOTIFICATIONS ==========
+        // ========== NOTIFICATIONS (Updated) ==========
         async function loadNotifications() {
             const list = document.getElementById('notifications-list');
             const badge = document.getElementById('notif-badge');
-            let notifications = [];
 
             try {
-                // 1. Pending students
-                const { count: pendingCount } = await supabaseClient
-                    .from('users')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('role', 'student')
-                    .eq('is_approved', false);
+                // 1. Delete notifications older than 20 days
+                const twentyDaysAgo = new Date();
+                twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
 
-                if (pendingCount && pendingCount > 0) {
-                    notifications.push({
-                        text: `${pendingCount} new student application${pendingCount > 1 ? 's' : ''} pending approval.`,
-                        type: 'pending'
-                    });
-                }
+                await supabaseClient
+                    .from('notifications')
+                    .delete()
+                    .lt('created_at', twentyDaysAgo.toISOString());
 
-                // 2. Submitted but not released results (simplified check)
-                const { data: submittedResults } = await supabaseClient
-                    .from('student_results')
-                    .select('student_id, term, session_id')
-                    .eq('ledger_submitted', true)
-                    .eq('results_released', false);
+                // 2. Fetch latest notifications
+                const { data: notifs, error } = await supabaseClient
+                    .from('notifications')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
 
-                if (submittedResults && submittedResults.length > 0) {
-                    // Count unique class/term combinations roughly
-                    notifications.push({
-                        text: `There are class results waiting for your approval.`,
-                        type: 'results'
-                    });
-                }
+                if (error) throw error;
 
-                // Render
-                if (notifications.length === 0) {
+                if (!notifs || notifs.length === 0) {
                     list.innerHTML = `<div class="notif-empty">No new notifications</div>`;
                     badge.style.display = 'none';
                 } else {
-                    list.innerHTML = notifications.map(n => `
-                        <div class="notif-item">${n.text}</div>
-                    `).join('');
-                    badge.textContent = notifications.length;
+                    list.innerHTML = notifs.map(n => `
+                <div class="notif-item">
+                    ${n.message}
+                    <br>
+                    <small style="color:#718096;">${new Date(n.created_at).toLocaleString()}</small>
+                </div>
+            `).join('');
+
+                    badge.textContent = notifs.length;
                     badge.style.display = 'inline-block';
                 }
 
-                // Also update dashboard summary
+                // Update dashboard summary
                 const summaryEl = document.getElementById('waiting-results-summary');
                 if (summaryEl) {
-                    if (submittedResults && submittedResults.length > 0) {
-                        summaryEl.textContent = `There are results waiting for approval. Open "Review Results" from the menu.`;
+                    const resultNotifs = (notifs || []).filter(n => n.type === 'result_submitted');
+                    if (resultNotifs.length > 0) {
+                        summaryEl.textContent = `${resultNotifs.length} result submission(s) waiting for your review.`;
                     } else {
                         summaryEl.textContent = `No results currently waiting for approval.`;
                     }
@@ -1039,6 +1031,7 @@
             } catch (err) {
                 console.error("Notification error:", err);
                 list.innerHTML = `<div class="notif-empty">Could not load notifications</div>`;
+                badge.style.display = 'none';
             }
         }
 

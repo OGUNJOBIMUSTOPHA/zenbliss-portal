@@ -328,6 +328,18 @@
                     alert("Registration Submission Failed: " + error.message);
                     return;
                 }
+                // Create notification for Admin
+                try {
+                    await supabaseClient
+                        .from('notifications')
+                        .insert({
+                            message: `A new student (${fullName}) just created a student account`,
+                            type: 'new_student',
+                            related_id: null
+                        });
+                } catch (notifError) {
+                    console.warn("Could not create notification:", notifError);
+                }
 
                 alert(`Application for ${fullName} submitted successfully!\nPlease wait for the administrator to approve your access token terminal profile before logging in.`);
 
