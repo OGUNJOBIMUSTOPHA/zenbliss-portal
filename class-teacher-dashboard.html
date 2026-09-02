@@ -446,20 +446,20 @@
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3>Teacher Menu</h3>
+            <h3>Menu</h3>
             <button class="sidebar-close" onclick="closeSidebar()">×</button>
         </div>
         <nav class="sidebar-nav">
-            <button class="nav-item active" onclick="showSection('dashboard')">🏠 Dashboard</button>
-            <button class="nav-item" onclick="showSection('results')">📝 Enter Results</button>
-            <button class="nav-item" onclick="showSection('configure')">🧾 Configure Student Card</button>
-            <button class="nav-item" onclick="showSection('bills')">💰 Input Bills</button>
+            <button class="nav-item active" onclick="showSection('dashboard')"> Dashboard</button>
+            <button class="nav-item" onclick="showSection('results')">Enter Results</button>
+            <button class="nav-item" onclick="showSection('configure')">Configure Student Card</button>
+            <button class="nav-item" onclick="showSection('bills')">Input Bills</button>
             <button class="nav-item" onclick="showSection('notifications')">
                 🔔 Notifications
                 <span class="badge" id="notif-badge" style="display:none;">0</span>
             </button>
             <div class="nav-divider"></div>
-            <button class="nav-item" onclick="handleLogout()" style="color:#FC8181;">🚪 Log Out</button>
+            <button class="nav-item" onclick="handleLogout()" style="color:#FC8181;">Log Out</button>
         </nav>
     </aside>
 
@@ -500,8 +500,7 @@
         <div id="section-select" class="section-panel active">
             <div class="gate-card" style="text-align:center;">
                 <h3 style="color:var(--primary-blue); margin-bottom:10px;">Select Class & Term to Work On</h3>
-                <p style="color:#718096; font-size:0.9rem; margin-bottom:20px;">Choose the class and term. This will be
-                    used for all sections.</p>
+                <p style="color:#718096; font-size:0.9rem; margin-bottom:20px;">Select a class and term</p>
 
                 <div style="display:flex; flex-direction:column; align-items:center; gap:14px; margin-bottom:22px;">
                     <div>
@@ -691,7 +690,7 @@
                         <div class="form-group">
                             <h4
                                 style="margin-bottom:10px; color:var(--primary-blue); text-transform:uppercase; font-size:0.9rem; border-bottom:1px solid #CBD5E0; padding-bottom:4px;">
-                                Attendance Log</h4>
+                                Attendance</h4>
                             <label>Days Present (Max 122)</label>
                             <input type="number" id="card-attendance" min="0" max="122" placeholder="e.g. 100">
                         </div>
@@ -722,7 +721,7 @@
         <!-- ========== INPUT BILLS (Once for the class) ========== -->
         <div id="section-bills" class="section-panel">
             <div class="control-box">
-                <h2>Input School Bills (Once for the Class)</h2>
+                <h2>Input School Bills</h2>
                 <p style="color:#718096; margin-bottom:16px;">These amounts will apply to all students in the selected
                     class and term and appear on their report cards.</p>
 
