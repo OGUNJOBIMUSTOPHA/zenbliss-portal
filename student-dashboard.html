@@ -846,7 +846,7 @@
             await loadAndDisplayBills(
                 currentStudentId,          // the logged-in student's id
                 chosenTerm,                // e.g. "3rd Term"
-                currentSessionId,          // the active session id
+                Number(chosenSessionId),   // the selected session id (was an undefined variable, caused a crash)
                 assignedClassStr           // e.g. "SS 2"
             );
             // ========== FETCH & DISPLAY BILLS ==========

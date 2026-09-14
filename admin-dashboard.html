@@ -883,13 +883,18 @@
             'lit', 'phy', 'chem', 'fmath', 'crk', 'yor', 'comp', 'td'
         ];
 
-        const jssSubjectPrefixes = ['mat', 'eng', 'civic', 'crk', 'yor', 'comp'];
+        // NOTE: must mirror the JSS subject list used on the Teacher and Student portals
+        // (subjectPrefixes filtered for non-senior classes), otherwise the admin ledger
+        // will look for columns the teacher never writes to.
+        const jssSubjectPrefixes = ['mat', 'eng', 'bst', 'pvs', 'cca', 'his', 'yor', 'fre', 'nve', 'crs'];
 
         const subjectHeadersMap = {
             'mat': 'Math', 'eng': 'English', 'bio': 'Biology', 'econ': 'Economics',
             'civic': 'Civic', 'comm': 'Commerce', 'gov': 'Govt', 'acc': 'Account',
             'lit': 'Literature', 'phy': 'Physics', 'chem': 'Chemistry', 'fmath': 'F.Math',
-            'crk': 'CRK', 'yor': 'Yoruba', 'comp': 'Computer', 'td': 'Tech. Draw'
+            'crk': 'CRK', 'yor': 'Yoruba', 'comp': 'Computer', 'td': 'Tech. Draw',
+            'bst': 'Basic Sci & Tech', 'pvs': 'Pre-Voc Studies', 'cca': 'Cult & Creative Arts',
+            'his': 'History', 'fre': 'French', 'nve': 'Nat. Values Ed.', 'crs': 'CRS'
         };
 
         // ========== SIDEBAR FUNCTIONS ==========
@@ -1128,6 +1133,19 @@
             } catch (err) {
                 console.error("Failed to load sessions: ", err.message);
             }
+        }
+
+        // Mirrors isSubjectLockedForTrack() from the Teacher and Student portals exactly,
+        // so the admin's read-only ledger view locks the same subjects the teacher locked
+        // when entering scores.
+        function isSubjectLockedForTrack(prefix, isSenior, dept) {
+            if (isSenior) {
+                if (['bst', 'pvs', 'cca', 'his', 'fre', 'nve', 'crs'].includes(prefix)) return true;
+                if (dept === "Science" || dept === "Science & Tech") return ['comm', 'lit', 'acc', 'gov', 'crk', 'yor'].includes(prefix);
+                if (dept === "Humanity") return ['phy', 'chem', 'td', 'acc'].includes(prefix);
+                if (dept === "Commercial") return ['lit', 'phy', 'chem', 'td', 'yor'].includes(prefix);
+            }
+            return false;
         }
 
         function getNextStudentClass(currentClass) {
@@ -1587,15 +1605,7 @@
                 const dept = student.department ? student.department.trim() : "None";
 
                 activePrefixes.forEach(prefix => {
-                    let isLocked = false;
-                    if (!isJuniorClass) {
-                        if (prefix === 'comm' && dept === "Science") isLocked = true;
-                        if (prefix === 'gov' && dept === "Science") isLocked = true;
-                        if (prefix === 'acc' && (dept === "Science" || dept === "Humanity")) isLocked = true;
-                        if (prefix === 'lit' && (dept === "Science" || dept === "Commercial")) isLocked = true;
-                        if (prefix === 'phy' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
-                        if (prefix === 'chem' && (dept === "Commercial" || dept === "Humanity")) isLocked = true;
-                    }
+                    const isLocked = !isJuniorClass && isSubjectLockedForTrack(prefix, true, dept);
 
                     if (isLocked) {
                         rowCellsHtml += `<td style="color:#cbd5e0; background:#f7fafc;">N/A</td>`;
