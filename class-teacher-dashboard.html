@@ -1384,10 +1384,86 @@
 
         // ========== BILLS (once for the class) ==========
         async function loadExistingClassBills() {
-            // For simplicity we just clear the fields. You can enhance later to load existing.
-            document.getElementById('bill-school-fees').value = "";
-            document.getElementById('bill-stationery').value = "";
-            document.getElementById('bill-other').value = "";
+            const feesInput = document.getElementById('bill-school-fees');
+            const stationeryInput = document.getElementById('bill-stationery');
+            const otherInput = document.getElementById('bill-other');
+            const saveBtn = document.querySelector('#section-bills .btn-submit');
+
+            // Reset first
+            feesInput.value = "";
+            stationeryInput.value = "";
+            otherInput.value = "";
+            feesInput.disabled = false;
+            stationeryInput.disabled = false;
+            otherInput.disabled = false;
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.style.opacity = "1";
+                saveBtn.style.cursor = "pointer";
+                saveBtn.innerText = "Save Bills for Entire Class";
+            }
+
+            if (!window.workingClass || !window.workingTerm || !window.currentActiveSessionId) {
+                return;
+            }
+
+            try {
+                const { data: allStudents } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('role', 'student')
+                    .eq('is_approved', true);
+
+                const filtered = (allStudents || []).filter(st => {
+                    if (!st.assigned_classes) return false;
+                    if (Array.isArray(st.assigned_classes)) return st.assigned_classes.includes(window.workingClass);
+                    return st.assigned_classes.toString().includes(window.workingClass);
+                });
+
+                if (filtered.length === 0) return;
+
+                const sampleStudentId = filtered[0].id;
+
+                // Load the saved bills
+                const { data: bill, error } = await supabaseClient
+                    .from('student_bills')
+                    .select('*')
+                    .eq('student_id', sampleStudentId)
+                    .eq('term', window.workingTerm)
+                    .eq('session_id', window.currentActiveSessionId)
+                    .maybeSingle();
+
+                if (error || !bill) return;
+
+                // Fill the inputs
+                feesInput.value = bill.school_fees != null ? bill.school_fees : "";
+                stationeryInput.value = bill.stationery != null ? bill.stationery : "";
+                otherInput.value = bill.other_bills != null ? bill.other_bills : "";
+
+                // Check if the ledger has already been submitted → lock the fields
+                const { data: resultCheck } = await supabaseClient
+                    .from('student_results')
+                    .select('ledger_submitted')
+                    .eq('student_id', sampleStudentId)
+                    .eq('term', window.workingTerm)
+                    .eq('session_id', window.currentActiveSessionId)
+                    .maybeSingle();
+
+                if (resultCheck && resultCheck.ledger_submitted === true) {
+                    feesInput.disabled = true;
+                    stationeryInput.disabled = true;
+                    otherInput.disabled = true;
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                        saveBtn.style.opacity = "0.55";
+                        saveBtn.style.cursor = "not-allowed";
+                        saveBtn.innerText = "Bills Locked (Already Submitted)";
+                    }
+                }
+
+            } catch (err) {
+                console.error("Could not load existing bills:", err);
+            }
         }
         async function saveClassBills() {
             const fees = Number(document.getElementById('bill-school-fees').value) || 0;
