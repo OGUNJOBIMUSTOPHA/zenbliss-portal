@@ -1389,7 +1389,6 @@
             document.getElementById('bill-stationery').value = "";
             document.getElementById('bill-other').value = "";
         }
-
         async function saveClassBills() {
             const fees = Number(document.getElementById('bill-school-fees').value) || 0;
             const stationery = Number(document.getElementById('bill-stationery').value) || 0;
@@ -1400,21 +1399,21 @@
                 return;
             }
 
-            // Get all students in the class
-            const { data: students } = await supabaseClient
-                .from('users')
-                .select('id')
-                .eq('role', 'student')
-                .eq('is_approved', true);
+            if (!window.currentActiveSessionId) {
+                alert("No active academic session found. Please ask the admin to publish a session first.");
+                return;
+            }
 
-            const classStudents = (students || []).filter(st => true); // simplified – in real use filter by class
-
-            // Better: filter properly
-            const { data: allStudents } = await supabaseClient
+            const { data: allStudents, error: studentsError } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('role', 'student')
                 .eq('is_approved', true);
+
+            if (studentsError) {
+                alert("Could not load students: " + studentsError.message);
+                return;
+            }
 
             const filtered = (allStudents || []).filter(st => {
                 if (!st.assigned_classes) return false;
@@ -1422,8 +1421,29 @@
                 return st.assigned_classes.toString().includes(window.workingClass);
             });
 
+            if (filtered.length === 0) {
+                alert("No students found in this class.");
+                return;
+            }
+
             let errors = false;
+            let firstErrorMessage = "";
+
             for (const s of filtered) {
+                const { data: existingBill, error: lookupError } = await supabaseClient
+                    .from('student_bills')
+                    .select('id')
+                    .eq('student_id', s.id)
+                    .eq('term', window.workingTerm)
+                    .eq('session_id', window.currentActiveSessionId)
+                    .maybeSingle();
+
+                if (lookupError) {
+                    errors = true;
+                    if (!firstErrorMessage) firstErrorMessage = lookupError.message;
+                    continue;
+                }
+
                 const payload = {
                     student_id: s.id,
                     session_id: window.currentActiveSessionId,
@@ -1432,14 +1452,26 @@
                     stationery: stationery,
                     other_bills: other
                 };
+
+                if (existingBill && existingBill.id) {
+                    payload.id = existingBill.id;
+                }
+
                 const { error } = await supabaseClient
                     .from('student_bills')
-                    .upsert(payload, { onConflict: 'student_id,term,session_id' });
-                if (error) errors = true;
+                    .upsert(payload);
+
+                if (error) {
+                    errors = true;
+                    if (!firstErrorMessage) firstErrorMessage = error.message;
+                }
             }
 
-            if (errors) alert("Some bills failed to save");
-            else alert("Bills saved for the entire class successfully!");
+            if (errors) {
+                alert("Some bills failed to save.\n\nError: " + firstErrorMessage);
+            } else {
+                alert("Bills saved for the entire class successfully!");
+            }
         }
 
         // Notifications

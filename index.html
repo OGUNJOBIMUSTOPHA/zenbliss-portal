@@ -340,6 +340,48 @@
                 return;
             }
 
+            // ===== NEW: Ask department for newly promoted SS 1 students =====
+            let assignedClass = "";
+            if (currentUser.assigned_classes) {
+                if (Array.isArray(currentUser.assigned_classes)) {
+                    assignedClass = currentUser.assigned_classes[0] || "";
+                } else {
+                    assignedClass = currentUser.assigned_classes.toString();
+                }
+            }
+
+            const needsDepartment = assignedClass.startsWith("SS") &&
+                (!currentUser.department || currentUser.department.trim() === "" || currentUser.department === "None");
+
+            if (needsDepartment) {
+                let chosenDept = "";
+                while (!chosenDept) {
+                    chosenDept = prompt(
+                        "Welcome to Senior Secondary!\n\nPlease select your Department:\n\nType one of the following exactly:\nScience\nHumanity\nCommercial"
+                    );
+                    if (chosenDept === null) {
+                        alert("You must choose a department to continue.");
+                        return;
+                    }
+                    chosenDept = chosenDept.trim();
+                    if (!["Science", "Humanity", "Commercial"].includes(chosenDept)) {
+                        alert("Invalid choice. Please type exactly: Science, Humanity or Commercial");
+                        chosenDept = "";
+                    }
+                }
+
+                const { error: deptError } = await supabaseClient
+                    .from('users')
+                    .update({ department: chosenDept })
+                    .eq('id', currentUser.id);
+
+                if (deptError) {
+                    alert("Could not save department. Please try again.\n" + deptError.message);
+                    return;
+                }
+            }
+            // ===== END department check =====
+
             // Generate security token mapping parameters
             const dynamicSession = createUniqueSessionToken();
 
